@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   AlertTriangleIcon,
   ChevronRightIcon,
@@ -99,10 +99,20 @@ const parseMoney = (s: string) => Number(s.replace(/[^0-9.]/g, "")) || 0;
 export const PickPackDashboardSection = (): JSX.Element => {
   const [selectedPickListId, setSelectedPickListId] = useState<string | null>(null);
   const [selectedShipmentIds, setSelectedShipmentIds] = useState<Set<string>>(new Set());
+  const [expandedShipmentIds, setExpandedShipmentIds] = useState<Set<string>>(new Set());
   const [warehouse, setWarehouse] = useState("PA Fulfilment Facility");
   const [newPickListId, setNewPickListId] = useState("");
   const [newPicker, setNewPicker] = useState<string>("");
   const [lowInventoryDismissed, setLowInventoryDismissed] = useState(false);
+
+  const toggleExpandShipment = (id: string) => {
+    setExpandedShipmentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filteredShipments = selectedPickListId
     ? shipmentRows.filter((s) => s.pickListId === selectedPickListId)
@@ -380,62 +390,131 @@ export const PickPackDashboardSection = (): JSX.Element => {
                 <TableBody>
                   {filteredShipments.map((row) => {
                     const isChecked = selectedShipmentIds.has(row.id);
+                    const isExpanded = expandedShipmentIds.has(row.id);
                     return (
-                      <TableRow
-                        key={row.id}
-                        data-testid={`row-shipment-${row.shipmentId}`}
-                        onClick={() => handleShipmentCheck(row.id, !isChecked)}
-                        className={`${rowBase} cursor-pointer ${isChecked ? rowSelected : rowDefault}`}
-                      >
-                        <TableCell
-                          className="h-8 px-2 py-0"
-                          onClick={(e) => e.stopPropagation()}
+                      <Fragment key={row.id}>
+                        <TableRow
+                          data-testid={`row-shipment-${row.shipmentId}`}
+                          onClick={() => handleShipmentCheck(row.id, !isChecked)}
+                          className={`${rowBase} cursor-pointer ${isChecked ? rowSelected : rowDefault}`}
                         >
-                          <div className="flex h-8 items-center justify-center">
-                            <Checkbox
-                              data-testid={`checkbox-shipment-${row.shipmentId}`}
-                              className="h-5 w-5 rounded-[4px] border-neutral-700 data-[state=checked]:border-brand-secondary data-[state=checked]:bg-brand-secondary data-[state=checked]:text-brand-secondary-contrast"
-                              checked={isChecked}
-                              onCheckedChange={(checked) => handleShipmentCheck(row.id, checked === true)}
-                              aria-label={`Select shipment ${row.shipmentId}`}
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell className="h-8 px-2 py-0">
-                          <span
-                            aria-hidden="true"
-                            className="flex h-6 w-6 items-center justify-center rounded border border-neutral-300 bg-neutral-0"
+                          <TableCell
+                            className="h-8 px-2 py-0"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <ChevronRightIcon className="h-3 w-3 text-neutral-700" />
-                          </span>
-                        </TableCell>
-                        <TableCell
-                          data-testid={`text-shipment-id-${row.shipmentId}`}
-                          className={cellTextBase}
-                        >
-                          {row.shipmentId}
-                        </TableCell>
-                        <TableCell className={cellTextBase}>{row.pickListId}</TableCell>
-                        <TableCell className="h-8 px-2 py-0">
-                          <div className="flex items-center gap-2.5">
-                            <span
-                              className="h-4 w-4 rounded-full bg-cover bg-center"
-                              style={{ backgroundImage: `url(${row.storeIcon})` }}
-                              aria-hidden="true"
-                            />
-                            <span className="font-body text-sm text-neutral-700">{row.store}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className={cellTextBase}>{row.totalValue}</TableCell>
-                        <TableCell className={cellTextBase}>{row.weight}</TableCell>
-                        <TableCell className={cellTextBase}>{row.customer}</TableCell>
-                        <TableCell className="h-8 px-2 py-0">
-                          <div className="flex items-center gap-2.5">
-                            <img className="h-4 w-4 shrink-0" alt="" src={row.carrierIcon} />
-                            <span className="font-body text-sm text-neutral-700">{row.carrier}</span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                            <div className="flex h-8 items-center justify-center">
+                              <Checkbox
+                                data-testid={`checkbox-shipment-${row.shipmentId}`}
+                                className="h-5 w-5 rounded-[4px] border-neutral-700 data-[state=checked]:border-brand-secondary data-[state=checked]:bg-brand-secondary data-[state=checked]:text-brand-secondary-contrast"
+                                checked={isChecked}
+                                onCheckedChange={(checked) => handleShipmentCheck(row.id, checked === true)}
+                                aria-label={`Select shipment ${row.shipmentId}`}
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell className="h-8 px-2 py-0">
+                            <button
+                              type="button"
+                              data-testid={`button-expand-shipment-${row.shipmentId}`}
+                              aria-label={isExpanded ? "Collapse products" : "Expand products"}
+                              aria-expanded={isExpanded}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleExpandShipment(row.id);
+                              }}
+                              className="flex h-6 w-6 items-center justify-center rounded border border-neutral-300 bg-neutral-0 hover:bg-neutral-100"
+                            >
+                              <ChevronRightIcon
+                                className={`h-3 w-3 text-neutral-700 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                              />
+                            </button>
+                          </TableCell>
+                          <TableCell
+                            data-testid={`text-shipment-id-${row.shipmentId}`}
+                            className={cellTextBase}
+                          >
+                            {row.shipmentId}
+                          </TableCell>
+                          <TableCell className={cellTextBase}>{row.pickListId}</TableCell>
+                          <TableCell className="h-8 px-2 py-0">
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className="h-4 w-4 rounded-full bg-cover bg-center"
+                                style={{ backgroundImage: `url(${row.storeIcon})` }}
+                                aria-hidden="true"
+                              />
+                              <span className="font-body text-sm text-neutral-700">{row.store}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className={cellTextBase}>{row.totalValue}</TableCell>
+                          <TableCell className={cellTextBase}>{row.weight}</TableCell>
+                          <TableCell className={cellTextBase}>{row.customer}</TableCell>
+                          <TableCell className="h-8 px-2 py-0">
+                            <div className="flex items-center gap-2.5">
+                              <img className="h-4 w-4 shrink-0" alt="" src={row.carrierIcon} />
+                              <span className="font-body text-sm text-neutral-700">{row.carrier}</span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        {isExpanded && (
+                          <TableRow
+                            data-testid={`row-shipment-expanded-${row.shipmentId}`}
+                            className="border-b border-neutral-300 bg-neutral-100 hover:bg-neutral-100"
+                          >
+                            <TableCell colSpan={9} className="p-0">
+                              <div className="px-12 py-3">
+                                <Table className="w-full bg-neutral-0">
+                                  <TableHeader>
+                                    <TableRow className="border-b border-neutral-300 hover:bg-transparent">
+                                      <TableHead className="h-8 w-[120px] px-3 font-body text-xs font-medium text-neutral-900">
+                                        Ext. ID
+                                      </TableHead>
+                                      <TableHead className="h-8 px-3 font-body text-xs font-medium text-neutral-900">
+                                        Name
+                                      </TableHead>
+                                      <TableHead className="h-8 w-[80px] px-3 text-right font-body text-xs font-medium text-neutral-900">
+                                        Qty
+                                      </TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {row.products.map((p, idx) => (
+                                      <TableRow
+                                        key={`${row.id}-${p.extId}-${idx}`}
+                                        className="border-b border-neutral-150 hover:bg-neutral-50"
+                                      >
+                                        <TableCell className="h-8 px-3 py-1 font-body text-sm text-neutral-900">
+                                          {p.extId}
+                                        </TableCell>
+                                        <TableCell className="h-8 px-3 py-1">
+                                          <a
+                                            href="#"
+                                            onClick={(e) => e.preventDefault()}
+                                            className="font-body text-sm font-medium text-brand-primary underline underline-offset-2 hover:opacity-80"
+                                          >
+                                            {p.name}
+                                          </a>
+                                        </TableCell>
+                                        <TableCell className="h-8 px-3 py-1 text-right font-body text-sm text-neutral-900">
+                                          <span className="inline-flex items-center justify-end gap-1">
+                                            {p.qty}
+                                            {p.lowInventory && (
+                                              <AlertTriangleIcon
+                                                className="h-3.5 w-3.5 text-warning-strong"
+                                                aria-label="Low inventory"
+                                              />
+                                            )}
+                                          </span>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </Fragment>
                     );
                   })}
                 </TableBody>
