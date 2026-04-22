@@ -125,11 +125,6 @@ export const PickPackDashboardSection = (): JSX.Element => {
     selectedShipmentIds.size > 0 ? "shipments" : selectedPickList ? "pickList" : null;
   const panelOpen = panelMode !== null;
 
-  const closePanel = () => {
-    setSelectedPickListId(null);
-    setSelectedShipmentIds(new Set());
-  };
-
   const handleCreatePickList = () => {
     alert(
       `Pick List created with ${selectedShipments.length} shipment(s):\n${selectedShipments.map((s) => s.shipmentId).join(", ")}`
@@ -230,7 +225,8 @@ export const PickPackDashboardSection = (): JSX.Element => {
                       <TableRow
                         key={row.id}
                         data-testid={`row-picklist-${row.pickListId}`}
-                        className={`${rowBase} ${isSelected ? rowSelected : rowDefault}`}
+                        onClick={() => togglePickListSelection(row.pickListId)}
+                        className={`${rowBase} cursor-pointer ${isSelected ? rowSelected : rowDefault}`}
                       >
                         <TableCell className="h-8 px-2 py-0">
                           <button
@@ -239,7 +235,10 @@ export const PickPackDashboardSection = (): JSX.Element => {
                             className="flex h-8 w-8 items-center justify-center"
                             aria-label={`Select pick list ${row.pickListId}`}
                             aria-pressed={isSelected}
-                            onClick={() => togglePickListSelection(row.pickListId)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePickListSelection(row.pickListId);
+                            }}
                           >
                             <span
                               className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
@@ -341,9 +340,13 @@ export const PickPackDashboardSection = (): JSX.Element => {
                       <TableRow
                         key={row.id}
                         data-testid={`row-shipment-${row.shipmentId}`}
-                        className={`${rowBase} ${isChecked ? rowSelected : rowDefault}`}
+                        onClick={() => handleShipmentCheck(row.id, !isChecked)}
+                        className={`${rowBase} cursor-pointer ${isChecked ? rowSelected : rowDefault}`}
                       >
-                        <TableCell className="h-8 px-2 py-0">
+                        <TableCell
+                          className="h-8 px-2 py-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="flex h-8 items-center justify-center">
                             <Checkbox
                               data-testid={`checkbox-shipment-${row.shipmentId}`}
@@ -441,15 +444,6 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     </h3>
                   )}
                 </div>
-                <button
-                  type="button"
-                  data-testid="button-close-panel"
-                  onClick={closePanel}
-                  className="flex h-7 w-7 items-center justify-center rounded text-neutral-700 hover:bg-neutral-100"
-                  aria-label="Close panel"
-                >
-                  <XIcon className="h-4 w-4" />
-                </button>
               </header>
 
               <div className="flex-1 overflow-y-auto p-4">
