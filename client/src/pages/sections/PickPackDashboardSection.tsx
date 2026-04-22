@@ -80,6 +80,16 @@ const shipmentRows: ShipmentRow[] = [
   { id: "shipment-10", shipmentId: "SH-010", pickListId: "PL-100004", store: "Walmart Marketplace", storeIcon: "/figmaAssets/integrations-9.png", totalValue: "$2,750.30", weight: "430", customer: "James Park", carrier: "UPS Express", carrierIcon: "/figmaAssets/pngegg--2--1-9.png" },
 ];
 
+// Design system token classes (centralized so component states stay consistent)
+const cellTextBase =
+  "h-8 px-2 py-0 font-body text-sm text-neutral-900";
+const headCellBase =
+  "h-8 px-2 font-body text-sm font-medium text-neutral-900";
+const rowBase =
+  "h-8 border-b border-neutral-300 cursor-pointer transition-colors";
+const rowDefault = "bg-neutral-0 hover:bg-neutral-100";
+const rowSelected = "bg-brand-secondary/10 hover:bg-brand-secondary/15";
+
 export const PickPackDashboardSection = (): JSX.Element => {
   const [selectedPickListId, setSelectedPickListId] = useState<string | null>(null);
   const [selectedShipmentIds, setSelectedShipmentIds] = useState<Set<string>>(new Set());
@@ -137,12 +147,12 @@ export const PickPackDashboardSection = (): JSX.Element => {
   return (
     <section className="flex flex-1 flex-col items-start justify-center gap-2 self-stretch">
       {/* Pick Lists Table */}
-      <Card className="h-auto w-full overflow-hidden rounded-lg border border-[#e4eaed] bg-white shadow-none">
+      <Card className="h-auto w-full overflow-hidden rounded-lg border border-neutral-300 bg-neutral-0 shadow-none">
         <CardContent className="p-0">
-          <header className="flex w-full flex-col gap-3 border-b border-[#eff6f9] bg-white px-5 py-3 md:flex-row md:items-center md:justify-between">
+          <header className="flex w-full flex-col gap-3 border-b border-neutral-150 bg-neutral-0 px-5 py-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-2">
-              <img className="h-6 w-6 shrink-0" alt="Package plus" src="/figmaAssets/package-plus-1.svg" />
-              <h2 className="m-0 [font-family:'Montserrat',Helvetica] text-2xl font-semibold leading-[33.6px] tracking-[0.15px] text-grey-11">
+              <img className="h-6 w-6 shrink-0" alt="" src="/figmaAssets/package-plus-1.svg" />
+              <h2 className="m-0 font-heading text-2xl font-semibold leading-[33.6px] tracking-[0.15px] text-neutral-900">
                 Pick and Pack
               </h2>
             </div>
@@ -150,11 +160,11 @@ export const PickPackDashboardSection = (): JSX.Element => {
               <Select value={warehouse} onValueChange={setWarehouse}>
                 <SelectTrigger
                   data-testid="select-warehouse"
-                  className="h-9 w-auto min-w-[200px] sm:min-w-[262px] gap-2 rounded border border-[#e4eaed] bg-white px-3 py-2 text-left shadow-none [&>svg]:text-[#45565b]"
+                  className="h-9 w-auto min-w-[200px] sm:min-w-[262px] gap-2 rounded border border-neutral-300 bg-neutral-0 px-3 py-2 text-left shadow-none [&>svg]:text-neutral-700"
                 >
                   <div className="flex min-w-0 items-center gap-2">
-                    <span className="text-sm text-[#7f9199]">Warehouse</span>
-                    <SelectValue className="text-sm font-medium text-[#0b1516]" />
+                    <span className="font-body text-sm text-neutral-500">Warehouse</span>
+                    <SelectValue className="font-body text-sm font-medium text-neutral-900" />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
@@ -165,11 +175,11 @@ export const PickPackDashboardSection = (): JSX.Element => {
               <Select defaultValue="All Time">
                 <SelectTrigger
                   data-testid="select-time"
-                  className="h-9 w-auto min-w-[140px] sm:min-w-[152px] gap-2 rounded border border-[#e4eaed] bg-white px-3 py-2 text-left shadow-none [&>svg]:text-[#45565b]"
+                  className="h-9 w-auto min-w-[140px] sm:min-w-[152px] gap-2 rounded border border-neutral-300 bg-neutral-0 px-3 py-2 text-left shadow-none [&>svg]:text-neutral-700"
                 >
                   <div className="flex min-w-0 items-center gap-2">
-                    <span className="text-sm text-[#7f9199]">Time</span>
-                    <SelectValue className="text-sm font-medium text-[#0b1516]" />
+                    <span className="font-body text-sm text-neutral-500">Time</span>
+                    <SelectValue className="font-body text-sm font-medium text-neutral-900" />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
@@ -182,7 +192,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
               <Button
                 data-testid="button-search"
                 variant="outline"
-                className="h-9 rounded border-[#e4eaed] bg-white px-2 py-1 text-[#0b1516] shadow-none hover:bg-white"
+                className="h-9 rounded border-neutral-300 bg-neutral-0 px-2 py-1 text-neutral-900 shadow-none hover:bg-neutral-100"
                 aria-label="Search"
               >
                 <SearchIcon className="h-5 w-5" />
@@ -190,23 +200,23 @@ export const PickPackDashboardSection = (): JSX.Element => {
               <Button
                 data-testid="button-filters"
                 variant="outline"
-                className="h-9 rounded border-[#e4eaed] bg-white px-3 py-2 text-[#0b1516] shadow-none hover:bg-white"
+                className="h-9 rounded border-neutral-300 bg-neutral-0 px-3 py-2 text-neutral-900 shadow-none hover:bg-neutral-100"
               >
                 <FilterIcon className="h-5 w-5" />
-                <span className="text-sm font-medium">Filters</span>
+                <span className="font-body text-sm font-medium">Filters</span>
               </Button>
             </div>
           </header>
           <div className="w-full overflow-x-auto">
             <Table className="w-full min-w-[760px]">
               <TableHeader>
-                <TableRow className="border-b border-[#e4eaed] bg-[#f6f9fb] hover:bg-[#f6f9fb]">
+                <TableRow className="border-b border-neutral-300 bg-neutral-100 hover:bg-neutral-100">
                   <TableHead className="h-8 w-9 px-2" />
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Pick List ID</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Created on</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Warehouse</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Total Orders</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Picker</TableHead>
+                  <TableHead className={headCellBase}>Pick List ID</TableHead>
+                  <TableHead className={headCellBase}>Created on</TableHead>
+                  <TableHead className={headCellBase}>Warehouse</TableHead>
+                  <TableHead className={headCellBase}>Total Orders</TableHead>
+                  <TableHead className={headCellBase}>Picker</TableHead>
                   <TableHead className="h-8 w-10 px-2" />
                 </TableRow>
               </TableHeader>
@@ -217,9 +227,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     <TableRow
                       key={row.id}
                       data-testid={`row-picklist-${row.pickListId}`}
-                      className={`h-8 border-b border-[#e4eaed] cursor-pointer transition-colors ${
-                        isSelected ? "bg-[#e6f5f3] hover:bg-[#d9f0ed]" : "bg-white hover:bg-[#f6f9fb]"
-                      }`}
+                      className={`${rowBase} ${isSelected ? rowSelected : rowDefault}`}
                       onClick={() => setDetail({ kind: "pickList", data: row })}
                     >
                       <TableCell className="h-8 px-2 py-0">
@@ -228,42 +236,45 @@ export const PickPackDashboardSection = (): JSX.Element => {
                           data-testid={`radio-picklist-${row.pickListId}`}
                           className="flex h-8 w-8 items-center justify-center"
                           aria-label={`Select pick list ${row.pickListId}`}
+                          aria-pressed={isSelected}
                           onClick={(e) => {
                             e.stopPropagation();
                             togglePickListSelection(row.pickListId);
                           }}
                         >
                           <span
-                            className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-                              isSelected ? "border-[#008572]" : "border-[#7f9199]"
+                            className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
+                              isSelected ? "border-brand-secondary" : "border-neutral-500"
                             }`}
                           >
-                            {isSelected && <span className="h-2.5 w-2.5 rounded-full bg-[#008572]" />}
+                            {isSelected && (
+                              <span className="h-2.5 w-2.5 rounded-full bg-brand-secondary" />
+                            )}
                           </span>
                         </button>
                       </TableCell>
                       <TableCell
                         data-testid={`text-picklist-id-${row.pickListId}`}
-                        className={`h-8 px-2 py-0 text-sm ${isSelected ? "text-[#008572] font-semibold" : "text-grey-11"}`}
+                        className={`${cellTextBase} ${isSelected ? "text-brand-secondary font-semibold" : ""}`}
                       >
                         {row.pickListId}
                       </TableCell>
-                      <TableCell className="h-8 px-2 py-0 text-sm text-grey-11">{row.createdOn}</TableCell>
-                      <TableCell className="h-8 px-2 py-0 text-sm text-grey-11">{row.warehouse}</TableCell>
-                      <TableCell className="h-8 px-2 py-0 text-sm text-grey-11">{row.totalOrders}</TableCell>
-                      <TableCell className="h-8 px-2 py-0 text-sm text-grey-11">{row.picker}</TableCell>
+                      <TableCell className={cellTextBase}>{row.createdOn}</TableCell>
+                      <TableCell className={cellTextBase}>{row.warehouse}</TableCell>
+                      <TableCell className={cellTextBase}>{row.totalOrders}</TableCell>
+                      <TableCell className={cellTextBase}>{row.picker}</TableCell>
                       <TableCell className="h-8 px-2 py-0">
                         <button
                           type="button"
                           data-testid={`button-open-picklist-${row.pickListId}`}
-                          className="flex h-6 w-6 items-center justify-center rounded border border-[#e4eaed] bg-white"
+                          className="flex h-6 w-6 items-center justify-center rounded border border-neutral-300 bg-neutral-0 hover:bg-neutral-100"
                           aria-label={`Open pick list ${row.pickListId}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setDetail({ kind: "pickList", data: row });
                           }}
                         >
-                          <ChevronRightIcon className="h-3 w-3 text-[#45565b]" />
+                          <ChevronRightIcon className="h-3 w-3 text-neutral-700" />
                         </button>
                       </TableCell>
                     </TableRow>
@@ -272,18 +283,18 @@ export const PickPackDashboardSection = (): JSX.Element => {
               </TableBody>
             </Table>
           </div>
-          <footer className="flex w-full flex-wrap items-center gap-4 border-t border-[#e4eaed] bg-white px-5 py-2">
-            <div className="inline-flex items-center gap-1 text-sm text-[#0b1516]">
+          <footer className="flex w-full flex-wrap items-center gap-4 border-t border-neutral-300 bg-neutral-0 px-5 py-2">
+            <div className="inline-flex items-center gap-1 font-body text-sm text-neutral-900">
               <span>Total Pick Lists:</span>
               <span className="font-medium">{pickPackRows.length}</span>
             </div>
-            <div className="inline-flex items-center gap-1 text-sm text-[#0b1516]">
+            <div className="inline-flex items-center gap-1 font-body text-sm text-neutral-900">
               <span>Need Attention:</span>
               <span className="font-medium">2</span>
             </div>
             {selectedPickListId && (
               <div className="ml-auto">
-                <span className="text-sm text-[#008572] font-medium">
+                <span className="font-body text-sm font-medium text-brand-secondary">
                   Viewing shipments for: {selectedPickListId}
                 </span>
               </div>
@@ -293,13 +304,13 @@ export const PickPackDashboardSection = (): JSX.Element => {
       </Card>
 
       {/* Shipments Table */}
-      <Card className="w-full overflow-hidden rounded-lg border border-[#e4eaed] bg-white shadow-none">
+      <Card className="w-full overflow-hidden rounded-lg border border-neutral-300 bg-neutral-0 shadow-none">
         <CardContent className="p-0">
-          <header className="flex h-auto min-h-[52px] items-center justify-between border-b border-[#eff6f9] bg-white px-5 py-2 gap-3">
-            <h3 className="m-0 text-lg font-medium text-[#0b1516]">
+          <header className="flex h-auto min-h-[52px] items-center justify-between gap-3 border-b border-neutral-150 bg-neutral-0 px-5 py-2">
+            <h3 className="m-0 font-heading text-lg font-medium text-neutral-900">
               Shipments
               {selectedPickListId && (
-                <span className="ml-2 text-sm font-normal text-[#7f9199]">
+                <span className="ml-2 font-body text-sm font-normal text-neutral-500">
                   — {filteredShipments.length} for {selectedPickListId}
                 </span>
               )}
@@ -307,25 +318,23 @@ export const PickPackDashboardSection = (): JSX.Element => {
             {selectedShipmentIds.size > 0 && (
               <Button
                 data-testid="button-create-picklist"
-                className="h-9 gap-2 rounded bg-[#008572] px-4 py-2 text-white hover:bg-[#007563] shadow-none"
+                className="h-9 gap-2 rounded bg-brand-secondary px-4 py-2 font-body text-sm font-medium text-brand-secondary-contrast shadow-none hover:bg-brand-secondary/90"
                 onClick={handleCreatePickList}
               >
                 <PackagePlusIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">
-                  Create Pick List ({selectedShipmentIds.size})
-                </span>
+                <span>Create Pick List ({selectedShipmentIds.size})</span>
               </Button>
             )}
           </header>
           <div className="w-full overflow-x-auto">
             <Table className="w-full min-w-[900px]">
               <TableHeader>
-                <TableRow className="border-b border-[#e4eaed] bg-[#f6f9fb] hover:bg-[#f6f9fb]">
+                <TableRow className="border-b border-neutral-300 bg-neutral-100 hover:bg-neutral-100">
                   <TableHead className="h-8 w-[44px] px-2">
                     <div className="flex h-8 items-center justify-center">
                       <Checkbox
                         data-testid="checkbox-select-all-shipments"
-                        className="h-5 w-5 rounded-[4px] border-[#45565b] data-[state=checked]:border-[#008572] data-[state=checked]:bg-[#008572] data-[state=checked]:text-white data-[state=indeterminate]:border-[#008572] data-[state=indeterminate]:bg-[#008572]"
+                        className="h-5 w-5 rounded-[4px] border-neutral-700 data-[state=checked]:border-brand-secondary data-[state=checked]:bg-brand-secondary data-[state=checked]:text-brand-secondary-contrast data-[state=indeterminate]:border-brand-secondary data-[state=indeterminate]:bg-brand-secondary"
                         checked={allShipmentsSelected || (someShipmentsSelected ? "indeterminate" : false)}
                         onCheckedChange={(checked) => handleSelectAllShipments(checked === true)}
                         aria-label="Select all shipments"
@@ -333,13 +342,13 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     </div>
                   </TableHead>
                   <TableHead className="h-8 w-9 px-2" />
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Shipment ID</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Pick List ID</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Store</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Total Value</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Weight (lb)</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Customer</TableHead>
-                  <TableHead className="h-8 px-2 text-sm font-medium text-[#0b1516]">Carrier</TableHead>
+                  <TableHead className={headCellBase}>Shipment ID</TableHead>
+                  <TableHead className={headCellBase}>Pick List ID</TableHead>
+                  <TableHead className={headCellBase}>Store</TableHead>
+                  <TableHead className={headCellBase}>Total Value</TableHead>
+                  <TableHead className={headCellBase}>Weight (lb)</TableHead>
+                  <TableHead className={headCellBase}>Customer</TableHead>
+                  <TableHead className={headCellBase}>Carrier</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -349,16 +358,14 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     <TableRow
                       key={row.id}
                       data-testid={`row-shipment-${row.shipmentId}`}
-                      className={`h-8 border-b border-[#e4eaed] cursor-pointer transition-colors ${
-                        isChecked ? "bg-[#e6f5f3] hover:bg-[#d9f0ed]" : "bg-white hover:bg-[#f6f9fb]"
-                      }`}
+                      className={`${rowBase} ${isChecked ? rowSelected : rowDefault}`}
                       onClick={() => setDetail({ kind: "shipment", data: row })}
                     >
                       <TableCell className="h-8 px-2 py-0" onClick={(e) => e.stopPropagation()}>
                         <div className="flex h-8 items-center justify-center">
                           <Checkbox
                             data-testid={`checkbox-shipment-${row.shipmentId}`}
-                            className="h-5 w-5 rounded-[4px] border-[#45565b] data-[state=checked]:border-[#008572] data-[state=checked]:bg-[#008572] data-[state=checked]:text-white"
+                            className="h-5 w-5 rounded-[4px] border-neutral-700 data-[state=checked]:border-brand-secondary data-[state=checked]:bg-brand-secondary data-[state=checked]:text-brand-secondary-contrast"
                             checked={isChecked}
                             onCheckedChange={(checked) => handleShipmentCheck(row.id, checked === true)}
                             aria-label={`Select shipment ${row.shipmentId}`}
@@ -369,40 +376,40 @@ export const PickPackDashboardSection = (): JSX.Element => {
                         <button
                           type="button"
                           data-testid={`button-open-shipment-${row.shipmentId}`}
-                          className="flex h-6 w-6 items-center justify-center rounded border border-[#e4eaed] bg-white"
+                          className="flex h-6 w-6 items-center justify-center rounded border border-neutral-300 bg-neutral-0 hover:bg-neutral-100"
                           aria-label={`Open shipment ${row.shipmentId}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setDetail({ kind: "shipment", data: row });
                           }}
                         >
-                          <ChevronRightIcon className="h-3 w-3 text-[#45565b]" />
+                          <ChevronRightIcon className="h-3 w-3 text-neutral-700" />
                         </button>
                       </TableCell>
                       <TableCell
                         data-testid={`text-shipment-id-${row.shipmentId}`}
-                        className="h-8 px-2 py-0 text-sm text-grey-11"
+                        className={cellTextBase}
                       >
                         {row.shipmentId}
                       </TableCell>
-                      <TableCell className="h-8 px-2 py-0 text-sm text-grey-11">{row.pickListId}</TableCell>
+                      <TableCell className={cellTextBase}>{row.pickListId}</TableCell>
                       <TableCell className="h-8 px-2 py-0">
                         <div className="flex items-center gap-2.5">
                           <span
-                            className="h-4 w-4 rounded-[50px] bg-cover bg-[50%_50%]"
+                            className="h-4 w-4 rounded-full bg-cover bg-center"
                             style={{ backgroundImage: `url(${row.storeIcon})` }}
                             aria-hidden="true"
                           />
-                          <span className="text-sm text-[#45565b]">{row.store}</span>
+                          <span className="font-body text-sm text-neutral-700">{row.store}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="h-8 px-2 py-0 text-sm text-grey-11">{row.totalValue}</TableCell>
-                      <TableCell className="h-8 px-2 py-0 text-sm text-grey-11">{row.weight}</TableCell>
-                      <TableCell className="h-8 px-2 py-0 text-sm text-grey-11">{row.customer}</TableCell>
+                      <TableCell className={cellTextBase}>{row.totalValue}</TableCell>
+                      <TableCell className={cellTextBase}>{row.weight}</TableCell>
+                      <TableCell className={cellTextBase}>{row.customer}</TableCell>
                       <TableCell className="h-8 px-2 py-0">
                         <div className="flex items-center gap-2.5">
-                          <img className="h-4 w-4 shrink-0" alt="Carrier" src={row.carrierIcon} />
-                          <span className="text-sm text-[#45565b]">{row.carrier}</span>
+                          <img className="h-4 w-4 shrink-0" alt="" src={row.carrierIcon} />
+                          <span className="font-body text-sm text-neutral-700">{row.carrier}</span>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -411,25 +418,25 @@ export const PickPackDashboardSection = (): JSX.Element => {
               </TableBody>
             </Table>
           </div>
-          <footer className="flex w-full flex-wrap items-center gap-4 border-t border-[#e4eaed] bg-white px-5 py-2">
-            <div className="inline-flex items-center gap-1 text-sm text-[#0b1516]">
+          <footer className="flex w-full flex-wrap items-center gap-4 border-t border-neutral-300 bg-neutral-0 px-5 py-2">
+            <div className="inline-flex items-center gap-1 font-body text-sm text-neutral-900">
               <span>Total Shipments:</span>
               <span className="font-medium">{filteredShipments.length}</span>
             </div>
-            <div className="inline-flex items-center gap-1 text-sm text-[#0b1516]">
+            <div className="inline-flex items-center gap-1 font-body text-sm text-neutral-900">
               <span>Needs Attention:</span>
               <span className="font-medium">2</span>
             </div>
             {selectedShipmentIds.size > 0 && (
               <div className="ml-auto inline-flex items-center gap-2">
-                <span className="text-sm text-[#7f9199]">
+                <span className="font-body text-sm text-neutral-500">
                   {selectedShipmentIds.size} shipment{selectedShipmentIds.size > 1 ? "s" : ""} selected
                 </span>
                 <Button
                   data-testid="button-clear-shipments"
                   variant="outline"
                   size="sm"
-                  className="h-7 text-xs border-[#e4eaed] text-[#45565b]"
+                  className="h-7 border-neutral-300 font-body text-xs text-neutral-700 hover:bg-neutral-100"
                   onClick={() => setSelectedShipmentIds(new Set())}
                 >
                   Clear
@@ -445,57 +452,65 @@ export const PickPackDashboardSection = (): JSX.Element => {
         <SheetContent
           data-testid="sheet-detail"
           side="right"
-          className="w-full sm:max-w-md md:max-w-lg overflow-y-auto"
+          className="w-full overflow-y-auto bg-neutral-0 sm:max-w-md md:max-w-lg"
         >
           {detail?.kind === "pickList" && (
             <>
               <SheetHeader className="text-left">
                 <div className="flex items-center gap-2">
                   <img className="h-6 w-6" alt="" src="/figmaAssets/package-plus-1.svg" />
-                  <SheetTitle data-testid="text-detail-title" className="text-xl">
+                  <SheetTitle data-testid="text-detail-title" className="font-heading text-xl text-neutral-900">
                     {detail.data.pickListId}
                   </SheetTitle>
                 </div>
-                <SheetDescription>Pick List details and associated shipments</SheetDescription>
+                <SheetDescription className="font-body text-sm text-neutral-500">
+                  Pick List details and associated shipments
+                </SheetDescription>
               </SheetHeader>
               <div className="mt-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4 rounded-lg border border-[#e4eaed] bg-[#f6f9fb] p-4">
+                <div className="grid grid-cols-2 gap-4 rounded-lg border border-neutral-300 bg-neutral-100 p-4">
                   <DetailField label="Created on" value={detail.data.createdOn} />
                   <DetailField label="Picker" value={detail.data.picker} />
                   <DetailField label="Warehouse" value={detail.data.warehouse} />
                   <DetailField label="Total Orders" value={detail.data.totalOrders} />
                 </div>
                 <div>
-                  <h4 className="mb-2 text-sm font-medium text-[#0b1516]">
+                  <h4 className="mb-2 font-heading text-sm font-medium text-neutral-900">
                     Shipments ({relatedShipments.length})
                   </h4>
                   <div className="space-y-2">
                     {relatedShipments.length === 0 && (
-                      <p className="text-sm text-[#7f9199]">No shipments associated with this pick list.</p>
+                      <p className="font-body text-sm text-neutral-500">
+                        No shipments associated with this pick list.
+                      </p>
                     )}
                     {relatedShipments.map((s) => (
                       <button
                         key={s.id}
                         type="button"
                         data-testid={`button-detail-shipment-${s.shipmentId}`}
-                        className="flex w-full items-center justify-between rounded-lg border border-[#e4eaed] bg-white p-3 text-left transition-colors hover:bg-[#f6f9fb]"
+                        className="flex w-full items-center justify-between rounded-lg border border-neutral-300 bg-neutral-0 p-3 text-left transition-colors hover:bg-neutral-100"
                         onClick={() => setDetail({ kind: "shipment", data: s })}
                       >
                         <div>
-                          <p className="text-sm font-medium text-[#0b1516]">{s.shipmentId}</p>
-                          <p className="text-xs text-[#7f9199]">{s.customer}</p>
+                          <p className="font-body text-sm font-medium text-neutral-900">{s.shipmentId}</p>
+                          <p className="font-body text-xs text-neutral-500">{s.customer}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-medium text-[#0b1516]">{s.totalValue}</p>
-                          <p className="text-xs text-[#7f9199]">{s.weight} lb</p>
+                          <p className="font-body text-sm font-medium text-neutral-900">{s.totalValue}</p>
+                          <p className="font-body text-xs text-neutral-500">{s.weight} lb</p>
                         </div>
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-[#008572] hover:bg-[#007563] text-white">Print Pick List</Button>
-                  <Button variant="outline" className="flex-1">Edit</Button>
+                  <Button className="flex-1 bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90">
+                    Print Pick List
+                  </Button>
+                  <Button variant="outline" className="flex-1 border-neutral-300 text-neutral-900 hover:bg-neutral-100">
+                    Edit
+                  </Button>
                 </div>
               </div>
             </>
@@ -506,14 +521,16 @@ export const PickPackDashboardSection = (): JSX.Element => {
               <SheetHeader className="text-left">
                 <div className="flex items-center gap-2">
                   <img className="h-6 w-6" alt="" src={detail.data.storeIcon} />
-                  <SheetTitle data-testid="text-detail-title" className="text-xl">
+                  <SheetTitle data-testid="text-detail-title" className="font-heading text-xl text-neutral-900">
                     {detail.data.shipmentId}
                   </SheetTitle>
                 </div>
-                <SheetDescription>Shipment details</SheetDescription>
+                <SheetDescription className="font-body text-sm text-neutral-500">
+                  Shipment details
+                </SheetDescription>
               </SheetHeader>
               <div className="mt-6 space-y-6">
-                <div className="grid grid-cols-2 gap-4 rounded-lg border border-[#e4eaed] bg-[#f6f9fb] p-4">
+                <div className="grid grid-cols-2 gap-4 rounded-lg border border-neutral-300 bg-neutral-100 p-4">
                   <DetailField label="Pick List" value={detail.data.pickListId} />
                   <DetailField label="Customer" value={detail.data.customer} />
                   <DetailField label="Store" value={detail.data.store} />
@@ -522,20 +539,26 @@ export const PickPackDashboardSection = (): JSX.Element => {
                   <DetailField label="Weight" value={`${detail.data.weight} lb`} />
                 </div>
                 <div>
-                  <h4 className="mb-2 text-sm font-medium text-[#0b1516]">Tracking</h4>
-                  <div className="rounded-lg border border-[#e4eaed] bg-white p-4">
+                  <h4 className="mb-2 font-heading text-sm font-medium text-neutral-900">Tracking</h4>
+                  <div className="rounded-lg border border-neutral-300 bg-neutral-0 p-4">
                     <div className="flex items-center gap-3">
-                      <img className="h-8 w-8" alt="Carrier" src={detail.data.carrierIcon} />
+                      <img className="h-8 w-8" alt="" src={detail.data.carrierIcon} />
                       <div>
-                        <p className="text-sm font-medium text-[#0b1516]">{detail.data.carrier}</p>
-                        <p className="text-xs text-[#7f9199]">Tracking #: 1Z999AA1{detail.data.shipmentId.replace(/\D/g, "")}</p>
+                        <p className="font-body text-sm font-medium text-neutral-900">{detail.data.carrier}</p>
+                        <p className="font-body text-xs text-neutral-500">
+                          Tracking #: 1Z999AA1{detail.data.shipmentId.replace(/\D/g, "")}
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-[#008572] hover:bg-[#007563] text-white">Print Label</Button>
-                  <Button variant="outline" className="flex-1">View Order</Button>
+                  <Button className="flex-1 bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90">
+                    Print Label
+                  </Button>
+                  <Button variant="outline" className="flex-1 border-neutral-300 text-neutral-900 hover:bg-neutral-100">
+                    View Order
+                  </Button>
                 </div>
               </div>
             </>
@@ -548,7 +571,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
 
 const DetailField = ({ label, value }: { label: string; value: string }) => (
   <div>
-    <p className="text-xs text-[#7f9199]">{label}</p>
-    <p className="text-sm font-medium text-[#0b1516]">{value}</p>
+    <p className="font-body text-xs text-neutral-500">{label}</p>
+    <p className="font-body text-sm font-medium text-neutral-900">{value}</p>
   </div>
 );

@@ -71,7 +71,7 @@ export const NavigationSidebarSection = ({
 }: NavigationSidebarSectionProps): JSX.Element => {
   return (
     <aside className="w-full">
-      <Card className="h-full min-h-[calc(100vh-1rem)] rounded-lg border-0 bg-[#e4eaed] shadow-none">
+      <Card className="h-full min-h-[calc(100vh-1rem)] rounded-lg border-0 bg-sidebar shadow-none">
         <CardContent className="flex h-full min-h-[calc(100vh-1rem)] flex-col items-stretch gap-4 px-2 pb-2 pt-4">
           <header className="flex flex-col items-center gap-4">
             <div className="flex h-8 items-center justify-center">
@@ -99,7 +99,7 @@ export const NavigationSidebarSection = ({
                     key={`${action.src}-${index}`}
                     type="button"
                     variant="ghost"
-                    className="h-9 w-9 rounded border border-solid border-[#b8c6cc] bg-transparent p-0 hover:bg-white/40"
+                    className="h-9 w-9 rounded border border-solid border-neutral-400 bg-transparent p-0 hover:bg-neutral-0/40"
                   >
                     <img className="h-4 w-4" alt={action.alt} src={action.src} />
                   </Button>
@@ -116,7 +116,7 @@ export const NavigationSidebarSection = ({
                     key={`${action.src}-${index}`}
                     type="button"
                     variant="ghost"
-                    className="h-9 w-9 rounded border border-solid border-[#b8c6cc] bg-transparent p-0 hover:bg-white/40"
+                    className="h-9 w-9 rounded border border-solid border-neutral-400 bg-transparent p-0 hover:bg-neutral-0/40"
                   >
                     <img className="h-4 w-4" alt={action.alt} src={action.src} />
                   </Button>
@@ -134,7 +134,7 @@ export const NavigationSidebarSection = ({
                       alt="Chevron down"
                       src="/figmaAssets/chevron-down.svg"
                     />
-                    <h2 className="[font-family:'Roboto',Helvetica] text-sm font-normal leading-none tracking-[0] text-[#0b1516]">
+                    <h2 className="font-body text-sm font-normal leading-none text-neutral-900">
                       PLANNING
                     </h2>
                   </div>
@@ -150,8 +150,8 @@ export const NavigationSidebarSection = ({
                         isCollapsed ? "w-9" : "w-full"
                       } ${
                         item.active
-                          ? "bg-[#008572] text-white hover:bg-[#007563] hover:text-white"
-                          : "bg-transparent text-[#45565b] hover:bg-white/40 hover:text-[#45565b]"
+                          ? "bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90 hover:text-brand-secondary-contrast"
+                          : "bg-transparent text-neutral-700 hover:bg-neutral-0/40 hover:text-neutral-700"
                       }`}
                     >
                       <img
@@ -174,14 +174,14 @@ export const NavigationSidebarSection = ({
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-auto inline-flex justify-start gap-2 self-start p-0 text-[#0b1516] hover:bg-transparent hover:text-[#0b1516]"
+                      className="h-auto inline-flex justify-start gap-2 self-start p-0 text-neutral-900 hover:bg-transparent hover:text-neutral-900"
                     >
                       <img
                         className="h-4 w-4"
                         alt={section.alt}
                         src={section.iconSrc}
                       />
-                      <span className="[font-family:'Roboto',Helvetica] text-sm font-normal leading-none tracking-[0]">
+                      <span className="font-body text-sm font-normal leading-none tracking-[0]">
                         {section.label}
                       </span>
                     </Button>
@@ -191,13 +191,13 @@ export const NavigationSidebarSection = ({
             <footer className="mt-auto flex flex-col gap-4 px-2 pt-6">
               {!isCollapsed && (
                 <div className="flex w-full items-center gap-2 rounded-lg p-1">
-                  <Avatar className="h-8 w-8 rounded-2xl bg-[#f7c9e5]">
-                    <AvatarFallback className="rounded-2xl bg-[#f7c9e5] font-body-body-1 text-[length:var(--body-body-1-font-size)] font-[number:var(--body-body-1-font-weight)] leading-[var(--body-body-1-line-height)] tracking-[var(--body-body-1-letter-spacing)] text-[#0b1516] [font-style:var(--body-body-1-font-style)]">
+                  <Avatar className="h-8 w-8 rounded-2xl bg-[hsl(322_77%_88%)]">
+                    <AvatarFallback className="rounded-2xl bg-[hsl(322_77%_88%)] font-body-body-1 text-[length:var(--body-body-1-font-size)] font-[number:var(--body-body-1-font-weight)] leading-[var(--body-body-1-line-height)] tracking-[var(--body-body-1-letter-spacing)] text-neutral-900 [font-style:var(--body-body-1-font-style)]">
                       JD
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start">
-                    <span className="[font-family:'Roboto',Helvetica] text-base font-normal leading-none tracking-[0] text-[#0b1516]">
+                    <span className="font-body text-base font-normal leading-none text-neutral-900">
                       John Doe
                     </span>
                   </div>
@@ -205,8 +205,8 @@ export const NavigationSidebarSection = ({
               )}
               {isCollapsed && (
                 <div className="flex justify-center">
-                  <Avatar className="h-8 w-8 rounded-2xl bg-[#f7c9e5]">
-                    <AvatarFallback className="rounded-2xl bg-[#f7c9e5] text-xs text-[#0b1516]">
+                  <Avatar className="h-8 w-8 rounded-2xl bg-[hsl(322_77%_88%)]">
+                    <AvatarFallback className="rounded-2xl bg-[hsl(322_77%_88%)] text-xs text-neutral-900">
                       JD
                     </AvatarFallback>
                   </Avatar>
@@ -234,9 +234,9 @@ export const NavigationSidebarSection = ({
                   aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
                   {isCollapsed ? (
-                    <ChevronRightIcon className="h-5 w-5 text-[#45565b]" />
+                    <ChevronRightIcon className="h-5 w-5 text-neutral-700" />
                   ) : (
-                    <ChevronLeftIcon className="h-5 w-5 text-[#45565b]" />
+                    <ChevronLeftIcon className="h-5 w-5 text-neutral-700" />
                   )}
                 </Button>
               </div>
