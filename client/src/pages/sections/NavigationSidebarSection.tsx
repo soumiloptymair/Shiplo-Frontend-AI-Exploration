@@ -71,8 +71,8 @@ export const NavigationSidebarSection = ({
 }: NavigationSidebarSectionProps): JSX.Element => {
   return (
     <aside className="w-full">
-      <Card className="h-full min-h-[1008px] rounded-lg border-0 bg-[#e4eaed] shadow-none">
-        <CardContent className="flex h-full min-h-[1008px] flex-col items-stretch gap-4 px-2 pb-2 pt-4">
+      <Card className="h-full min-h-[calc(100vh-1rem)] rounded-lg border-0 bg-[#e4eaed] shadow-none">
+        <CardContent className="flex h-full min-h-[calc(100vh-1rem)] flex-col items-stretch gap-4 px-2 pb-2 pt-4">
           <header className="flex flex-col items-center gap-4">
             <div className="flex h-8 items-center justify-center">
               {isCollapsed ? (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { NavigationSidebarSection } from "./sections/NavigationSidebarSection";
 import { PickPackDashboardSection } from "./sections/PickPackDashboardSection";
@@ -6,12 +6,24 @@ import { PickPackDashboardSection } from "./sections/PickPackDashboardSection";
 export const OrdersDataGrid = (): JSX.Element => {
   const [isNavCollapsed, setIsNavCollapsed] = useState(false);
 
+  // Auto-collapse the sidebar on narrow screens (responsive)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsNavCollapsed(true);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <main className="w-full bg-grey-02 p-2">
-      <div className="mx-auto flex w-full min-w-[1440px] items-stretch gap-2">
+    <main className="min-h-screen w-full bg-grey-02 p-2">
+      <div className="mx-auto flex w-full items-stretch gap-2">
         <Card
           className={`shrink-0 rounded-none border-0 bg-transparent shadow-none transition-all duration-200 ${
-            isNavCollapsed ? "w-[52px]" : "w-[208px]"
+            isNavCollapsed ? "w-[60px]" : "w-[208px]"
           }`}
         >
           <CardContent className="h-full p-0">
