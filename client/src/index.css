@@ -65,9 +65,9 @@
   --grey-02: hsl(195 17% 91%);
   --grey-11: hsl(188 30% 6%);
 
-  /* Typography (Shiplo body = Poppins, headings = Montserrat) */
-  --font-body: "Poppins", "Inter", system-ui, sans-serif;
-  --font-heading: "Montserrat", "Poppins", system-ui, sans-serif;
+  /* Typography (Figma frames: body = Roboto, headings = Montserrat) */
+  --font-body: "Roboto", "Helvetica", system-ui, sans-serif;
+  --font-heading: "Montserrat", "Roboto", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   /* Legacy text-style font-family aliases (existing components reference these) */
