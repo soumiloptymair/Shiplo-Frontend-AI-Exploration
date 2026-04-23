@@ -212,7 +212,9 @@ export const PickPackDashboardSection = (): JSX.Element => {
                 <Select value={warehouse} onValueChange={setWarehouse}>
                   <SelectTrigger
                     data-testid="select-warehouse"
-                    className="h-9 w-auto min-w-[200px] sm:min-w-[262px] gap-2 rounded border border-neutral-300 bg-neutral-0 px-3 py-2 text-left shadow-none [&>svg]:text-neutral-700"
+                    className={`h-9 w-auto min-w-[200px] sm:min-w-[262px] gap-2 rounded border border-neutral-300 bg-neutral-0 px-3 py-2 text-left shadow-none [&>svg]:text-neutral-700 ${
+                      panelOpen ? "hidden xl:flex" : "hidden md:flex"
+                    }`}
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <span className="font-body text-sm text-neutral-500">Warehouse</span>
@@ -227,7 +229,9 @@ export const PickPackDashboardSection = (): JSX.Element => {
                 <Select defaultValue="All Time">
                   <SelectTrigger
                     data-testid="select-time"
-                    className="h-9 w-auto min-w-[140px] sm:min-w-[152px] gap-2 rounded border border-neutral-300 bg-neutral-0 px-3 py-2 text-left shadow-none [&>svg]:text-neutral-700"
+                    className={`h-9 w-auto min-w-[140px] sm:min-w-[152px] gap-2 rounded border border-neutral-300 bg-neutral-0 px-3 py-2 text-left shadow-none [&>svg]:text-neutral-700 ${
+                      panelOpen ? "hidden 2xl:flex" : "hidden lg:flex"
+                    }`}
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <span className="font-body text-sm text-neutral-500">Time</span>
