@@ -195,9 +195,9 @@ export const PickPackDashboardSection = (): JSX.Element => {
     : [];
 
   return (
-    <div className="flex w-full flex-1 items-stretch gap-2">
+    <div className="flex h-full min-h-full w-full flex-1 items-stretch gap-2">
       {/* Main content (squeezes left when panel opens) */}
-      <section className="flex min-w-0 flex-1 flex-col items-start justify-center gap-2">
+      <section className="flex min-w-0 flex-1 flex-col items-stretch gap-2">
         {/* Pick Lists Table */}
         <Card className="h-auto w-full overflow-hidden rounded-lg border border-neutral-300 bg-neutral-0 shadow-none">
           <CardContent className="p-0">
@@ -350,8 +350,8 @@ export const PickPackDashboardSection = (): JSX.Element => {
         </Card>
 
         {/* Shipments Table */}
-        <Card className="w-full overflow-hidden rounded-lg border border-neutral-300 bg-neutral-0 shadow-none">
-          <CardContent className="p-0">
+        <Card className="flex w-full min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-300 bg-neutral-0 shadow-none">
+          <CardContent className="flex min-h-0 flex-1 flex-col p-0">
             <header className="flex h-auto min-h-[52px] items-center justify-between gap-3 border-b border-neutral-150 bg-neutral-0 px-5 py-2">
               <h3 className="m-0 font-heading text-lg font-medium text-neutral-900">
                 Shipments
@@ -362,7 +362,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
                 )}
               </h3>
             </header>
-            <div className="w-full overflow-x-auto">
+            <div className="w-full min-h-0 flex-1 overflow-auto">
               <Table className="w-full min-w-[900px]">
                 <TableHeader>
                   <TableRow className="border-b border-neutral-300 bg-neutral-100 hover:bg-neutral-100">

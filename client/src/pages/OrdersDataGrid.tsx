@@ -20,7 +20,7 @@ export const OrdersDataGrid = (): JSX.Element => {
 
   return (
     <main className="min-h-screen w-full bg-grey-02 p-2">
-      <div className="mx-auto flex w-full items-stretch gap-2">
+      <div className="mx-auto flex min-h-[calc(100vh-1rem)] w-full items-stretch gap-2">
         <Card
           className={`shrink-0 rounded-none border-0 bg-transparent shadow-none transition-all duration-200 ${
             isNavCollapsed ? "w-[60px]" : "w-[208px]"
