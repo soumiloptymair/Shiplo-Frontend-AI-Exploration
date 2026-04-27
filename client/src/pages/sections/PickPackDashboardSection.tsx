@@ -350,13 +350,6 @@ export const PickPackDashboardSection = (): JSX.Element => {
                 <span>Need Attention:</span>
                 <span className="font-medium">2</span>
               </div>
-              {selectedPickListId && (
-                <div className="ml-auto">
-                  <span className="font-body text-sm font-medium text-brand-secondary">
-                    Viewing shipments for: {selectedPickListId}
-                  </span>
-                </div>
-              )}
             </footer>
           </CardContent>
         </Card>
@@ -367,12 +360,27 @@ export const PickPackDashboardSection = (): JSX.Element => {
             <header className="flex h-auto min-h-[52px] items-center justify-between gap-3 border-b border-neutral-150 bg-neutral-0 px-5 py-2">
               <h3 className="m-0 font-heading text-lg font-medium text-neutral-900">
                 Shipments
-                {selectedPickListId && (
-                  <span className="ml-2 font-body text-sm font-normal text-neutral-500">
-                    — {filteredShipments.length} for {selectedPickListId}
-                  </span>
-                )}
               </h3>
+              {selectedPickListId && (
+                <div
+                  data-testid="pill-picklist-filter"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-brand-secondary/30 bg-brand-secondary/10 py-1 pl-3 pr-1.5 font-body text-xs font-medium text-brand-secondary"
+                >
+                  <span>{selectedPickListId}</span>
+                  <button
+                    type="button"
+                    data-testid="button-clear-picklist-filter"
+                    onClick={() => {
+                      setSelectedPickListId(null);
+                      setSelectedShipmentIds(new Set());
+                    }}
+                    aria-label={`Clear filter ${selectedPickListId}`}
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-brand-secondary hover:bg-brand-secondary/20"
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
             </header>
             <div className="w-full min-h-0 flex-1 overflow-auto">
               <Table className="w-full min-w-[900px]">
