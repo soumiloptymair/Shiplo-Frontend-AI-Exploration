@@ -60,7 +60,7 @@ type ShipmentRow = {
 
 const PICKERS = ["Jane Smith", "John Doe", "Maria Garcia", "Sam Patel"];
 
-const pickPackRows: PickListRow[] = Array.from({ length: 8 }, (_, index) => ({
+const INITIAL_PICK_PACK_ROWS: PickListRow[] = Array.from({ length: 8 }, (_, index) => ({
   id: `pick-pack-${index + 1}`,
   pickListId: `PL-${100000 + index}`,
   createdOn: "01/15/2025",
@@ -75,7 +75,7 @@ const LMB = "Large Moving Boxes";
 const TAPE = "Packing Tape";
 const WRAP = "Bubble Wrap Roll";
 
-const shipmentRows: ShipmentRow[] = [
+const INITIAL_SHIPMENT_ROWS: ShipmentRow[] = [
   { id: "shipment-1", shipmentId: "SH-001", pickListId: "PL-100000", store: "Walmart Marketplace", storeIcon: "/figmaAssets/integrations.png", totalValue: "$1,234.50", weight: "210", customer: "Alice Johnson", carrier: "UPS Express", carrierIcon: "/figmaAssets/pngegg--2--1.png", products: [ { extId: "P-10001", name: SMB, qty: 2, lowInventory: true }, { extId: "P-10002", name: TAPE, qty: 4 } ] },
   { id: "shipment-2", shipmentId: "SH-002", pickListId: "PL-100000", store: "Walmart Marketplace", storeIcon: "/figmaAssets/integrations-1.png", totalValue: "$890.00", weight: "145", customer: "Bob Martinez", carrier: "UPS Express", carrierIcon: "/figmaAssets/pngegg--2--1-1.png", products: [ { extId: "P-10003", name: MMB, qty: 1 }, { extId: "P-10001", name: SMB, qty: 2, lowInventory: true } ] },
   { id: "shipment-3", shipmentId: "SH-003", pickListId: "PL-100001", store: "Walmart Marketplace", storeIcon: "/figmaAssets/integrations-2.png", totalValue: "$2,100.75", weight: "380", customer: "Carol White", carrier: "UPS Express", carrierIcon: "/figmaAssets/pngegg--2--1-2.png", products: [ { extId: "P-10004", name: LMB, qty: 3 }, { extId: "P-10005", name: WRAP, qty: 2 } ] },
@@ -97,12 +97,15 @@ const rowSelected = "bg-brand-secondary/10 hover:bg-brand-secondary/15";
 const parseMoney = (s: string) => Number(s.replace(/[^0-9.]/g, "")) || 0;
 
 export const PickPackDashboardSection = (): JSX.Element => {
+  const [pickPackRows, setPickPackRows] = useState<PickListRow[]>(INITIAL_PICK_PACK_ROWS);
+  const [shipmentRows, setShipmentRows] = useState<ShipmentRow[]>(INITIAL_SHIPMENT_ROWS);
   const [selectedPickListId, setSelectedPickListId] = useState<string | null>(null);
   const [selectedShipmentIds, setSelectedShipmentIds] = useState<Set<string>>(new Set());
   const [expandedShipmentIds, setExpandedShipmentIds] = useState<Set<string>>(new Set());
   const [warehouse, setWarehouse] = useState("PA Fulfilment Facility");
   const [newPickListId, setNewPickListId] = useState("");
   const [newPicker, setNewPicker] = useState<string>("");
+  const [newPickListIdError, setNewPickListIdError] = useState<string | null>(null);
   const [lowInventoryDismissed, setLowInventoryDismissed] = useState(false);
 
   const toggleExpandShipment = (id: string) => {
@@ -192,18 +195,59 @@ export const PickPackDashboardSection = (): JSX.Element => {
           : null;
   const panelOpen = panelMode !== null;
 
+  const formatDateMDY = (d: Date) => {
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${mm}/${dd}/${d.getFullYear()}`;
+  };
+
   const handleCreatePickList = () => {
-    alert(
-      `Pick List created with ${selectedShipments.length} shipment(s):\n${selectedShipments.map((s) => s.shipmentId).join(", ")}`
+    const trimmedId = newPickListId.trim();
+    if (!trimmedId || !newPicker || selectedShipments.length === 0) return;
+    if (pickPackRows.some((p) => p.pickListId.toLowerCase() === trimmedId.toLowerCase())) {
+      setNewPickListIdError(`${trimmedId} already exists`);
+      return;
+    }
+    const selectedIds = new Set(selectedShipmentIds);
+    const newPickList: PickListRow = {
+      id: `pick-pack-${Date.now()}`,
+      pickListId: trimmedId,
+      createdOn: formatDateMDY(new Date()),
+      warehouse,
+      totalOrders: String(selectedShipments.length),
+      picker: newPicker,
+    };
+    setPickPackRows((prev) => [newPickList, ...prev]);
+    setShipmentRows((prev) =>
+      prev.map((s) => (selectedIds.has(s.id) ? { ...s, pickListId: trimmedId } : s)),
     );
     setSelectedShipmentIds(new Set());
-    setSelectedPickListId(null);
+    setNewPickListId("");
+    setNewPicker("");
+    setNewPickListIdError(null);
+    setSelectedPickListId(trimmedId);
   };
 
   const handleAddToPickList = () => {
-    if (!selectedPickListId) return;
-    alert(
-      `Added ${selectedShipments.length} shipment(s) to ${selectedPickListId}:\n${selectedShipments.map((s) => s.shipmentId).join(", ")}`
+    if (!selectedPickListId || selectedShipments.length === 0) return;
+    const targetPickListId = selectedPickListId;
+    const selectedIds = new Set(selectedShipmentIds);
+    setShipmentRows((prev) =>
+      prev.map((s) =>
+        selectedIds.has(s.id) ? { ...s, pickListId: targetPickListId } : s,
+      ),
+    );
+    setPickPackRows((prev) =>
+      prev.map((p) =>
+        p.pickListId === targetPickListId
+          ? {
+              ...p,
+              totalOrders: String(
+                Number(p.totalOrders || "0") + selectedShipments.length,
+              ),
+            }
+          : p,
+      ),
     );
     setSelectedShipmentIds(new Set());
     // Keep the pick list selected so the user sees the updated context.
@@ -802,11 +846,31 @@ export const PickPackDashboardSection = (): JSX.Element => {
                             <Input
                               id="input-new-picklist-id"
                               data-testid="input-new-picklist-id"
-                              placeholder="Enter"
+                              placeholder="e.g. PL-100100"
                               value={newPickListId}
-                              onChange={(e) => setNewPickListId(e.target.value)}
-                              className="h-9 border-neutral-300 bg-neutral-0 font-body text-sm text-neutral-900 placeholder:text-neutral-500"
+                              onChange={(e) => {
+                                setNewPickListId(e.target.value);
+                                if (newPickListIdError) setNewPickListIdError(null);
+                              }}
+                              className={`h-9 bg-neutral-0 font-body text-sm text-neutral-900 placeholder:text-neutral-500 ${
+                                newPickListIdError
+                                  ? "border-error focus-visible:ring-error/30"
+                                  : "border-neutral-300"
+                              }`}
+                              aria-invalid={!!newPickListIdError}
+                              aria-describedby={
+                                newPickListIdError ? "input-new-picklist-id-error" : undefined
+                              }
                             />
+                            {newPickListIdError && (
+                              <p
+                                id="input-new-picklist-id-error"
+                                data-testid="error-new-picklist-id"
+                                className="mt-1 font-body text-xs text-error"
+                              >
+                                {newPickListIdError}
+                              </p>
+                            )}
                           </div>
                           <div>
                             <label
