@@ -194,6 +194,23 @@ export const PickPackDashboardSection = (): JSX.Element => {
     ? shipmentRows.filter((s) => s.pickListId === selectedPickList.pickListId)
     : [];
 
+  // Aggregate items across the shipments that belong to the selected pick list
+  const relatedItems: Product[] = useMemo(() => {
+    const map = new Map<string, Product>();
+    for (const s of relatedShipments) {
+      for (const p of s.products) {
+        const existing = map.get(p.extId);
+        if (existing) {
+          existing.qty += p.qty;
+          existing.lowInventory = existing.lowInventory || p.lowInventory;
+        } else {
+          map.set(p.extId, { ...p });
+        }
+      }
+    }
+    return Array.from(map.values());
+  }, [relatedShipments]);
+
   return (
     <div className="flex h-full min-h-full w-full flex-1 items-stretch gap-2">
       {/* Main content (squeezes left when panel opens) */}
@@ -596,32 +613,47 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     </div>
                     <div>
                       <h4 className="mb-2 font-heading text-sm font-medium text-neutral-900">
-                        Shipments ({relatedShipments.length})
+                        Items ({relatedItems.length})
                       </h4>
-                      <div className="space-y-2">
-                        {relatedShipments.length === 0 && (
-                          <p className="font-body text-sm text-neutral-500">
-                            No shipments associated with this pick list.
-                          </p>
-                        )}
-                        {relatedShipments.map((s) => (
-                          <div
-                            key={s.id}
-                            className="flex items-center justify-between rounded-lg border border-neutral-300 bg-neutral-0 p-3"
-                          >
-                            <div className="min-w-0">
-                              <p className="font-body text-sm font-medium text-neutral-900">
-                                {s.shipmentId}
-                              </p>
-                              <p className="truncate font-body text-xs text-neutral-500">{s.customer}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-body text-sm font-medium text-neutral-900">{s.totalValue}</p>
-                              <p className="font-body text-xs text-neutral-500">{s.weight} lb</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      {relatedItems.length === 0 ? (
+                        <p className="font-body text-sm text-neutral-500">
+                          No items associated with this pick list.
+                        </p>
+                      ) : (
+                        <div className="overflow-hidden rounded-lg border border-neutral-300 bg-neutral-0">
+                          <Table className="w-full">
+                            <TableHeader>
+                              <TableRow className="border-b border-neutral-300 bg-neutral-100 hover:bg-neutral-100">
+                                <TableHead className="h-8 px-3 font-body text-xs font-medium text-neutral-900">
+                                  ID
+                                </TableHead>
+                                <TableHead className="h-8 w-[80px] px-3 text-right font-body text-xs font-medium text-neutral-900">
+                                  Qty
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {relatedItems.map((item) => (
+                                <TableRow
+                                  key={item.extId}
+                                  data-testid={`row-item-${item.extId}`}
+                                  className="border-b border-neutral-150 hover:bg-neutral-50"
+                                >
+                                  <TableCell className="h-8 px-3 py-1 font-body text-sm text-neutral-900">
+                                    {item.extId}
+                                  </TableCell>
+                                  <TableCell
+                                    data-testid={`text-item-qty-${item.extId}`}
+                                    className="h-8 px-3 py-1 text-right font-body text-sm text-neutral-900"
+                                  >
+                                    {item.qty}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
