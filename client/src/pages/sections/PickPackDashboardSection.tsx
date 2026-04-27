@@ -114,9 +114,34 @@ export const PickPackDashboardSection = (): JSX.Element => {
     });
   };
 
-  const filteredShipments = selectedPickListId
-    ? shipmentRows.filter((s) => s.pickListId === selectedPickListId)
-    : shipmentRows;
+  // Shipments already a part of the currently selected pick list — these
+  // appear at the top of the table with their checkboxes disabled (and checked).
+  const existingPickListShipmentIds = useMemo(
+    () =>
+      new Set(
+        selectedPickListId
+          ? shipmentRows
+              .filter((s) => s.pickListId === selectedPickListId)
+              .map((s) => s.id)
+          : [],
+      ),
+    [selectedPickListId],
+  );
+
+  // Display order: when a pick list is selected, hoist its shipments to the top,
+  // followed by the rest. Otherwise show the natural order.
+  const displayShipments = useMemo(() => {
+    if (!selectedPickListId) return shipmentRows;
+    const inList = shipmentRows.filter((s) => s.pickListId === selectedPickListId);
+    const rest = shipmentRows.filter((s) => s.pickListId !== selectedPickListId);
+    return [...inList, ...rest];
+  }, [selectedPickListId]);
+
+  // Only shipments NOT already in the selected pick list are togglable.
+  const togglableShipments = useMemo(
+    () => displayShipments.filter((s) => !existingPickListShipmentIds.has(s.id)),
+    [displayShipments, existingPickListShipmentIds],
+  );
 
   const togglePickListSelection = (pickListId: string) => {
     if (selectedPickListId === pickListId) {
@@ -129,6 +154,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
   };
 
   const handleShipmentCheck = (shipmentId: string, checked: boolean) => {
+    if (existingPickListShipmentIds.has(shipmentId)) return; // disabled, no-op
     setSelectedShipmentIds((prev) => {
       const next = new Set(prev);
       if (checked) next.add(shipmentId);
@@ -140,23 +166,30 @@ export const PickPackDashboardSection = (): JSX.Element => {
   };
 
   const handleSelectAllShipments = (checked: boolean) => {
-    if (checked) setSelectedShipmentIds(new Set(filteredShipments.map((s) => s.id)));
+    if (checked) setSelectedShipmentIds(new Set(togglableShipments.map((s) => s.id)));
     else setSelectedShipmentIds(new Set());
   };
 
   const allShipmentsSelected =
-    filteredShipments.length > 0 &&
-    filteredShipments.every((s) => selectedShipmentIds.has(s.id));
+    togglableShipments.length > 0 &&
+    togglableShipments.every((s) => selectedShipmentIds.has(s.id));
   const someShipmentsSelected =
-    filteredShipments.some((s) => selectedShipmentIds.has(s.id)) && !allShipmentsSelected;
+    togglableShipments.some((s) => selectedShipmentIds.has(s.id)) && !allShipmentsSelected;
 
   const selectedShipments = shipmentRows.filter((s) => selectedShipmentIds.has(s.id));
   const selectedPickList = pickPackRows.find((p) => p.pickListId === selectedPickListId) ?? null;
 
   // Panel opens when EITHER a pick list radio is selected OR shipments are being selected.
-  // Shipment selection takes precedence in the panel content (more recent action).
-  const panelMode: "pickList" | "shipments" | null =
-    selectedShipmentIds.size > 0 ? "shipments" : selectedPickList ? "pickList" : null;
+  // When a pick list is selected AND the user is choosing extra shipments, we enter
+  // "addShipments" mode (the panel offers an "Add to Picklist" action).
+  const panelMode: "pickList" | "shipments" | "addShipments" | null =
+    selectedPickList && selectedShipmentIds.size > 0
+      ? "addShipments"
+      : selectedShipmentIds.size > 0
+        ? "shipments"
+        : selectedPickList
+          ? "pickList"
+          : null;
   const panelOpen = panelMode !== null;
 
   const handleCreatePickList = () => {
@@ -165,6 +198,15 @@ export const PickPackDashboardSection = (): JSX.Element => {
     );
     setSelectedShipmentIds(new Set());
     setSelectedPickListId(null);
+  };
+
+  const handleAddToPickList = () => {
+    if (!selectedPickListId) return;
+    alert(
+      `Added ${selectedShipments.length} shipment(s) to ${selectedPickListId}:\n${selectedShipments.map((s) => s.shipmentId).join(", ")}`
+    );
+    setSelectedShipmentIds(new Set());
+    // Keep the pick list selected so the user sees the updated context.
   };
 
   const totalValue = selectedShipments.reduce((sum, s) => sum + parseMoney(s.totalValue), 0);
@@ -408,15 +450,24 @@ export const PickPackDashboardSection = (): JSX.Element => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredShipments.map((row) => {
-                    const isChecked = selectedShipmentIds.has(row.id);
+                  {displayShipments.map((row) => {
+                    const isInPickList = existingPickListShipmentIds.has(row.id);
+                    const isChecked = isInPickList || selectedShipmentIds.has(row.id);
                     const isExpanded = expandedShipmentIds.has(row.id);
+                    const rowClass = isInPickList
+                      ? "bg-brand-secondary/10 hover:bg-brand-secondary/10"
+                      : isChecked
+                        ? rowSelected
+                        : rowDefault;
                     return (
                       <Fragment key={row.id}>
                         <TableRow
                           data-testid={`row-shipment-${row.shipmentId}`}
-                          onClick={() => handleShipmentCheck(row.id, !isChecked)}
-                          className={`${rowBase} cursor-pointer ${isChecked ? rowSelected : rowDefault}`}
+                          onClick={() => {
+                            if (isInPickList) return;
+                            handleShipmentCheck(row.id, !isChecked);
+                          }}
+                          className={`${rowBase} ${isInPickList ? "cursor-default" : "cursor-pointer"} ${rowClass}`}
                         >
                           <TableCell
                             className="h-8 px-2 py-0"
@@ -425,10 +476,15 @@ export const PickPackDashboardSection = (): JSX.Element => {
                             <div className="flex h-8 items-center justify-center">
                               <Checkbox
                                 data-testid={`checkbox-shipment-${row.shipmentId}`}
-                                className="h-5 w-5 rounded-[4px] border-neutral-700 data-[state=checked]:border-brand-secondary data-[state=checked]:bg-brand-secondary data-[state=checked]:text-brand-secondary-contrast"
+                                className="h-5 w-5 rounded-[4px] border-neutral-700 data-[state=checked]:border-brand-secondary data-[state=checked]:bg-brand-secondary data-[state=checked]:text-brand-secondary-contrast disabled:cursor-not-allowed disabled:opacity-100"
                                 checked={isChecked}
+                                disabled={isInPickList}
                                 onCheckedChange={(checked) => handleShipmentCheck(row.id, checked === true)}
-                                aria-label={`Select shipment ${row.shipmentId}`}
+                                aria-label={
+                                  isInPickList
+                                    ? `${row.shipmentId} is already in ${selectedPickListId}`
+                                    : `Select shipment ${row.shipmentId}`
+                                }
                               />
                             </div>
                           </TableCell>
@@ -543,7 +599,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
             <footer className="flex w-full flex-wrap items-center gap-4 border-t border-neutral-300 bg-neutral-0 px-5 py-2">
               <div className="inline-flex items-center gap-1 font-body text-sm text-neutral-900">
                 <span>Total Shipments:</span>
-                <span className="font-medium">{filteredShipments.length}</span>
+                <span className="font-medium">{displayShipments.length}</span>
               </div>
               <div className="inline-flex items-center gap-1 font-body text-sm text-neutral-900">
                 <span>Needs Attention:</span>
@@ -572,7 +628,11 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     data-testid="text-panel-title"
                     className="m-0 truncate font-heading text-sm font-semibold uppercase tracking-wider text-neutral-900"
                   >
-                    {panelMode === "pickList" && selectedPickList ? selectedPickList.pickListId : "PICKLIST"}
+                    {panelMode === "pickList" && selectedPickList
+                      ? selectedPickList.pickListId
+                      : panelMode === "addShipments" && selectedPickList
+                        ? `${selectedPickList.pickListId} · ADD`
+                        : "PICKLIST"}
                   </h3>
                 </div>
                 <div className="flex items-center gap-1">
@@ -677,7 +737,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
                   </div>
                 )}
 
-                {panelMode === "shipments" && (
+                {(panelMode === "shipments" || panelMode === "addShipments") && (
                   <div>
                     {/* Low Inventory alert */}
                     {lowInventoryProduct && !lowInventoryDismissed && (
@@ -708,52 +768,74 @@ export const PickPackDashboardSection = (): JSX.Element => {
 
                     {/* Form: Picklist ID + Picker + counts */}
                     <div className="space-y-3 px-4 pb-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label
-                            htmlFor="input-new-picklist-id"
-                            className="mb-1 block font-body text-xs font-medium text-neutral-900"
+                      {panelMode === "addShipments" && selectedPickList ? (
+                        <div
+                          data-testid="banner-add-to-picklist"
+                          className="rounded-md border border-brand-secondary/30 bg-brand-secondary/10 px-3 py-2"
+                        >
+                          <p className="font-body text-xs font-medium text-neutral-700">
+                            Adding shipments to
+                          </p>
+                          <p
+                            data-testid="text-target-picklist"
+                            className="font-body text-sm font-semibold text-brand-secondary"
                           >
-                            Picklist ID
-                          </label>
-                          <Input
-                            id="input-new-picklist-id"
-                            data-testid="input-new-picklist-id"
-                            placeholder="Enter"
-                            value={newPickListId}
-                            onChange={(e) => setNewPickListId(e.target.value)}
-                            className="h-9 border-neutral-300 bg-neutral-0 font-body text-sm text-neutral-900 placeholder:text-neutral-500"
-                          />
+                            {selectedPickList.pickListId}
+                            <span className="ml-2 font-normal text-neutral-700">
+                              · Picker: {selectedPickList.picker}
+                            </span>
+                          </p>
                         </div>
-                        <div>
-                          <label
-                            htmlFor="select-new-picker"
-                            className="mb-1 block font-body text-xs font-medium text-neutral-900"
-                          >
-                            Picker
-                          </label>
-                          <Select value={newPicker} onValueChange={setNewPicker}>
-                            <SelectTrigger
-                              id="select-new-picker"
-                              data-testid="select-new-picker"
-                              className="h-9 border-neutral-300 bg-neutral-0 font-body text-sm text-neutral-900 [&>span]:text-neutral-900 data-[placeholder]:[&>span]:text-neutral-500"
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label
+                              htmlFor="input-new-picklist-id"
+                              className="mb-1 block font-body text-xs font-medium text-neutral-900"
                             >
-                              <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {PICKERS.map((p) => (
-                                <SelectItem key={p} value={p}>
-                                  {p}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                              Picklist ID
+                            </label>
+                            <Input
+                              id="input-new-picklist-id"
+                              data-testid="input-new-picklist-id"
+                              placeholder="Enter"
+                              value={newPickListId}
+                              onChange={(e) => setNewPickListId(e.target.value)}
+                              className="h-9 border-neutral-300 bg-neutral-0 font-body text-sm text-neutral-900 placeholder:text-neutral-500"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="select-new-picker"
+                              className="mb-1 block font-body text-xs font-medium text-neutral-900"
+                            >
+                              Picker
+                            </label>
+                            <Select value={newPicker} onValueChange={setNewPicker}>
+                              <SelectTrigger
+                                id="select-new-picker"
+                                data-testid="select-new-picker"
+                                className="h-9 border-neutral-300 bg-neutral-0 font-body text-sm text-neutral-900 [&>span]:text-neutral-900 data-[placeholder]:[&>span]:text-neutral-500"
+                              >
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {PICKERS.map((p) => (
+                                  <SelectItem key={p} value={p}>
+                                    {p}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <div className="grid grid-cols-2 gap-3 pt-1">
                         <div>
                           <p className="font-body text-xs font-medium text-neutral-900">
-                            Total Shipments
+                            {panelMode === "addShipments"
+                              ? "Shipments to add"
+                              : "Total Shipments"}
                           </p>
                           <p
                             data-testid="text-total-shipments"
@@ -781,21 +863,34 @@ export const PickPackDashboardSection = (): JSX.Element => {
                           className="flex-1 border-neutral-300 text-neutral-900 hover:bg-neutral-100"
                           onClick={() => {
                             setSelectedShipmentIds(new Set());
-                            setNewPickListId("");
-                            setNewPicker("");
+                            if (panelMode !== "addShipments") {
+                              setNewPickListId("");
+                              setNewPicker("");
+                            }
                             setLowInventoryDismissed(false);
                           }}
                         >
                           Cancel
                         </Button>
-                        <Button
-                          data-testid="button-create-picklist"
-                          className="flex-1 bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90"
-                          onClick={handleCreatePickList}
-                          disabled={!newPickListId.trim() || !newPicker}
-                        >
-                          Create Pick List
-                        </Button>
+                        {panelMode === "addShipments" ? (
+                          <Button
+                            data-testid="button-add-to-picklist"
+                            className="flex-1 bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90"
+                            onClick={handleAddToPickList}
+                            disabled={selectedShipments.length === 0}
+                          >
+                            Add to Picklist
+                          </Button>
+                        ) : (
+                          <Button
+                            data-testid="button-create-picklist"
+                            className="flex-1 bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90"
+                            onClick={handleCreatePickList}
+                            disabled={!newPickListId.trim() || !newPicker}
+                          >
+                            Create Pick List
+                          </Button>
+                        )}
                       </div>
                     </div>
 
@@ -879,10 +974,14 @@ export const PickPackDashboardSection = (): JSX.Element => {
                   </Button>
                 </footer>
               )}
-              {panelMode === "shipments" && (
+              {(panelMode === "shipments" || panelMode === "addShipments") && (
                 <footer className="flex items-center justify-between border-t border-neutral-150 px-4 py-2">
                   <div className="font-body text-xs text-neutral-700">
-                    <span className="font-semibold text-neutral-900">Selected Shipments:</span>{" "}
+                    <span className="font-semibold text-neutral-900">
+                      {panelMode === "addShipments"
+                        ? "Shipments to add:"
+                        : "Selected Shipments:"}
+                    </span>{" "}
                     {selectedShipments.length}
                   </div>
                   <div className="font-body text-xs text-neutral-700">
