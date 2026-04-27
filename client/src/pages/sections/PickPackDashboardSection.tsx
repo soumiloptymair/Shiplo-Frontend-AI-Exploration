@@ -290,7 +290,6 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     <TableHead className={headCellBase}>Warehouse</TableHead>
                     <TableHead className={headCellBase}>Total Orders</TableHead>
                     <TableHead className={headCellBase}>Picker</TableHead>
-                    <TableHead className="h-8 w-10 px-2" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -336,14 +335,6 @@ export const PickPackDashboardSection = (): JSX.Element => {
                         <TableCell className={cellTextBase}>{row.warehouse}</TableCell>
                         <TableCell className={cellTextBase}>{row.totalOrders}</TableCell>
                         <TableCell className={cellTextBase}>{row.picker}</TableCell>
-                        <TableCell className="h-8 px-2 py-0">
-                          <span
-                            aria-hidden="true"
-                            className="flex h-6 w-6 items-center justify-center rounded border border-neutral-300 bg-neutral-0"
-                          >
-                            <ChevronRightIcon className="h-3 w-3 text-neutral-700" />
-                          </span>
-                        </TableCell>
                       </TableRow>
                     );
                   })}
