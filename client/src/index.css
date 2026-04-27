@@ -42,6 +42,10 @@
   --status-info-soft: 210 100% 96%;      /* #EBF5FF */
   --status-info-strong: 207 89% 21%;     /* #063D65 */
 
+  /* Semantic — picking (yellow/cream chip) */
+  --status-picking: 38 100% 88%;         /* #FFEAC0 */
+  --status-picking-strong: 30 60% 25%;   /* #663F1F */
+
   /* Neutral scale */
   --neutral-0:   0 0% 100%;              /* #FFFFFF */
   --neutral-50:  0 0% 97%;               /* #F7F7F7 */

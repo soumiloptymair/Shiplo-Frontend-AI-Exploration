@@ -83,6 +83,8 @@ module.exports = {
           soft: "hsl(var(--status-info-soft))",
           strong: "hsl(var(--status-info-strong))",
         },
+        "status-picking": "hsl(var(--status-picking))",
+        "status-picking-strong": "hsl(var(--status-picking-strong))",
 
         // Neutral scale
         neutral: {

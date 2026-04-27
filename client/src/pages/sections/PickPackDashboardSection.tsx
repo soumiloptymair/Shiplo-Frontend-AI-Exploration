@@ -1,6 +1,7 @@
 import { Fragment, useMemo, useState } from "react";
 import {
   AlertTriangleIcon,
+  ChevronDownIcon,
   ChevronRightIcon,
   FilterIcon,
   MoreVerticalIcon,
@@ -154,6 +155,8 @@ export const PickPackDashboardSection = (): JSX.Element => {
       setSelectedPickListId(pickListId);
       setSelectedShipmentIds(new Set());
     }
+    // Re-show alerts when the active pick list context changes
+    setLowInventoryDismissed(false);
   };
 
   const handleShipmentCheck = (shipmentId: string, checked: boolean) => {
@@ -171,6 +174,8 @@ export const PickPackDashboardSection = (): JSX.Element => {
   const handleSelectAllShipments = (checked: boolean) => {
     if (checked) setSelectedShipmentIds(new Set(togglableShipments.map((s) => s.id)));
     else setSelectedShipmentIds(new Set());
+    // Re-show alert when selection changes — the low-inventory product may have changed
+    setLowInventoryDismissed(false);
   };
 
   const allShipmentsSelected =
@@ -279,6 +284,21 @@ export const PickPackDashboardSection = (): JSX.Element => {
   const relatedShipments = selectedPickList
     ? shipmentRows.filter((s) => s.pickListId === selectedPickList.pickListId)
     : [];
+
+  // Prototype-only stats for the picklist detail panel.
+  const totalShipmentsCount = relatedShipments.length;
+  const shippedCount = Math.max(0, totalShipmentsCount - 2);
+  const remainingCount = Math.max(0, totalShipmentsCount - shippedCount);
+
+  const relatedLowInventoryNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const s of relatedShipments) {
+      for (const p of s.products) {
+        if (p.lowInventory) names.add(p.name);
+      }
+    }
+    return Array.from(names);
+  }, [relatedShipments]);
 
   // Aggregate items across the shipments that belong to the selected pick list
   const relatedItems: Product[] = useMemo(() => {
@@ -708,79 +728,187 @@ export const PickPackDashboardSection = (): JSX.Element => {
 
               <div className="flex-1 overflow-y-auto">
                 {panelMode === "pickList" && selectedPickList && (
-                  <div className="space-y-5 p-4">
-                    <p className="font-body text-sm text-neutral-500">
-                      Pick list details and associated shipments.
-                    </p>
-                    <div className="grid grid-cols-2 gap-3 rounded-lg border border-neutral-300 bg-neutral-100 p-4">
-                      <DetailField label="Created on" value={selectedPickList.createdOn} />
-                      <DetailField label="Picker" value={selectedPickList.picker} />
-                      <DetailField label="Warehouse" value={selectedPickList.warehouse} />
-                      <DetailField label="Total Orders" value={selectedPickList.totalOrders} />
-                    </div>
-                    <div className="-mx-4">
-                      <Tabs defaultValue="products" className="w-full">
-                        <TabsList className="h-auto w-full justify-start gap-4 rounded-none border-b border-neutral-300 bg-neutral-0 px-4 py-0">
-                          <TabsTrigger
-                            value="products"
-                            data-testid="tab-picklist-products"
-                            className="rounded-none border-b-2 border-transparent bg-transparent px-0 py-2 font-body text-sm text-neutral-700 shadow-none data-[state=active]:border-brand-secondary data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-brand-secondary data-[state=active]:shadow-none"
-                          >
-                            Products
-                          </TabsTrigger>
-                        </TabsList>
-                      </Tabs>
-                      <div className="px-4 pt-3">
-                        {relatedItems.length === 0 ? (
-                          <p className="font-body text-sm text-neutral-500">
-                            No products associated with this pick list.
+                  <div>
+                    {/* Low Inventory alert */}
+                    {relatedLowInventoryNames.length > 0 && !lowInventoryDismissed && (
+                      <div
+                        data-testid="alert-picklist-low-inventory"
+                        className="mx-0 flex items-start gap-3 bg-warning-soft px-4 py-3"
+                      >
+                        <AlertTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-warning-strong" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-body text-sm font-semibold text-neutral-900">
+                            Low Inventory
                           </p>
-                        ) : (
-                          <Table className="w-full">
-                            <TableHeader>
-                              <TableRow className="border-b border-neutral-300 bg-neutral-0 hover:bg-neutral-0">
-                                <TableHead className="h-8 w-[100px] px-2 font-body text-xs font-medium text-neutral-900">
-                                  Ext. ID
-                                </TableHead>
-                                <TableHead className="h-8 px-2 font-body text-xs font-medium text-neutral-900">
-                                  Product Name
-                                </TableHead>
-                                <TableHead className="h-8 w-[80px] px-2 text-right font-body text-xs font-medium text-neutral-900">
-                                  Quantity
-                                </TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {relatedItems.map((item) => (
-                                <TableRow
-                                  key={item.extId}
-                                  data-testid={`row-item-${item.extId}`}
-                                  className="h-8 border-b border-neutral-150 hover:bg-neutral-50"
-                                >
-                                  <TableCell className="h-8 px-2 py-1 font-body text-sm text-neutral-900">
-                                    {item.extId}
-                                  </TableCell>
-                                  <TableCell className="h-8 px-2 py-1">
-                                    <a
-                                      href="#"
-                                      onClick={(e) => e.preventDefault()}
-                                      className="font-body text-sm font-medium text-brand-primary underline underline-offset-2 hover:opacity-80"
-                                    >
-                                      {item.name}
-                                    </a>
-                                  </TableCell>
-                                  <TableCell
-                                    data-testid={`text-item-qty-${item.extId}`}
-                                    className="h-8 px-2 py-1 text-right font-body text-sm text-neutral-900"
-                                  >
-                                    {item.qty}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        )}
+                          <p className="font-body text-xs text-neutral-700">
+                            Product Name: {relatedLowInventoryNames.join(", ")}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          data-testid="button-dismiss-picklist-low-inventory"
+                          onClick={() => setLowInventoryDismissed(true)}
+                          aria-label="Dismiss alert"
+                          className="text-neutral-700 hover:text-neutral-900"
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </button>
                       </div>
+                    )}
+
+                    {/* ID + status pill + metadata */}
+                    <div className="px-4 pt-4 pb-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <h2
+                          data-testid="text-picklist-id"
+                          className="m-0 font-heading text-lg font-semibold leading-7 text-neutral-900"
+                        >
+                          ID: {selectedPickList.pickListId}
+                        </h2>
+                        <div
+                          data-testid="pill-picklist-status"
+                          className="inline-flex h-6 items-center rounded-full bg-status-picking pl-3 pr-0 font-body text-sm font-medium text-neutral-900"
+                        >
+                          <span>Picking</span>
+                          <span className="mx-2 h-4 w-px bg-neutral-900/20" aria-hidden="true" />
+                          <button
+                            type="button"
+                            data-testid="button-change-picklist-status"
+                            aria-label="Change status"
+                            className="flex h-6 w-6 items-center justify-center rounded-r-full hover:bg-black/5"
+                          >
+                            <ChevronDownIcon className="h-4 w-4 text-neutral-900" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="mt-2 space-y-1">
+                        <p className="font-body text-sm text-neutral-900">
+                          <span className="text-neutral-700">Picker: </span>
+                          <span data-testid="text-picklist-picker">{selectedPickList.picker}</span>
+                        </p>
+                        <p className="font-body text-sm text-neutral-900">
+                          <span className="text-neutral-700">Created On: </span>
+                          <span data-testid="text-picklist-created">{selectedPickList.createdOn}</span>
+                        </p>
+                        <p className="font-body text-sm text-neutral-900">
+                          <span className="text-neutral-700">Warehouse: </span>
+                          <span data-testid="text-picklist-warehouse">{selectedPickList.warehouse}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="grid grid-cols-4 gap-2 border-y border-neutral-150 bg-neutral-0 px-4 py-3">
+                      <div>
+                        <p
+                          data-testid="stat-total-orders"
+                          className="font-heading text-lg font-semibold leading-6 text-neutral-900"
+                        >
+                          {selectedPickList.totalOrders}
+                        </p>
+                        <p className="mt-0.5 font-body text-xs text-neutral-700">Total Orders</p>
+                      </div>
+                      <div>
+                        <p
+                          data-testid="stat-total-shipments"
+                          className="font-heading text-lg font-semibold leading-6 text-neutral-900"
+                        >
+                          {totalShipmentsCount}
+                        </p>
+                        <p className="mt-0.5 font-body text-xs text-neutral-700">Total Shipments</p>
+                      </div>
+                      <div>
+                        <p
+                          data-testid="stat-shipped"
+                          className="font-heading text-lg font-semibold leading-6 text-neutral-900"
+                        >
+                          {shippedCount}
+                        </p>
+                        <p className="mt-0.5 font-body text-xs text-neutral-700">Shipped</p>
+                      </div>
+                      <div>
+                        <p
+                          data-testid="stat-remaining"
+                          className="font-heading text-lg font-semibold leading-6 text-neutral-900"
+                        >
+                          {remainingCount}
+                        </p>
+                        <p className="mt-0.5 font-body text-xs text-neutral-700">Remaining</p>
+                      </div>
+                    </div>
+
+                    {/* Tabs */}
+                    <Tabs defaultValue="products" className="w-full">
+                      <TabsList className="h-auto w-full justify-start gap-4 rounded-none border-b border-neutral-150 bg-neutral-0 px-4 py-0">
+                        <TabsTrigger
+                          value="products"
+                          data-testid="tab-picklist-products"
+                          className="rounded-none border-b-2 border-transparent bg-transparent px-0 py-2 font-body text-sm text-neutral-700 shadow-none data-[state=active]:border-brand-secondary data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-brand-secondary data-[state=active]:shadow-none"
+                        >
+                          Products
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+
+                    {/* Products table */}
+                    <div className="px-4 pt-3 pb-4">
+                      {relatedItems.length === 0 ? (
+                        <p className="font-body text-sm text-neutral-500">
+                          No products associated with this pick list.
+                        </p>
+                      ) : (
+                        <Table className="w-full">
+                          <TableHeader>
+                            <TableRow className="border-b border-neutral-300 bg-neutral-100 hover:bg-neutral-100">
+                              <TableHead className="h-8 w-[80px] px-3 font-body text-xs font-medium text-neutral-900">
+                                Ext. ID
+                              </TableHead>
+                              <TableHead className="h-8 px-3 font-body text-xs font-medium text-neutral-900">
+                                Name
+                              </TableHead>
+                              <TableHead className="h-8 w-[70px] px-3 text-right font-body text-xs font-medium text-neutral-900">
+                                Qty
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {relatedItems.map((item) => (
+                              <TableRow
+                                key={item.extId}
+                                data-testid={`row-item-${item.extId}`}
+                                className="h-8 border-b border-neutral-150 hover:bg-neutral-50"
+                              >
+                                <TableCell className="h-8 px-3 py-1 font-body text-sm text-neutral-900">
+                                  {item.extId}
+                                </TableCell>
+                                <TableCell className="h-8 px-3 py-1">
+                                  <a
+                                    href="#"
+                                    onClick={(e) => e.preventDefault()}
+                                    className="font-body text-sm font-medium text-brand-primary underline underline-offset-2 hover:opacity-80"
+                                  >
+                                    {item.name}
+                                  </a>
+                                </TableCell>
+                                <TableCell
+                                  data-testid={`text-item-qty-${item.extId}`}
+                                  className="h-8 px-3 py-1 text-right font-body text-sm text-neutral-900"
+                                >
+                                  <span className="inline-flex items-center justify-end gap-1">
+                                    {item.qty}
+                                    {item.lowInventory && (
+                                      <AlertTriangleIcon
+                                        className="h-3.5 w-3.5 text-warning-strong"
+                                        aria-label="Low inventory"
+                                      />
+                                    )}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1030,16 +1158,25 @@ export const PickPackDashboardSection = (): JSX.Element => {
               </div>
 
               {panelMode === "pickList" && (
-                <footer className="flex gap-2 border-t border-neutral-150 px-4 py-3">
-                  <Button className="flex-1 bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90">
-                    Print Pick List
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-neutral-300 text-neutral-900 hover:bg-neutral-100"
-                  >
-                    Edit
-                  </Button>
+                <footer className="flex items-center gap-6 border-t border-neutral-150 px-4 py-2">
+                  <div className="font-body text-xs text-neutral-700">
+                    <span className="text-neutral-700">Selected Shipments: </span>
+                    <span
+                      data-testid="text-picklist-selected-shipments"
+                      className="font-semibold text-neutral-900"
+                    >
+                      {totalShipmentsCount}
+                    </span>
+                  </div>
+                  <div className="font-body text-xs text-neutral-700">
+                    <span className="text-neutral-700">Quantity </span>
+                    <span
+                      data-testid="text-picklist-quantity"
+                      className="font-semibold text-neutral-900"
+                    >
+                      {relatedItems.reduce((sum, p) => sum + p.qty, 0)}
+                    </span>
+                  </div>
                 </footer>
               )}
               {(panelMode === "shipments" || panelMode === "addShipments") && (
@@ -1065,10 +1202,3 @@ export const PickPackDashboardSection = (): JSX.Element => {
     </div>
   );
 };
-
-const DetailField = ({ label, value }: { label: string; value: string }) => (
-  <div className="min-w-0">
-    <p className="font-body text-xs text-neutral-500">{label}</p>
-    <p className="truncate font-body text-sm font-medium text-neutral-900">{value}</p>
-  </div>
-);
