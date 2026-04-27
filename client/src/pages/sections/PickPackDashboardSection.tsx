@@ -455,7 +455,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     const isChecked = isInPickList || selectedShipmentIds.has(row.id);
                     const isExpanded = expandedShipmentIds.has(row.id);
                     const rowClass = isInPickList
-                      ? "bg-brand-secondary/10 hover:bg-brand-secondary/10"
+                      ? "bg-neutral-100 hover:bg-neutral-100 text-neutral-500"
                       : isChecked
                         ? rowSelected
                         : rowDefault;
@@ -476,7 +476,11 @@ export const PickPackDashboardSection = (): JSX.Element => {
                             <div className="flex h-8 items-center justify-center">
                               <Checkbox
                                 data-testid={`checkbox-shipment-${row.shipmentId}`}
-                                className="h-5 w-5 rounded-[4px] border-neutral-700 data-[state=checked]:border-brand-secondary data-[state=checked]:bg-brand-secondary data-[state=checked]:text-brand-secondary-contrast disabled:cursor-not-allowed disabled:opacity-100"
+                                className={
+                                  isInPickList
+                                    ? "h-5 w-5 rounded-[4px] border-neutral-500 bg-neutral-300 data-[state=checked]:border-neutral-500 data-[state=checked]:bg-neutral-300 data-[state=checked]:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-100"
+                                    : "h-5 w-5 rounded-[4px] border-neutral-700 data-[state=checked]:border-brand-secondary data-[state=checked]:bg-brand-secondary data-[state=checked]:text-brand-secondary-contrast"
+                                }
                                 checked={isChecked}
                                 disabled={isInPickList}
                                 onCheckedChange={(checked) => handleShipmentCheck(row.id, checked === true)}
