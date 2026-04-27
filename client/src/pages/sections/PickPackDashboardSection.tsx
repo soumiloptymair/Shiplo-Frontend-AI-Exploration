@@ -611,65 +611,70 @@ export const PickPackDashboardSection = (): JSX.Element => {
                       <DetailField label="Warehouse" value={selectedPickList.warehouse} />
                       <DetailField label="Total Orders" value={selectedPickList.totalOrders} />
                     </div>
-                    <section className="overflow-hidden rounded-lg border border-neutral-300 bg-neutral-0">
-                      <header className="flex items-center justify-between border-b border-neutral-300 bg-neutral-100 px-3 py-2">
-                        <h4 className="m-0 font-heading text-sm font-semibold text-neutral-900">
-                          Products
-                        </h4>
-                        <span className="font-body text-xs text-neutral-700">
-                          {relatedItems.length}
-                        </span>
-                      </header>
-                      {relatedItems.length === 0 ? (
-                        <p className="px-3 py-4 font-body text-sm text-neutral-500">
-                          No products associated with this pick list.
-                        </p>
-                      ) : (
-                        <Table className="w-full">
-                          <TableHeader>
-                            <TableRow className="border-b border-neutral-300 bg-neutral-0 hover:bg-neutral-0">
-                              <TableHead className="h-8 w-[100px] px-3 font-body text-xs font-medium text-neutral-900">
-                                Ext. ID
-                              </TableHead>
-                              <TableHead className="h-8 px-3 font-body text-xs font-medium text-neutral-900">
-                                Product Name
-                              </TableHead>
-                              <TableHead className="h-8 w-[80px] px-3 text-right font-body text-xs font-medium text-neutral-900">
-                                Quantity
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {relatedItems.map((item) => (
-                              <TableRow
-                                key={item.extId}
-                                data-testid={`row-item-${item.extId}`}
-                                className="border-b border-neutral-150 last:border-b-0 hover:bg-neutral-50"
-                              >
-                                <TableCell className="h-8 px-3 py-1 font-body text-sm text-neutral-900">
-                                  {item.extId}
-                                </TableCell>
-                                <TableCell className="h-8 px-3 py-1">
-                                  <a
-                                    href="#"
-                                    onClick={(e) => e.preventDefault()}
-                                    className="font-body text-sm font-medium text-brand-primary underline underline-offset-2 hover:opacity-80"
-                                  >
-                                    {item.name}
-                                  </a>
-                                </TableCell>
-                                <TableCell
-                                  data-testid={`text-item-qty-${item.extId}`}
-                                  className="h-8 px-3 py-1 text-right font-body text-sm text-neutral-900"
-                                >
-                                  {item.qty}
-                                </TableCell>
+                    <div className="-mx-4">
+                      <Tabs defaultValue="products" className="w-full">
+                        <TabsList className="h-auto w-full justify-start gap-4 rounded-none border-b border-neutral-300 bg-neutral-0 px-4 py-0">
+                          <TabsTrigger
+                            value="products"
+                            data-testid="tab-picklist-products"
+                            className="rounded-none border-b-2 border-transparent bg-transparent px-0 py-2 font-body text-sm text-neutral-700 shadow-none data-[state=active]:border-brand-secondary data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-brand-secondary data-[state=active]:shadow-none"
+                          >
+                            Products
+                          </TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                      <div className="px-4 pt-3">
+                        {relatedItems.length === 0 ? (
+                          <p className="font-body text-sm text-neutral-500">
+                            No products associated with this pick list.
+                          </p>
+                        ) : (
+                          <Table className="w-full">
+                            <TableHeader>
+                              <TableRow className="border-b border-neutral-300 bg-neutral-0 hover:bg-neutral-0">
+                                <TableHead className="h-8 w-[100px] px-2 font-body text-xs font-medium text-neutral-900">
+                                  Ext. ID
+                                </TableHead>
+                                <TableHead className="h-8 px-2 font-body text-xs font-medium text-neutral-900">
+                                  Product Name
+                                </TableHead>
+                                <TableHead className="h-8 w-[80px] px-2 text-right font-body text-xs font-medium text-neutral-900">
+                                  Quantity
+                                </TableHead>
                               </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      )}
-                    </section>
+                            </TableHeader>
+                            <TableBody>
+                              {relatedItems.map((item) => (
+                                <TableRow
+                                  key={item.extId}
+                                  data-testid={`row-item-${item.extId}`}
+                                  className="h-8 border-b border-neutral-150 hover:bg-neutral-50"
+                                >
+                                  <TableCell className="h-8 px-2 py-1 font-body text-sm text-neutral-900">
+                                    {item.extId}
+                                  </TableCell>
+                                  <TableCell className="h-8 px-2 py-1">
+                                    <a
+                                      href="#"
+                                      onClick={(e) => e.preventDefault()}
+                                      className="font-body text-sm font-medium text-brand-primary underline underline-offset-2 hover:opacity-80"
+                                    >
+                                      {item.name}
+                                    </a>
+                                  </TableCell>
+                                  <TableCell
+                                    data-testid={`text-item-qty-${item.extId}`}
+                                    className="h-8 px-2 py-1 text-right font-body text-sm text-neutral-900"
+                                  >
+                                    {item.qty}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
 
