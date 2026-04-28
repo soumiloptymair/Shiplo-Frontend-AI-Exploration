@@ -464,9 +464,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
         <Card className="flex w-full min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-300 bg-neutral-0 shadow-none">
           <CardContent className="flex min-h-0 flex-1 flex-col p-0">
             <header className="flex h-auto min-h-[52px] items-center justify-between gap-3 border-b border-neutral-150 bg-neutral-0 px-5 py-2">
-              <h3 className="m-0 font-heading text-lg font-medium text-neutral-900">
-                Shipments
-              </h3>
+              <h3 className="m-0 font-heading text-lg font-medium text-neutral-900">Orders</h3>
               {selectedPickListId && (
                 <div
                   data-testid="pill-picklist-filter"
@@ -677,7 +675,6 @@ export const PickPackDashboardSection = (): JSX.Element => {
           </CardContent>
         </Card>
       </section>
-
       {/* Inline detail panel — squeezes the page contents to the left when open */}
       <aside
         data-testid="panel-detail"
