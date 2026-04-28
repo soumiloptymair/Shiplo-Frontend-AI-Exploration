@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -104,9 +103,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
   const [selectedShipmentIds, setSelectedShipmentIds] = useState<Set<string>>(new Set());
   const [expandedShipmentIds, setExpandedShipmentIds] = useState<Set<string>>(new Set());
   const [warehouse, setWarehouse] = useState("PA Fulfilment Facility");
-  const [newPickListId, setNewPickListId] = useState("");
   const [newPicker, setNewPicker] = useState<string>("");
-  const [newPickListIdError, setNewPickListIdError] = useState<string | null>(null);
   const [lowInventoryDismissed, setLowInventoryDismissed] = useState(false);
 
   const toggleExpandShipment = (id: string) => {
@@ -206,17 +203,27 @@ export const PickPackDashboardSection = (): JSX.Element => {
     return `${mm}/${dd}/${d.getFullYear()}`;
   };
 
-  const handleCreatePickList = () => {
-    const trimmedId = newPickListId.trim();
-    if (!trimmedId || !newPicker || selectedShipments.length === 0) return;
-    if (pickPackRows.some((p) => p.pickListId.toLowerCase() === trimmedId.toLowerCase())) {
-      setNewPickListIdError(`${trimmedId} already exists`);
-      return;
+  const generateNextPickListId = (existing: PickListRow[]): string => {
+    const PREFIX = "PL-";
+    const START = 100000;
+    let max = START - 1;
+    for (const row of existing) {
+      const match = /^PL-(\d+)$/i.exec(row.pickListId);
+      if (match) {
+        const n = parseInt(match[1], 10);
+        if (Number.isFinite(n) && n > max) max = n;
+      }
     }
+    return `${PREFIX}${max + 1}`;
+  };
+
+  const handleCreatePickList = () => {
+    if (!newPicker || selectedShipments.length === 0) return;
+    const generatedId = generateNextPickListId(pickPackRows);
     const selectedIds = new Set(selectedShipmentIds);
     const newPickList: PickListRow = {
       id: `pick-pack-${Date.now()}`,
-      pickListId: trimmedId,
+      pickListId: generatedId,
       createdOn: formatDateMDY(new Date()),
       warehouse,
       totalOrders: String(selectedShipments.length),
@@ -224,13 +231,11 @@ export const PickPackDashboardSection = (): JSX.Element => {
     };
     setPickPackRows((prev) => [newPickList, ...prev]);
     setShipmentRows((prev) =>
-      prev.map((s) => (selectedIds.has(s.id) ? { ...s, pickListId: trimmedId } : s)),
+      prev.map((s) => (selectedIds.has(s.id) ? { ...s, pickListId: generatedId } : s)),
     );
     setSelectedShipmentIds(new Set());
-    setNewPickListId("");
     setNewPicker("");
-    setNewPickListIdError(null);
-    setSelectedPickListId(trimmedId);
+    setSelectedPickListId(generatedId);
   };
 
   const handleAddToPickList = () => {
@@ -960,67 +965,32 @@ export const PickPackDashboardSection = (): JSX.Element => {
                           </p>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label
-                              htmlFor="input-new-picklist-id"
-                              className="mb-1 block font-body text-xs font-medium text-neutral-900"
+                        <div>
+                          <label
+                            htmlFor="select-new-picker"
+                            className="mb-1 block font-body text-xs font-medium text-neutral-900"
+                          >
+                            Picker
+                          </label>
+                          <Select value={newPicker} onValueChange={setNewPicker}>
+                            <SelectTrigger
+                              id="select-new-picker"
+                              data-testid="select-new-picker"
+                              className="h-9 border-neutral-300 bg-neutral-0 font-body text-sm text-neutral-900 [&>span]:text-neutral-900 data-[placeholder]:[&>span]:text-neutral-500"
                             >
-                              Picklist ID
-                            </label>
-                            <Input
-                              id="input-new-picklist-id"
-                              data-testid="input-new-picklist-id"
-                              placeholder="e.g. PL-100100"
-                              value={newPickListId}
-                              onChange={(e) => {
-                                setNewPickListId(e.target.value);
-                                if (newPickListIdError) setNewPickListIdError(null);
-                              }}
-                              className={`h-9 bg-neutral-0 font-body text-sm text-neutral-900 placeholder:text-neutral-500 ${
-                                newPickListIdError
-                                  ? "border-error focus-visible:ring-error/30"
-                                  : "border-neutral-300"
-                              }`}
-                              aria-invalid={!!newPickListIdError}
-                              aria-describedby={
-                                newPickListIdError ? "input-new-picklist-id-error" : undefined
-                              }
-                            />
-                            {newPickListIdError && (
-                              <p
-                                id="input-new-picklist-id-error"
-                                data-testid="error-new-picklist-id"
-                                className="mt-1 font-body text-xs text-error"
-                              >
-                                {newPickListIdError}
-                              </p>
-                            )}
-                          </div>
-                          <div>
-                            <label
-                              htmlFor="select-new-picker"
-                              className="mb-1 block font-body text-xs font-medium text-neutral-900"
-                            >
-                              Picker
-                            </label>
-                            <Select value={newPicker} onValueChange={setNewPicker}>
-                              <SelectTrigger
-                                id="select-new-picker"
-                                data-testid="select-new-picker"
-                                className="h-9 border-neutral-300 bg-neutral-0 font-body text-sm text-neutral-900 [&>span]:text-neutral-900 data-[placeholder]:[&>span]:text-neutral-500"
-                              >
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {PICKERS.map((p) => (
-                                  <SelectItem key={p} value={p}>
-                                    {p}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {PICKERS.map((p) => (
+                                <SelectItem key={p} value={p}>
+                                  {p}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="mt-1 font-body text-xs text-neutral-500">
+                            Pick list ID will be generated automatically.
+                          </p>
                         </div>
                       )}
                       <div className="grid grid-cols-2 gap-3 pt-1">
@@ -1057,7 +1027,6 @@ export const PickPackDashboardSection = (): JSX.Element => {
                           onClick={() => {
                             setSelectedShipmentIds(new Set());
                             if (panelMode !== "addShipments") {
-                              setNewPickListId("");
                               setNewPicker("");
                             }
                             setLowInventoryDismissed(false);
@@ -1079,7 +1048,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
                             data-testid="button-create-picklist"
                             className="flex-1 bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90"
                             onClick={handleCreatePickList}
-                            disabled={!newPickListId.trim() || !newPicker}
+                            disabled={!newPicker || selectedShipments.length === 0}
                           >
                             Create Pick List
                           </Button>
