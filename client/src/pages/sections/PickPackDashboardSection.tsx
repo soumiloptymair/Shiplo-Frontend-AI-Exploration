@@ -418,6 +418,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
                     <TableHead className={headCellBase}>Warehouse</TableHead>
                     <TableHead className={headCellBase}>Total Orders</TableHead>
                     <TableHead className={headCellBase}>Picker</TableHead>
+                    <TableHead className={headCellBase}>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -463,6 +464,18 @@ export const PickPackDashboardSection = (): JSX.Element => {
                         <TableCell className={cellTextBase}>{row.warehouse}</TableCell>
                         <TableCell className={cellTextBase}>{row.totalOrders}</TableCell>
                         <TableCell className={cellTextBase}>{row.picker}</TableCell>
+                        <TableCell className="h-8 px-2 py-0">
+                          <span
+                            data-testid={`pill-status-${row.pickListId}`}
+                            className={`inline-flex h-6 items-center rounded-full px-3 font-body text-sm font-medium text-neutral-900 ${
+                              row.status === "Complete"
+                                ? "bg-success-soft"
+                                : "bg-status-picking"
+                            }`}
+                          >
+                            {row.status}
+                          </span>
+                        </TableCell>
                       </TableRow>
                     );
                   })}
