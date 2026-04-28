@@ -27,6 +27,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type PickListStatus = "Picking" | "Complete";
 
 type PickListRow = {
   id: string;
@@ -35,6 +43,7 @@ type PickListRow = {
   warehouse: string;
   totalOrders: string;
   picker: string;
+  status: PickListStatus;
 };
 
 type Product = {
@@ -67,6 +76,7 @@ const INITIAL_PICK_PACK_ROWS: PickListRow[] = Array.from({ length: 8 }, (_, inde
   warehouse: index % 2 === 0 ? "KS Fulfilment Center" : "PA Fulfilment Facility",
   totalOrders: String(10 + index * 2),
   picker: index % 3 === 0 ? "Jane Smith" : "John Doe",
+  status: "Picking",
 }));
 
 const SMB = "Small Moving Boxes";
@@ -175,6 +185,12 @@ export const PickPackDashboardSection = (): JSX.Element => {
     setLowInventoryDismissed(false);
   };
 
+  const setPickListStatus = (pickListId: string, status: PickListStatus) => {
+    setPickPackRows((prev) =>
+      prev.map((p) => (p.pickListId === pickListId ? { ...p, status } : p)),
+    );
+  };
+
   const allShipmentsSelected =
     togglableShipments.length > 0 &&
     togglableShipments.every((s) => selectedShipmentIds.has(s.id));
@@ -228,6 +244,7 @@ export const PickPackDashboardSection = (): JSX.Element => {
       warehouse,
       totalOrders: String(selectedShipments.length),
       picker: newPicker,
+      status: "Picking",
     };
     setPickPackRows((prev) => [newPickList, ...prev]);
     setShipmentRows((prev) =>
@@ -767,21 +784,60 @@ export const PickPackDashboardSection = (): JSX.Element => {
                         >
                           ID: {selectedPickList.pickListId}
                         </h2>
-                        <div
-                          data-testid="pill-picklist-status"
-                          className="inline-flex h-6 items-center rounded-full bg-status-picking pl-3 pr-0 font-body text-sm font-medium text-neutral-900"
-                        >
-                          <span>Picking</span>
-                          <span className="mx-2 h-4 w-px bg-neutral-900/20" aria-hidden="true" />
-                          <button
-                            type="button"
-                            data-testid="button-change-picklist-status"
-                            aria-label="Change status"
-                            className="flex h-6 w-6 items-center justify-center rounded-r-full hover:bg-black/5"
-                          >
-                            <ChevronDownIcon className="h-4 w-4 text-neutral-900" />
-                          </button>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              data-testid="pill-picklist-status"
+                              aria-label={`Status: ${selectedPickList.status}. Click to change.`}
+                              className={`inline-flex h-6 items-center rounded-full pl-3 pr-0 font-body text-sm font-medium text-neutral-900 transition-colors ${
+                                selectedPickList.status === "Complete"
+                                  ? "bg-success-soft"
+                                  : "bg-status-picking"
+                              }`}
+                            >
+                              <span data-testid="text-picklist-status">
+                                {selectedPickList.status}
+                              </span>
+                              <span
+                                className="mx-2 h-4 w-px bg-neutral-900/20"
+                                aria-hidden="true"
+                              />
+                              <span
+                                aria-hidden="true"
+                                className="flex h-6 w-6 items-center justify-center rounded-r-full"
+                              >
+                                <ChevronDownIcon className="h-4 w-4 text-neutral-900" />
+                              </span>
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="min-w-[140px]">
+                            <DropdownMenuItem
+                              data-testid="menu-status-picking"
+                              onSelect={() =>
+                                setPickListStatus(selectedPickList.pickListId, "Picking")
+                              }
+                            >
+                              <span
+                                className="mr-2 inline-block h-2 w-2 rounded-full bg-status-picking ring-1 ring-neutral-900/20"
+                                aria-hidden="true"
+                              />
+                              Picking
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              data-testid="menu-status-complete"
+                              onSelect={() =>
+                                setPickListStatus(selectedPickList.pickListId, "Complete")
+                              }
+                            >
+                              <span
+                                className="mr-2 inline-block h-2 w-2 rounded-full bg-success ring-1 ring-success/30"
+                                aria-hidden="true"
+                              />
+                              Complete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       <div className="mt-2 space-y-1">
                         <p className="font-body text-sm text-neutral-900">
