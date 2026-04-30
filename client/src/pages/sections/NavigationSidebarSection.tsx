@@ -1,7 +1,15 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ScanBarcode,
+  Settings,
+  Workflow,
+  Tag,
+  ListChecks,
+} from "lucide-react";
 
 interface NavigationSidebarSectionProps {
   isCollapsed?: boolean;
@@ -10,12 +18,14 @@ interface NavigationSidebarSectionProps {
 
 const topActions = [
   {
-    alt: "Icon",
+    alt: "Import",
     src: "/figmaAssets/icon-1.svg",
+    testId: "button-import",
   },
   {
-    alt: "Icon",
+    alt: "Notifications",
     src: "/figmaAssets/icon.svg",
+    testId: "button-notifications",
   },
 ];
 
@@ -23,19 +33,19 @@ const planningItems = [
   {
     label: "Shipments",
     iconSrc: "/figmaAssets/icon-2.svg",
-    alt: "Icon",
+    alt: "Shipments",
     active: false,
   },
   {
     label: "Pickup",
     iconSrc: "/figmaAssets/package-2.svg",
-    alt: "Package",
+    alt: "Pickup",
     active: false,
   },
   {
     label: "Quotes",
     iconSrc: "/figmaAssets/clipboard-list.svg",
-    alt: "Clipboard list",
+    alt: "Quotes",
     active: false,
   },
   {
@@ -47,9 +57,17 @@ const planningItems = [
   {
     label: "Pick and Pack",
     iconSrc: "/figmaAssets/package-plus.svg",
-    alt: "Package plus",
+    alt: "Pick and Pack",
     active: true,
   },
+];
+
+const resourceItems = [
+  { label: "Roles and permissions", Icon: ScanBarcode },
+  { label: "Automations", Icon: Workflow },
+  { label: "Preferences", Icon: Settings },
+  { label: "Branded Tracking", Icon: Tag },
+  { label: "Defaults", Icon: ListChecks },
 ];
 
 const collapsedSections = [
@@ -72,14 +90,19 @@ export const NavigationSidebarSection = ({
   return (
     <aside className="w-full">
       <Card className="h-full min-h-[calc(100vh-1rem)] rounded-lg border-0 bg-sidebar shadow-none">
-        <CardContent className="flex h-full min-h-[calc(100vh-1rem)] flex-col items-stretch gap-4 px-2 pb-2 pt-4">
+        <CardContent
+          className={`flex h-full min-h-[calc(100vh-1rem)] flex-col items-stretch gap-4 pb-2 pt-4 ${
+            isCollapsed ? "px-1" : "px-2"
+          }`}
+        >
           <header className="flex flex-col items-center gap-4">
             <div className="flex h-8 items-center justify-center">
               {isCollapsed ? (
                 <img
                   className="h-6 w-6"
                   alt="Shiplo logo"
-                  src="/figmaAssets/package-plus.svg"
+                  src="/figmaAssets/shiplo-mark.svg"
+                  data-testid="img-sidebar-logo-collapsed"
                 />
               ) : (
                 <img
@@ -89,43 +112,35 @@ export const NavigationSidebarSection = ({
                 />
               )}
             </div>
-            {!isCollapsed && (
-              <nav
-                aria-label="Quick actions"
-                className="flex items-start justify-center gap-1.5"
-              >
-                {topActions.map((action, index) => (
-                  <Button
-                    key={`${action.src}-${index}`}
-                    type="button"
-                    variant="ghost"
-                    className="h-9 w-9 rounded border border-solid border-neutral-400 bg-transparent p-0 hover:bg-neutral-0/40"
-                  >
-                    <img className="h-4 w-4" alt={action.alt} src={action.src} />
-                  </Button>
-                ))}
-              </nav>
-            )}
-            {isCollapsed && (
-              <nav
-                aria-label="Quick actions"
-                className="flex flex-col items-center gap-1.5"
-              >
-                {topActions.map((action, index) => (
-                  <Button
-                    key={`${action.src}-${index}`}
-                    type="button"
-                    variant="ghost"
-                    className="h-9 w-9 rounded border border-solid border-neutral-400 bg-transparent p-0 hover:bg-neutral-0/40"
-                  >
-                    <img className="h-4 w-4" alt={action.alt} src={action.src} />
-                  </Button>
-                ))}
-              </nav>
-            )}
+            <nav
+              aria-label="Quick actions"
+              className={`flex items-center justify-center gap-1.5 ${
+                isCollapsed ? "flex-col" : ""
+              }`}
+            >
+              {topActions.map((action, index) => (
+                <Button
+                  key={`${action.src}-${index}`}
+                  type="button"
+                  variant="ghost"
+                  aria-label={action.alt}
+                  data-testid={action.testId}
+                  className="h-9 w-9 rounded border border-solid border-neutral-400 bg-transparent p-0 hover:bg-neutral-0/40"
+                >
+                  <img className="h-4 w-4" alt={action.alt} src={action.src} />
+                </Button>
+              ))}
+            </nav>
           </header>
           <nav aria-label="Sidebar navigation" className="flex flex-1 flex-col">
-            <div className="flex flex-col gap-5 px-1 py-2">
+            <div className={`flex flex-col gap-5 py-2 ${isCollapsed ? "px-0" : "px-1"}`}>
+              {isCollapsed && (
+                <div
+                  className="mx-auto h-px w-8 bg-neutral-400"
+                  aria-hidden="true"
+                  data-testid="divider-top"
+                />
+              )}
               <section className="flex flex-col gap-1">
                 {!isCollapsed && (
                   <div className="inline-flex items-center gap-2 pb-1">
@@ -139,15 +154,21 @@ export const NavigationSidebarSection = ({
                     </h2>
                   </div>
                 )}
-                <div className={`flex flex-col gap-1 ${isCollapsed ? "" : "px-2"}`}>
+                <div
+                  className={`flex flex-col ${
+                    isCollapsed ? "items-center gap-1" : "gap-1 px-2"
+                  }`}
+                >
                   {planningItems.map((item) => (
                     <Button
                       key={item.label}
                       type="button"
                       variant="ghost"
                       title={isCollapsed ? item.label : undefined}
-                      className={`h-auto justify-start gap-2 rounded px-2 py-1 ${
-                        isCollapsed ? "w-9" : "w-full"
+                      aria-label={isCollapsed ? item.label : undefined}
+                      data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                      className={`h-auto justify-start gap-2 rounded p-1 ${
+                        isCollapsed ? "w-9 justify-center" : "w-full px-2 py-1"
                       } ${
                         item.active
                           ? "bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90 hover:text-brand-secondary-contrast"
@@ -155,7 +176,7 @@ export const NavigationSidebarSection = ({
                       }`}
                     >
                       <img
-                        className="h-6 w-6 shrink-0"
+                        className={`shrink-0 ${isCollapsed ? "h-6 w-6" : "h-6 w-6"}`}
                         alt={item.alt}
                         src={item.iconSrc}
                       />
@@ -168,6 +189,33 @@ export const NavigationSidebarSection = ({
                   ))}
                 </div>
               </section>
+              {isCollapsed && (
+                <>
+                  <div
+                    className="mx-auto h-px w-8 bg-neutral-400"
+                    aria-hidden="true"
+                    data-testid="divider-resources"
+                  />
+                  <section
+                    className="flex flex-col items-center gap-1"
+                    aria-label="Resources"
+                  >
+                    {resourceItems.map(({ label, Icon }) => (
+                      <Button
+                        key={label}
+                        type="button"
+                        variant="ghost"
+                        title={label}
+                        aria-label={label}
+                        data-testid={`nav-resource-${label.toLowerCase().replace(/\s+/g, "-")}`}
+                        className="h-9 w-9 justify-center rounded p-1 text-neutral-700 hover:bg-neutral-0/40 hover:text-neutral-700"
+                      >
+                        <Icon className="h-5 w-5" strokeWidth={1.75} />
+                      </Button>
+                    ))}
+                  </section>
+                </>
+              )}
               {!isCollapsed &&
                 collapsedSections.map((section) => (
                   <section key={section.label} className="flex flex-col gap-1">
@@ -188,7 +236,7 @@ export const NavigationSidebarSection = ({
                   </section>
                 ))}
             </div>
-            <footer className="mt-auto flex flex-col gap-4 px-2 pt-6">
+            <footer className={`mt-auto flex flex-col gap-3 pt-6 ${isCollapsed ? "px-0" : "px-2"}`}>
               {!isCollapsed && (
                 <div className="flex w-full items-center gap-2 rounded-lg p-1">
                   <Avatar className="h-8 w-8 rounded-2xl bg-[hsl(322_77%_88%)]">
@@ -212,7 +260,11 @@ export const NavigationSidebarSection = ({
                   </Avatar>
                 </div>
               )}
-              <div className={`flex items-center ${isCollapsed ? "justify-center" : "justify-between"}`}>
+              <div
+                className={`flex items-center ${
+                  isCollapsed ? "justify-center" : "justify-between"
+                }`}
+              >
                 {!isCollapsed && (
                   <Button
                     type="button"
@@ -232,6 +284,7 @@ export const NavigationSidebarSection = ({
                   className="h-auto w-6 p-0 hover:bg-transparent"
                   onClick={onToggleCollapse}
                   aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  data-testid="button-toggle-sidebar"
                 >
                   {isCollapsed ? (
                     <ChevronRightIcon className="h-5 w-5 text-neutral-700" />
