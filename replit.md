@@ -1,6 +1,6 @@
-# Shiplo — Pick and Pack
+# Shiplo
 
-A pixel-faithful replica of the Shiplo Pick and Pack module from Figma file `7d1Ged8LHQYBV9abYhNhxG`.
+A pixel-faithful replica of the Shiplo dashboard modules from Figma file `7d1Ged8LHQYBV9abYhNhxG`. Currently includes the Shipments and Pick and Pack modules.
 
 ## Stack
 
@@ -12,14 +12,20 @@ A pixel-faithful replica of the Shiplo Pick and Pack module from Figma file `7d1
 
 ## Layout
 
-- `client/src/pages/sections/PickPackDashboardSection.tsx` — main dashboard with Pick Lists table, Shipments table, and right detail panel with three modes (`pickList`, `shipments`, `addShipments`).
+- `client/src/components/AppShell.tsx` — shared shell with collapsible sidebar and content slot. Used by every page.
+- `client/src/pages/ShipmentsPage.tsx` — Shipments module (title bar with All/Orders/Returns tabs, status filter, search, +New Shipment, 10-column data grid). Mounted at `/` and `/shipments`.
+- `client/src/pages/OrdersDataGrid.tsx` — thin wrapper that mounts `PickPackDashboardSection` inside `AppShell`. Mounted at `/pick-and-pack`.
+- `client/src/pages/sections/PickPackDashboardSection.tsx` — Pick and Pack dashboard with Pick Lists table, Shipments table, and right detail panel with three modes (`pickList`, `shipments`, `addShipments`).
+- `client/src/pages/sections/NavigationSidebarSection.tsx` — sidebar; planning items with a real route render as `wouter` `Link`s with active state from `useLocation`; placeholder items (Pickup/Quotes/Wallet) render as disabled buttons.
+- `shared/schema.ts` — shared types including `Shipment`, `ShipmentStatus`, `FreightType`, `ShipmentKind`.
 - `client/src/index.css` — design tokens (HSL custom properties).
 - `tailwind.config.ts` — exposes tokens as Tailwind color utilities.
 - `attached_assets/shiplo_design_system_extracted_*.md` — source-of-truth tokens.
 
 ## Design tokens (added)
 
-- `--status-picking` (`#FFEAC0`) and `--status-picking-strong` for the Picking status pill in the pick-list detail panel. Available as `bg-status-picking` / `text-status-picking-strong` utilities.
+- `--status-picking` (`#FFEAC0`) for the Picking status pill in the pick-list detail panel.
+- Shipment status pill tokens: `--status-shipped`, `--status-label-created`, `--status-delayed`, `--status-delivered`, `--status-on-hold`, `--status-needs-review`, `--status-cancelled`. All available as `bg-status-*` Tailwind utilities.
 
 ## Dashboard behavior
 

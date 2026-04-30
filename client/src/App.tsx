@@ -6,13 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
 import { OrdersDataGrid } from "@/pages/OrdersDataGrid";
+import { ShipmentsPage } from "@/pages/ShipmentsPage";
 
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      <Route path="/" component={OrdersDataGrid} />
-      {/* Fallback to 404 */}
+      <Route path="/" component={ShipmentsPage} />
+      <Route path="/shipments" component={ShipmentsPage} />
+      <Route path="/pick-and-pack" component={OrdersDataGrid} />
       <Route component={NotFound} />
     </Switch>
   );

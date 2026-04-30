@@ -46,6 +46,15 @@
   --status-picking: 38 100% 88%;         /* #FFEAC0 */
   --status-picking-strong: 30 60% 25%;   /* #663F1F */
 
+  /* Shipment status pills (soft chip backgrounds) */
+  --status-shipped:        173 50% 85%;  /* #C7E8E4 — teal soft */
+  --status-label-created:  265 60% 90%;  /* #DFD3F4 — lavender */
+  --status-delayed:         28 100% 86%; /* #FFD8B7 — peach */
+  --status-delivered:      130 50% 86%;  /* #CDEBCF — mint */
+  --status-on-hold:         43 100% 84%; /* #FFE4AB — light yellow */
+  --status-needs-review:    50 100% 84%; /* #FFF0AB — pale yellow */
+  --status-cancelled:        2 90% 90%;  /* #FCD3D2 — pink/red soft */
+
   /* Neutral scale */
   --neutral-0:   0 0% 100%;              /* #FFFFFF */
   --neutral-50:  0 0% 97%;               /* #F7F7F7 */

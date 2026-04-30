@@ -86,6 +86,15 @@ module.exports = {
         "status-picking": "hsl(var(--status-picking))",
         "status-picking-strong": "hsl(var(--status-picking-strong))",
 
+        // Shipment-status soft pill backgrounds
+        "status-shipped": "hsl(var(--status-shipped))",
+        "status-label-created": "hsl(var(--status-label-created))",
+        "status-delayed": "hsl(var(--status-delayed))",
+        "status-delivered": "hsl(var(--status-delivered))",
+        "status-on-hold": "hsl(var(--status-on-hold))",
+        "status-needs-review": "hsl(var(--status-needs-review))",
+        "status-cancelled": "hsl(var(--status-cancelled))",
+
         // Neutral scale
         neutral: {
           0: "hsl(var(--neutral-0))",

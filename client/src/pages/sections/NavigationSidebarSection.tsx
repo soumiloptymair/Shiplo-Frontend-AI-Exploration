@@ -1,3 +1,4 @@
+import { Link, useLocation } from "wouter";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,36 +30,44 @@ const topActions = [
   },
 ];
 
-const planningItems = [
+const planningItems: Array<{
+  label: string;
+  iconSrc: string;
+  alt: string;
+  href?: string;
+  matchPaths: string[];
+}> = [
   {
     label: "Shipments",
     iconSrc: "/figmaAssets/icon-2.svg",
     alt: "Shipments",
-    active: false,
+    href: "/shipments",
+    matchPaths: ["/", "/shipments"],
   },
   {
     label: "Pickup",
     iconSrc: "/figmaAssets/package-2.svg",
     alt: "Pickup",
-    active: false,
+    matchPaths: [],
   },
   {
     label: "Quotes",
     iconSrc: "/figmaAssets/clipboard-list.svg",
     alt: "Quotes",
-    active: false,
+    matchPaths: [],
   },
   {
     label: "Wallet",
     iconSrc: "/figmaAssets/wallet.svg",
     alt: "Wallet",
-    active: false,
+    matchPaths: [],
   },
   {
     label: "Pick and Pack",
     iconSrc: "/figmaAssets/package-plus.svg",
     alt: "Pick and Pack",
-    active: true,
+    href: "/pick-and-pack",
+    matchPaths: ["/pick-and-pack"],
   },
 ];
 
@@ -87,6 +96,7 @@ export const NavigationSidebarSection = ({
   isCollapsed = false,
   onToggleCollapse,
 }: NavigationSidebarSectionProps): JSX.Element => {
+  const [location] = useLocation();
   return (
     <aside className="w-full">
       <Card className="h-full min-h-[calc(100vh-1rem)] rounded-lg border-0 bg-sidebar shadow-none">
@@ -159,34 +169,60 @@ export const NavigationSidebarSection = ({
                     isCollapsed ? "items-center gap-1" : "gap-1 px-2"
                   }`}
                 >
-                  {planningItems.map((item) => (
-                    <Button
-                      key={item.label}
-                      type="button"
-                      variant="ghost"
-                      title={isCollapsed ? item.label : undefined}
-                      aria-label={isCollapsed ? item.label : undefined}
-                      data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-                      className={`h-auto justify-start gap-2 rounded p-1 ${
-                        isCollapsed ? "w-9 justify-center" : "w-full px-2 py-1"
-                      } ${
-                        item.active
-                          ? "bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90 hover:text-brand-secondary-contrast"
-                          : "bg-transparent text-neutral-700 hover:bg-neutral-0/40 hover:text-neutral-700"
-                      }`}
-                    >
-                      <img
-                        className={`shrink-0 ${isCollapsed ? "h-6 w-6" : "h-6 w-6"}`}
-                        alt={item.alt}
-                        src={item.iconSrc}
-                      />
-                      {!isCollapsed && (
-                        <span className="font-subtitle-2-medium text-[length:var(--subtitle-2-medium-font-size)] font-[number:var(--subtitle-2-medium-font-weight)] leading-[var(--subtitle-2-medium-line-height)] tracking-[var(--subtitle-2-medium-letter-spacing)] [font-style:var(--subtitle-2-medium-font-style)]">
-                          {item.label}
-                        </span>
-                      )}
-                    </Button>
-                  ))}
+                  {planningItems.map((item) => {
+                    const isActive = item.matchPaths.includes(location);
+                    const testId = `nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`;
+                    const baseClasses = `flex h-auto items-center gap-2 rounded p-1 no-underline ${
+                      isCollapsed ? "w-9 justify-center" : "w-full justify-start px-2 py-1"
+                    } ${
+                      isActive
+                        ? "bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90"
+                        : "bg-transparent text-neutral-700 hover:bg-neutral-0/40"
+                    }`;
+                    const inner = (
+                      <>
+                        <img
+                          className="h-6 w-6 shrink-0"
+                          alt={item.alt}
+                          src={item.iconSrc}
+                        />
+                        {!isCollapsed && (
+                          <span className="font-subtitle-2-medium text-[length:var(--subtitle-2-medium-font-size)] font-[number:var(--subtitle-2-medium-font-weight)] leading-[var(--subtitle-2-medium-line-height)] tracking-[var(--subtitle-2-medium-letter-spacing)] [font-style:var(--subtitle-2-medium-font-style)]">
+                            {item.label}
+                          </span>
+                        )}
+                      </>
+                    );
+
+                    if (item.href) {
+                      return (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          data-testid={testId}
+                          title={isCollapsed ? item.label : undefined}
+                          aria-label={isCollapsed ? item.label : undefined}
+                          aria-current={isActive ? "page" : undefined}
+                          className={baseClasses}
+                        >
+                          {inner}
+                        </Link>
+                      );
+                    }
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        disabled
+                        data-testid={testId}
+                        title={isCollapsed ? item.label : undefined}
+                        aria-label={isCollapsed ? item.label : undefined}
+                        className={`${baseClasses} cursor-not-allowed opacity-60`}
+                      >
+                        {inner}
+                      </button>
+                    );
+                  })}
                 </div>
               </section>
               {isCollapsed && (
