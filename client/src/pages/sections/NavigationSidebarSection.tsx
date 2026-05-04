@@ -182,7 +182,7 @@ export const NavigationSidebarSection = ({
                     const inner = (
                       <>
                         <img
-                          className="h-6 w-6 shrink-0"
+                          className={`h-6 w-6 shrink-0 ${isActive ? "brightness-0 invert" : ""}`}
                           alt={item.alt}
                           src={item.iconSrc}
                         />
