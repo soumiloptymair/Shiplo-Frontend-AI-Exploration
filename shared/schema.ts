@@ -56,4 +56,7 @@ export interface Shipment {
   source: string;
   warehouse: string;
   shipping: string;
+  method: string;
+  customer: string;
+  tags: string[];
 }
