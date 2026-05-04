@@ -181,12 +181,12 @@ export const NavigationSidebarSection = ({
                   {planningItems.map((item) => {
                     const isActive = item.matchPaths.includes(location);
                     const testId = `nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`;
-                    const baseClasses = `flex h-auto items-center gap-2 rounded p-1 no-underline ${
+                    const baseClasses = `flex h-8 items-center gap-2 rounded px-3 py-1.5 no-underline ${
                       isCollapsed ? "w-9 justify-center" : "w-full justify-start px-2 py-1"
                     } ${
                       isActive
                         ? "bg-brand-secondary text-brand-secondary-contrast hover:bg-brand-secondary/90"
-                        : "bg-transparent text-neutral-700 hover:bg-neutral-0/40"
+                        : "bg-transparent text-neutral-900 hover:bg-neutral-100"
                     }`;
                     const inner = (
                       <>
@@ -198,12 +198,12 @@ export const NavigationSidebarSection = ({
                           />
                         ) : (
                           <item.LucideIcon
-                            className={`h-6 w-6 shrink-0 ${isActive ? "text-white" : "text-neutral-700"}`}
+                            className={`h-6 w-6 shrink-0 ${isActive ? "text-white" : "text-neutral-900"}`}
                             aria-hidden="true"
                           />
                         )}
                         {!isCollapsed && (
-                          <span className="font-subtitle-2-medium text-[length:var(--subtitle-2-medium-font-size)] font-[number:var(--subtitle-2-medium-font-weight)] leading-[var(--subtitle-2-medium-line-height)] tracking-[var(--subtitle-2-medium-letter-spacing)] [font-style:var(--subtitle-2-medium-font-style)]">
+                          <span className="font-body text-sm font-normal leading-none tracking-[0]">
                             {item.label}
                           </span>
                         )}
