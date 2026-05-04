@@ -10,6 +10,7 @@ import {
   Workflow,
   Tag,
   ListChecks,
+  FileCode2,
 } from "lucide-react";
 
 interface NavigationSidebarSectionProps {
@@ -30,13 +31,14 @@ const topActions = [
   },
 ];
 
-const planningItems: Array<{
+type PlanningItem = {
   label: string;
-  iconSrc: string;
   alt: string;
   href?: string;
   matchPaths: string[];
-}> = [
+} & ({ iconSrc: string } | { LucideIcon: typeof FileCode2 });
+
+const planningItems: PlanningItem[] = [
   {
     label: "Shipments",
     iconSrc: "/figmaAssets/icon-2.svg",
@@ -68,6 +70,13 @@ const planningItems: Array<{
     alt: "Pick and Pack",
     href: "/pick-and-pack",
     matchPaths: ["/pick-and-pack"],
+  },
+  {
+    label: "Source Code",
+    LucideIcon: FileCode2,
+    alt: "Source Code",
+    href: "/code",
+    matchPaths: ["/code"],
   },
 ];
 
@@ -181,11 +190,18 @@ export const NavigationSidebarSection = ({
                     }`;
                     const inner = (
                       <>
-                        <img
-                          className={`h-6 w-6 shrink-0 ${isActive ? "brightness-0 invert" : ""}`}
-                          alt={item.alt}
-                          src={item.iconSrc}
-                        />
+                        {"iconSrc" in item ? (
+                          <img
+                            className={`h-6 w-6 shrink-0 ${isActive ? "brightness-0 invert" : ""}`}
+                            alt={item.alt}
+                            src={item.iconSrc}
+                          />
+                        ) : (
+                          <item.LucideIcon
+                            className={`h-6 w-6 shrink-0 ${isActive ? "text-white" : "text-neutral-700"}`}
+                            aria-hidden="true"
+                          />
+                        )}
                         {!isCollapsed && (
                           <span className="font-subtitle-2-medium text-[length:var(--subtitle-2-medium-font-size)] font-[number:var(--subtitle-2-medium-font-weight)] leading-[var(--subtitle-2-medium-line-height)] tracking-[var(--subtitle-2-medium-letter-spacing)] [font-style:var(--subtitle-2-medium-font-style)]">
                             {item.label}

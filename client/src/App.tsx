@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 
 import { OrdersDataGrid } from "@/pages/OrdersDataGrid";
 import { ShipmentsPage } from "@/pages/ShipmentsPage";
+import { CodeViewerPage } from "@/pages/CodeViewerPage";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={ShipmentsPage} />
       <Route path="/shipments" component={ShipmentsPage} />
       <Route path="/pick-and-pack" component={OrdersDataGrid} />
+      <Route path="/code" component={CodeViewerPage} />
       <Route component={NotFound} />
     </Switch>
   );

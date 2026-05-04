@@ -16,7 +16,8 @@ A pixel-faithful replica of the Shiplo dashboard modules from Figma file `7d1Ged
 - `client/src/pages/ShipmentsPage.tsx` — Shipments module (title bar with All/Orders/Returns tabs, status filter, search, +New Shipment, 10-column data grid). Mounted at `/` and `/shipments`.
 - `client/src/pages/OrdersDataGrid.tsx` — thin wrapper that mounts `PickPackDashboardSection` inside `AppShell`. Mounted at `/pick-and-pack`.
 - `client/src/pages/sections/PickPackDashboardSection.tsx` — Pick and Pack dashboard with Pick Lists table, Shipments table, and right detail panel with three modes (`pickList`, `shipments`, `addShipments`).
-- `client/src/pages/sections/NavigationSidebarSection.tsx` — sidebar; planning items with a real route render as `wouter` `Link`s with active state from `useLocation`; placeholder items (Pickup/Quotes/Wallet) render as disabled buttons.
+- `client/src/pages/CodeViewerPage.tsx` — Source Code viewer with file tree sidebar, search, line-numbered code display, and copy button. Mounted at `/code`.
+- `client/src/pages/sections/NavigationSidebarSection.tsx` — sidebar; planning items with a real route render as `wouter` `Link`s with active state from `useLocation`; placeholder items (Pickup/Quotes/Wallet) render as disabled buttons. Supports both `img` and Lucide icon types.
 - `shared/schema.ts` — shared types including `Shipment`, `ShipmentStatus`, `FreightType`, `ShipmentKind`.
 - `client/src/index.css` — design tokens (HSL custom properties).
 - `tailwind.config.ts` — exposes tokens as Tailwind color utilities.
