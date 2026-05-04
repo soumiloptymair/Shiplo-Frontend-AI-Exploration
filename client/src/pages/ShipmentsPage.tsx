@@ -324,9 +324,9 @@ const ShipmentsPageInner = (): JSX.Element => {
                   <TableCell className={cellTextBase}>{s.createdOn}</TableCell>
                   <TableCell className={cellTextBase}>{s.value}</TableCell>
                   <TableCell className={cellTextBase}>
-                    <span className="inline-flex items-center gap-1.5">
-                      <img src={SOURCE_ICON} alt="" className="h-4 w-4" />
-                      <span className="text-warning">{s.source}</span>
+                    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <img src={SOURCE_ICON} alt="" className="h-4 w-4 shrink-0" />
+                      <span className="text-neutral-900">{s.source}</span>
                     </span>
                   </TableCell>
                   <TableCell className={cellTextBase}>{s.warehouse}</TableCell>
