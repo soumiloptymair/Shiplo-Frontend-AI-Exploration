@@ -194,7 +194,7 @@ const ShipmentsPageInner = (): JSX.Element => {
           >
             <SelectTrigger
               data-testid="select-status-filter"
-              className="h-9 w-[180px] gap-2 rounded border-neutral-300 bg-neutral-0 font-body text-sm font-medium text-neutral-900"
+              className="h-9 w-[180px] gap-2 rounded border-neutral-300 bg-neutral-0 px-3 font-body text-sm font-medium text-neutral-900"
             >
               <span className="flex flex-1 items-center gap-2">
                 <span className="text-neutral-500">Status</span>
@@ -235,7 +235,7 @@ const ShipmentsPageInner = (): JSX.Element => {
           <Button
             type="button"
             data-testid="button-new-shipment"
-            className="h-9 gap-1 rounded bg-brand-secondary px-3 font-body text-base font-medium text-brand-secondary-contrast hover:bg-brand-secondary/90"
+            className="h-9 gap-1 rounded bg-brand-secondary px-3 font-body text-sm font-medium text-brand-secondary-contrast hover:bg-brand-secondary/90"
           >
             <Plus className="h-4 w-4" />
             New Shipment
