@@ -78,7 +78,7 @@ const SAMPLE_SHIPMENTS: Shipment[] = [
 ];
 
 const cellBase = "h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle";
-const headBase = "h-8 px-2 font-body text-sm font-medium text-neutral-900 bg-neutral-100";
+const headBase = "h-8 px-2 font-body text-sm font-medium text-neutral-900 bg-neutral-100 whitespace-nowrap";
 
 const TABS: ShipmentTab[] = ["All", "Orders", "Returns"];
 
@@ -173,7 +173,7 @@ const ShipmentsPageInner = (): JSX.Element => {
   };
 
   return (
-    <section className="flex h-full min-h-[calc(100vh-1rem)] flex-col rounded-lg bg-neutral-0">
+    <section className="flex h-full flex-col overflow-hidden rounded-lg bg-neutral-0">
 
       {/* ── Title bar ── */}
       <header className="flex items-center justify-between gap-4 rounded-t-lg border-b border-neutral-150 bg-neutral-0 px-5 py-4">
@@ -264,9 +264,9 @@ const ShipmentsPageInner = (): JSX.Element => {
       </header>
 
       {/* ── Data grid ── */}
-      <div className="flex-1 overflow-x-auto">
+      <div className="flex-1 overflow-auto">
         <Table className="w-full min-w-[1640px] border-collapse">
-          <TableHeader>
+          <TableHeader className="sticky top-0 z-10">
             <TableRow className="border-b border-[#e4eaed] bg-neutral-100 hover:bg-neutral-100">
               {/* Checkbox */}
               <TableHead className={`${headBase} w-[60px] pl-5 pr-3`}>
