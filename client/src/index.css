@@ -16,10 +16,10 @@
    * Tailwind can wrap them with hsl(var(--token) / <alpha>).
    * ============================================================ */
 
-  /* Brand */
-  --brand-primary: 218 65% 48%;          /* #2B64CB */
+  /* Brand — Dark Orange */
+  --brand-primary: 20 100% 36%;          /* #B84800 — deep burnt orange */
   --brand-primary-contrast: 0 0% 100%;   /* #FFFFFF */
-  --brand-secondary: 179 100% 25%;       /* #008280 */
+  --brand-secondary: 24 100% 44%;        /* #E06400 — dark orange (CTA) */
   --brand-secondary-contrast: 0 0% 100%; /* #FFFFFF */
 
   /* Semantic — success */
@@ -70,7 +70,7 @@
   --neutral-900: 188 30% 6%;             /* #0B1516 */
 
   /* Selected/hover overlays */
-  --overlay-selected: 179 100% 25% / 0.08;
+  --overlay-selected: 24 100% 44% / 0.08;
   --overlay-hover:    188 30% 6% / 0.04;
 
   /* Legacy aliases used by the codebase */
