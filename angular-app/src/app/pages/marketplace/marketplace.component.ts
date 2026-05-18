@@ -14,9 +14,7 @@ export interface ConnectorRow {
   id: string;
   category: string;
   brand: string;
-  brandLogoBg: string;
-  brandLogoText: string;
-  brandLogoColor: string;
+  logoUrl: string;
   accountName: string;
   installedDate: string;
   installedBy: string;
@@ -34,29 +32,32 @@ const CATEGORY_LABELS: Record<string, string> = {
   accounting: 'Accounting',
 };
 
-interface CatSeed { id: string; connected: number; available: number; brand: string; logoBg: string; logoColor: string; }
+interface CatSeed { id: string; connected: number; available: number; brand: string; slug: string; color: string; }
 
 const CATEGORY_SEEDS: CatSeed[] = [
-  { id: 'carriers',   connected: 8, available: 2, brand: 'FedEx',    logoBg: '#4D148C', logoColor: '#FF6200' },
-  { id: 'ecommerce',  connected: 5, available: 11, brand: 'Shopify', logoBg: '#95BF47', logoColor: '#FFFFFF' },
-  { id: 'erp',        connected: 4, available: 10, brand: 'SAP',     logoBg: '#0FAAFF', logoColor: '#FFFFFF' },
-  { id: 'oms',        connected: 6, available: 18, brand: 'Brightpearl', logoBg: '#0C2340', logoColor: '#FFFFFF' },
-  { id: 'wms',        connected: 1, available: 2, brand: 'Manhattan', logoBg: '#1F2937', logoColor: '#FFFFFF' },
-  { id: 'tms',        connected: 1, available: 2, brand: 'Oracle',   logoBg: '#C74634', logoColor: '#FFFFFF' },
-  { id: 'accounting', connected: 1, available: 1, brand: 'Xero',     logoBg: '#13B5EA', logoColor: '#FFFFFF' },
+  { id: 'carriers',   connected: 8,  available: 2,  brand: 'FedEx',      slug: 'fedex',      color: '4D148C' },
+  { id: 'ecommerce',  connected: 5,  available: 11, brand: 'Shopify',    slug: 'shopify',    color: '95BF47' },
+  { id: 'erp',        connected: 4,  available: 10, brand: 'SAP',        slug: 'sap',        color: '0FAAFF' },
+  { id: 'oms',        connected: 6,  available: 18, brand: 'Salesforce', slug: 'salesforce', color: '00A1E0' },
+  { id: 'wms',        connected: 1,  available: 2,  brand: 'Oracle',     slug: 'oracle',     color: 'C74634' },
+  { id: 'tms',        connected: 1,  available: 2,  brand: 'DHL',        slug: 'dhl',        color: 'D40511' },
+  { id: 'accounting', connected: 1,  available: 1,  brand: 'Xero',       slug: 'xero',       color: '13B5EA' },
 ];
+
+function logoFor(slug: string, color: string): string {
+  return `https://cdn.simpleicons.org/${slug}/${color}`;
+}
 
 function generateRows(): ConnectorRow[] {
   const rows: ConnectorRow[] = [];
   for (const seed of CATEGORY_SEEDS) {
+    const url = logoFor(seed.slug, seed.color);
     for (let i = 0; i < seed.connected; i++) {
       rows.push({
         id: `${seed.id}-c-${i + 1}`,
         category: seed.id,
         brand: seed.brand,
-        brandLogoBg: seed.logoBg,
-        brandLogoText: seed.brand,
-        brandLogoColor: seed.logoColor,
+        logoUrl: url,
         accountName: `${seed.brand} Default Account`,
         installedDate: '19 Feb 2026, 18:32 CST',
         installedBy: i < Math.ceil(seed.connected * 0.6) ? 'Shipper 1' : i < seed.connected - 1 ? 'Shipper 2' : 'Admin 1',
@@ -69,12 +70,10 @@ function generateRows(): ConnectorRow[] {
         id: `${seed.id}-a-${i + 1}`,
         category: seed.id,
         brand: seed.brand,
-        brandLogoBg: seed.logoBg,
-        brandLogoText: seed.brand,
-        brandLogoColor: seed.logoColor,
+        logoUrl: url,
         accountName: `${seed.brand} Test Account`,
-        installedDate: '—',
-        installedBy: '—',
+        installedDate: '19 Feb 2026, 18:32 CST',
+        installedBy: 'Admin 1',
         description: 'Application one line descri...',
         status: 'Disconnected',
       });
