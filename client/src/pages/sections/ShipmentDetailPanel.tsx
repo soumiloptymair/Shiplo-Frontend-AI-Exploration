@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   X,
   Printer,
@@ -13,6 +13,12 @@ import {
   Warehouse,
   Undo2,
   Plus,
+  FileText,
+  Download,
+  Trash2,
+  ImagePlus,
+  FileX,
+  Image as ImageIcon,
 } from "lucide-react";
 import type { Shipment, ShipmentStatus } from "@shared/schema";
 
@@ -99,6 +105,22 @@ const SectionHeader = ({
   </div>
 );
 
+/* ── Document row type ── */
+interface DocFile {
+  id: number;
+  name: string;
+  type: string;
+  date: string;
+  size: string;
+}
+
+/* ── POD image type ── */
+interface PodImage {
+  id: number;
+  dataUrl: string;
+  name: string;
+}
+
 interface Props {
   shipment: Shipment;
   onClose: () => void;
@@ -106,6 +128,43 @@ interface Props {
 
 export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
   const [activeTab, setActiveTab] = useState<PanelTab>("Label");
+  const [docs, setDocs] = useState<DocFile[]>([]);
+  const [podImages, setPodImages] = useState<PodImage[]>([]);
+  const docInputRef = useRef<HTMLInputElement>(null);
+  const podInputRef = useRef<HTMLInputElement>(null);
+  const nextDocId = useRef(1);
+  const nextPodId = useRef(1);
+
+  function handleDocUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    const now = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const added: DocFile[] = files.map((f) => ({
+      id: nextDocId.current++,
+      name: f.name,
+      type: f.name.split(".").pop()?.toUpperCase() ?? "FILE",
+      date: now,
+      size: f.size < 1024 * 1024
+        ? `${(f.size / 1024).toFixed(0)} KB`
+        : `${(f.size / (1024 * 1024)).toFixed(1)} MB`,
+    }));
+    setDocs((d) => [...d, ...added]);
+    e.target.value = "";
+  }
+
+  function handlePodUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    files.forEach((f) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setPodImages((prev) => [
+          ...prev,
+          { id: nextPodId.current++, dataUrl: ev.target?.result as string, name: f.name },
+        ]);
+      };
+      reader.readAsDataURL(f);
+    });
+    e.target.value = "";
+  }
 
   return (
     <div
@@ -408,27 +467,212 @@ export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
             </div>
 
             {/* DOCUMENTS section */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               <SectionHeader
                 title="Documents"
                 action={
-                  <button
-                    type="button"
-                    data-testid="button-add-document"
-                    className="flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 font-body text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-                  >
-                    <Plus className="h-3 w-3" />
-                    Add File
-                  </button>
+                  <>
+                    <input
+                      ref={docInputRef}
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={handleDocUpload}
+                      data-testid="input-doc-upload"
+                    />
+                    <button
+                      type="button"
+                      data-testid="button-add-document"
+                      onClick={() => docInputRef.current?.click()}
+                      className="flex items-center gap-1 rounded border border-[#b8c6cc] bg-white px-2 py-0.5 font-body text-xs font-medium text-[#45565b] hover:bg-neutral-50"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add File
+                    </button>
+                  </>
                 }
               />
-              <p className="font-body text-sm text-[#45565b]">No Documents Attached</p>
+
+              {docs.length === 0 ? (
+                /* Empty state */
+                <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-[#b8c6cc] bg-[#f6f9fb] px-4 py-6 text-center">
+                  <FileX className="h-8 w-8 text-[#b8c6cc]" />
+                  <p className="font-body text-sm font-medium text-[#45565b]">No Documents Added</p>
+                  <p className="font-body text-xs text-[#7e97a0]">
+                    Click <span className="font-medium">+ Add File</span> to attach documents
+                  </p>
+                </div>
+              ) : (
+                /* Documents table */
+                <div className="overflow-hidden rounded-lg border border-[#e4eaed]">
+                  <table className="w-full text-left" data-testid="table-documents">
+                    <thead>
+                      <tr className="border-b border-[#e4eaed] bg-[#f6f9fb]">
+                        <th className="px-3 py-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">
+                          Name
+                        </th>
+                        <th className="px-3 py-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">
+                          Type
+                        </th>
+                        <th className="px-3 py-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">
+                          Date
+                        </th>
+                        <th className="px-3 py-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">
+                          Size
+                        </th>
+                        <th className="w-[52px] px-3 py-2" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {docs.map((doc, idx) => (
+                        <tr
+                          key={doc.id}
+                          data-testid={`row-doc-${doc.id}`}
+                          className={`border-b border-[#e4eaed] last:border-0 ${
+                            idx % 2 === 1 ? "bg-[#f6f9fb]" : "bg-white"
+                          }`}
+                        >
+                          <td className="max-w-[120px] px-3 py-2">
+                            <span className="flex items-center gap-1.5 overflow-hidden">
+                              <FileText className="h-3.5 w-3.5 shrink-0 text-[#2B64CB]" />
+                              <span
+                                className="overflow-hidden text-ellipsis whitespace-nowrap font-body text-xs font-medium text-[#2da1cb]"
+                                title={doc.name}
+                              >
+                                {doc.name}
+                              </span>
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 font-body text-xs text-[#45565b]">{doc.type}</td>
+                          <td className="px-3 py-2 font-body text-xs text-[#45565b] whitespace-nowrap">{doc.date}</td>
+                          <td className="px-3 py-2 font-body text-xs text-[#45565b]">{doc.size}</td>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                aria-label={`Download ${doc.name}`}
+                                data-testid={`button-download-doc-${doc.id}`}
+                                className="flex h-5 w-5 items-center justify-center rounded text-[#45565b] hover:bg-neutral-100"
+                              >
+                                <Download className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                aria-label={`Delete ${doc.name}`}
+                                data-testid={`button-delete-doc-${doc.id}`}
+                                onClick={() => setDocs((d) => d.filter((x) => x.id !== doc.id))}
+                                className="flex h-5 w-5 items-center justify-center rounded text-[#45565b] hover:bg-red-50 hover:text-red-500"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             {/* PROOF OF DELIVERY section */}
-            <div className="flex flex-col gap-4">
-              <SectionHeader title="Proof of Delivery" />
-              <p className="font-body text-sm text-[#45565b]">No proof of delivery attached.</p>
+            <div className="flex flex-col gap-3">
+              <SectionHeader
+                title="Proof of Delivery"
+                action={
+                  <>
+                    <input
+                      ref={podInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePodUpload}
+                      data-testid="input-pod-upload"
+                    />
+                    {podImages.length > 0 && (
+                      <button
+                        type="button"
+                        data-testid="button-add-pod-image"
+                        onClick={() => podInputRef.current?.click()}
+                        className="flex items-center gap-1 rounded border border-[#b8c6cc] bg-white px-2 py-0.5 font-body text-xs font-medium text-[#45565b] hover:bg-neutral-50"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add Image
+                      </button>
+                    )}
+                  </>
+                }
+              />
+
+              {podImages.length === 0 ? (
+                /* Empty state with CTA */
+                <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-[#b8c6cc] bg-[#f6f9fb] px-4 py-6 text-center">
+                  <ImageIcon className="h-8 w-8 text-[#b8c6cc]" />
+                  <div>
+                    <p className="font-body text-sm font-medium text-[#45565b]">No Images Uploaded</p>
+                    <p className="font-body text-xs text-[#7e97a0]">
+                      Attach proof of delivery images
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    data-testid="button-add-pod-image-cta"
+                    onClick={() => podInputRef.current?.click()}
+                    className="flex items-center gap-2 rounded-lg border border-[#008572] px-4 py-2 font-body text-sm font-medium text-[#008572] hover:bg-[#f6f9fb]"
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                    Add Images
+                  </button>
+                </div>
+              ) : (
+                /* Image tile grid */
+                <div className="grid grid-cols-3 gap-2" data-testid="grid-pod-images">
+                  {podImages.map((img) => (
+                    <div
+                      key={img.id}
+                      data-testid={`tile-pod-${img.id}`}
+                      className="group relative overflow-hidden rounded-lg border border-[#e4eaed] bg-neutral-100"
+                      style={{ aspectRatio: "1 / 1" }}
+                    >
+                      <img
+                        src={img.dataUrl}
+                        alt={img.name}
+                        className="h-full w-full object-cover"
+                      />
+                      {/* Hover overlay with delete */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                        <button
+                          type="button"
+                          aria-label={`Remove ${img.name}`}
+                          data-testid={`button-delete-pod-${img.id}`}
+                          onClick={() => setPodImages((p) => p.filter((x) => x.id !== img.id))}
+                          className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-red-500 hover:bg-white"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      {/* Filename tooltip */}
+                      <div className="absolute bottom-0 left-0 right-0 truncate bg-black/50 px-1.5 py-0.5">
+                        <span className="font-body text-[10px] text-white">{img.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Add more tile */}
+                  <button
+                    type="button"
+                    data-testid="button-add-pod-tile"
+                    onClick={() => podInputRef.current?.click()}
+                    className="flex items-center justify-center rounded-lg border border-dashed border-[#b8c6cc] bg-[#f6f9fb] text-[#45565b] hover:border-[#008572] hover:text-[#008572]"
+                    style={{ aspectRatio: "1 / 1" }}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <Plus className="h-5 w-5" />
+                      <span className="font-body text-[10px]">Add</span>
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
 
           </div>
