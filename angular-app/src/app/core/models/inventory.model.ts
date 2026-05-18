@@ -70,6 +70,23 @@ export const DEFAULT_MATERIALS: MaterialFlag[] = [
 
 export const DEFAULT_SHIPPING_REQS = ['Furniture dolly', 'Blankets'];
 
+export interface VariantActivityEntry {
+  id: string;
+  shipmentId: string;
+  source: string;
+  orderDate: string;
+  warehouse: string;
+  inventoryChange: number;
+  updatedStock: number;
+}
+
+export const DEFAULT_VARIANT_ACTIVITY: VariantActivityEntry[] = [
+  { id: 'a-1', shipmentId: '220578391662185', source: 'Shopify', orderDate: 'Feb 02, 2026, 10:30 CDT', warehouse: 'Dallas 01', inventoryChange: -18, updatedStock: 18 },
+  { id: 'a-2', shipmentId: '220578391662185', source: 'Shopify', orderDate: 'Feb 02, 2026, 10:30 CDT', warehouse: 'Dallas 01', inventoryChange: -18, updatedStock: 18 },
+  { id: 'a-3', shipmentId: '220578391662185', source: 'Shopify', orderDate: 'Feb 02, 2026, 10:30 CDT', warehouse: 'Dallas 01', inventoryChange: -18, updatedStock: 18 },
+  { id: 'a-4', shipmentId: '220578391662185', source: 'Shopify', orderDate: 'Feb 02, 2026, 10:30 CDT', warehouse: 'Dallas 01', inventoryChange: -18, updatedStock: 18 },
+];
+
 export const DEFAULT_IMAGES = [
   'figmaAssets/product-1.png',
   'figmaAssets/product-2.png',

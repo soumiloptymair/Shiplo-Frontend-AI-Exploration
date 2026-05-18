@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../../../core/services/inventory.service';
+import { DEFAULT_VARIANT_ACTIVITY, VariantActivityEntry } from '../../../core/models/inventory.model';
 
 type VariantTab = 'Inventory' | 'Details' | 'Activity' | 'Notes';
 
@@ -22,11 +23,29 @@ export class VariantDetailPanelComponent {
   });
 
   constructor() {
-    // Reset to Inventory tab whenever the selected variant changes.
+    // Reset tab and activity search whenever the selected variant changes.
     effect(() => {
       this.svc.selectedVariantId();
       this.activeTab.set('Inventory');
+      this.activityQuery.set('');
     });
+  }
+
+  readonly activity: VariantActivityEntry[] = DEFAULT_VARIANT_ACTIVITY;
+  readonly activityQuery = signal('');
+
+  readonly filteredActivity = computed(() => {
+    const q = this.activityQuery().trim().toLowerCase();
+    if (!q) return this.activity;
+    return this.activity.filter(a =>
+      a.shipmentId.toLowerCase().includes(q) ||
+      a.warehouse.toLowerCase().includes(q) ||
+      a.source.toLowerCase().includes(q)
+    );
+  });
+
+  onActivityQuery(e: Event) {
+    this.activityQuery.set((e.target as HTMLInputElement).value);
   }
 
   setTab(t: VariantTab) { this.activeTab.set(t); }
