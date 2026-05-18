@@ -32,33 +32,65 @@ export interface InventoryProduct {
   variants: ProductVariant[];
 }
 
-export const SAMPLE_INVENTORY: InventoryProduct[] = [
-  {
-    id: 'p-1', name: 'Basic Moving Chairs Kit', extId: '2345A2345',
-    type: 'Furniture', attributes: 'Size, Color',
-    hsCode: '9401.39.00', origin: 'Canada',
-    variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: false,
-    variants: [
-      { id: 'v-1-1', name: 'Variant 1', extId: '12345A234', sku: 'PBM495145051', value: '$16.50', tags: ['Tag 1'], extraTagCount: 2, size: 'small',  color: 'grey',  length: '15', width: '15', height: '40', weight: '15', hasInventory: true },
-      { id: 'v-1-2', name: 'Variant 2', extId: '12345A234', sku: 'PBM495145052', value: '$18.50', tags: ['Tag 1'], extraTagCount: 2, size: 'medium', color: 'grey',  length: '-',  width: '-',  height: '-',  weight: '-',  hasInventory: false },
-      { id: 'v-1-3', name: 'Variant 3', extId: '12345A234', sku: 'PBM495145053', value: '$20.50', tags: ['Tag 1'], extraTagCount: 2, size: 'large',  color: 'grey',  length: '-',  width: '-',  height: '-',  weight: '-',  hasInventory: false },
-      { id: 'v-1-4', name: 'Variant 4', extId: '12345A234', sku: 'PBM495145054', value: '$16.50', tags: ['Tag 1'], extraTagCount: 2, size: 'small',  color: 'black', length: '15', width: '15', height: '40', weight: '15', hasInventory: true },
-      { id: 'v-1-5', name: 'Variant 5', extId: '12345A234', sku: 'PBM495145055', value: '$18.50', tags: ['Tag 1'], extraTagCount: 2, size: 'large',  color: 'black', length: '-',  width: '-',  height: '-',  weight: '-',  hasInventory: false },
-      { id: 'v-1-6', name: 'Variant 6', extId: '12345A234', sku: 'PBM495145056', value: '$20.50', tags: ['Tag 1'], extraTagCount: 2, size: 'medium', color: 'black', length: '-',  width: '-',  height: '-',  weight: '-',  hasInventory: false, needsAttention: true },
-      { id: 'v-1-7', name: 'Variant 7', extId: '12345A234', sku: 'PBM495145057', value: '$16.50', tags: ['Tag 1'], extraTagCount: 2, size: 'small',  color: 'blue',  length: '15', width: '15', height: '40', weight: '15', hasInventory: true },
-      { id: 'v-1-8', name: 'Variant 8', extId: '12345A234', sku: 'PBM495145058', value: '$18.50', tags: ['Tag 1'], extraTagCount: 2, size: 'medium', color: 'blue',  length: '-',  width: '-',  height: '-',  weight: '-',  hasInventory: false, needsAttention: true },
-      { id: 'v-1-9', name: 'Variant 9', extId: '12345A234', sku: 'PBM495145059', value: '$20.50', tags: ['Tag 1'], extraTagCount: 0, size: 'large',  color: 'blue',  length: '-',  width: '-',  height: '-',  weight: '-',  hasInventory: false },
-    ],
-  },
-  { id: 'p-2',  name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-3',  name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-4',  name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-5',  name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-6',  name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-7',  name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-8',  name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-9',  name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-10', name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-11', name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
-  { id: 'p-12', name: 'Product Name 1', extId: '2345A2345', type: 'Furniture', attributes: 'Size, Color', hsCode: '9401.39.00', origin: 'Canada', variantCount: 9, valueRange: '$16.50 - $20.50', needsAttention: true,  variants: [] },
+const SIZES = ['small', 'medium', 'large'];
+const COLORS = ['grey', 'black', 'blue', 'white', 'red', 'green'];
+const VALUES = ['$16.50', '$18.50', '$20.50'];
+
+function buildVariants(productId: string, count: number): ProductVariant[] {
+  const variants: ProductVariant[] = [];
+  for (let i = 1; i <= count; i++) {
+    const hasInventory = i % 3 === 1;
+    const needsAttention = i % 4 === 0;
+    variants.push({
+      id: `${productId}-v-${i}`,
+      name: `Variant ${i}`,
+      extId: '12345A234',
+      sku: `PBM${productId.replace('p-', '49514')}${String(i).padStart(3, '0')}`,
+      value: VALUES[i % VALUES.length],
+      tags: ['Tag 1'],
+      extraTagCount: i === count ? 0 : 2,
+      size: SIZES[i % SIZES.length],
+      color: COLORS[Math.floor((i - 1) / 3) % COLORS.length],
+      length: hasInventory ? '15' : '-',
+      width: hasInventory ? '15' : '-',
+      height: hasInventory ? '40' : '-',
+      weight: hasInventory ? '15' : '-',
+      hasInventory,
+      needsAttention,
+    });
+  }
+  return variants;
+}
+
+const PRODUCT_NAMES = [
+  'Basic Moving Chairs Kit',
+  'Compact Office Desk Set',
+  'Modular Bookshelf Unit',
+  'Outdoor Patio Lounger',
+  'Adjustable Standing Desk',
+  'Ergonomic Task Chair',
+  'Storage Cabinet Bundle',
+  'Folding Dining Table',
+  'Velvet Accent Sofa',
+  'Studio Floor Lamp',
+  'Memory Foam Mattress',
+  'Wall-Mounted Shelving',
 ];
+
+export const SAMPLE_INVENTORY: InventoryProduct[] = PRODUCT_NAMES.map((name, idx) => {
+  const id = `p-${idx + 1}`;
+  const variantCount = 6 + ((idx * 2) % 5);
+  return {
+    id,
+    name,
+    extId: '2345A2345',
+    type: 'Furniture',
+    attributes: 'Size, Color',
+    hsCode: '9401.39.00',
+    origin: 'Canada',
+    variantCount,
+    valueRange: '$16.50 - $20.50',
+    needsAttention: idx !== 0,
+    variants: buildVariants(id, variantCount),
+  };
+});
