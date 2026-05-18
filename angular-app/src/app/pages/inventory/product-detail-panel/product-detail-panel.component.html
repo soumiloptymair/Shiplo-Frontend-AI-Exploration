@@ -77,7 +77,7 @@
 
       <!-- ATTRIBUTES -->
       <section class="mb-5">
-        <h3 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#45565b]">Attributes</h3>
+        <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Attributes</h3>
         <div class="space-y-1.5">
           <div class="flex items-baseline justify-between gap-3">
             <span class="text-[13px] leading-[18px] text-[#45565b]">Color</span>
@@ -92,7 +92,7 @@
 
       <!-- PRODUCT DIMENSIONS -->
       <section class="mb-5">
-        <h3 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#45565b]">Product Dimensions</h3>
+        <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Product Dimensions</h3>
         <div class="grid grid-cols-4 gap-3 rounded-md border border-[#e4eaed] bg-neutral-0 px-4 py-3">
           <div>
             <div class="text-[11px] leading-[14px] text-[#45565b]">Length</div>
@@ -115,7 +115,7 @@
 
       <!-- MATERIALS -->
       <section class="mb-5">
-        <h3 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#45565b]">Materials</h3>
+        <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Materials</h3>
         <ul class="space-y-2 list-none p-0 m-0">
           @for (m of sel.product.materials; track m.label) {
             <li class="flex items-start gap-2 text-[13px] leading-[18px] text-[#0b1516]"
@@ -137,7 +137,7 @@
 
       <!-- SHIPPING REQUIREMENTS -->
       <section class="mb-5">
-        <h3 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#45565b]">Shipping Requirements</h3>
+        <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Shipping Requirements</h3>
         <ul class="space-y-1.5 list-none p-0 m-0">
           @for (r of sel.product.shippingRequirements; track r) {
             <li class="flex items-center gap-2 text-[13px] leading-[18px] text-[#0b1516]">
@@ -150,7 +150,7 @@
 
       <!-- RETURN -->
       <section class="mb-5">
-        <h3 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#45565b]">Return</h3>
+        <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Return</h3>
         <div class="flex items-start gap-2 text-[13px] leading-[18px] text-[#0b1516]"
              data-testid="text-return-policy">
           @if (!sel.product.canReturn) {
@@ -168,7 +168,7 @@
 
       <!-- PRODUCT IMAGES -->
       <section>
-        <h3 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#45565b]">Product Images</h3>
+        <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Product Images</h3>
         <div class="grid grid-cols-3 gap-2">
           @for (img of sel.product.images; track img; let i = $index) {
             <div class="aspect-square overflow-hidden rounded-md border border-[#e4eaed] bg-[#f4f7f8]"
