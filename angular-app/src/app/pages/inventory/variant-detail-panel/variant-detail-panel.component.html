@@ -149,6 +149,109 @@
         }
       </div>
 
+    } @else if (activeTab() === 'Details') {
+
+      <!-- Grouped card: Dimensions / Materials / Shipping / Return -->
+      <div class="mb-4 flex flex-col gap-4 rounded-lg bg-[#f6f9fb] p-3">
+
+        <!-- VARIANT DIMENSIONS -->
+        <section>
+          <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Variant Dimensions</h3>
+          <div class="grid grid-cols-4 gap-3">
+            <div>
+              <div class="text-[11px] leading-[14px] text-[#45565b]">Length</div>
+              <div class="mt-1 text-[14px] leading-[18px] font-medium text-[#0b1516]" data-testid="text-vdim-length">{{ sel.variant.length }}{{ sel.variant.hasInventory ? ' in' : '' }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] leading-[14px] text-[#45565b]">Width</div>
+              <div class="mt-1 text-[14px] leading-[18px] font-medium text-[#0b1516]" data-testid="text-vdim-width">{{ sel.variant.width }}{{ sel.variant.hasInventory ? ' in' : '' }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] leading-[14px] text-[#45565b]">Height</div>
+              <div class="mt-1 text-[14px] leading-[18px] font-medium text-[#0b1516]" data-testid="text-vdim-height">{{ sel.variant.height }}{{ sel.variant.hasInventory ? ' in' : '' }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] leading-[14px] text-[#45565b]">Weight</div>
+              <div class="mt-1 text-[14px] leading-[18px] font-medium text-[#0b1516]" data-testid="text-vdim-weight">{{ sel.variant.weight }}{{ sel.variant.hasInventory ? ' lbs' : '' }}</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="h-px w-full bg-[#e4eaed]"></div>
+
+        <!-- MATERIALS -->
+        <section>
+          <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Materials</h3>
+          <ul class="space-y-2 list-none p-0 m-0">
+            @for (m of sel.product.materials; track m.label) {
+              <li class="flex items-start gap-2 text-[13px] leading-[18px] text-[#0b1516]">
+                @if (m.status === 'yes') {
+                  <svg class="mt-[1px] h-4 w-4 shrink-0 text-[#008572]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 14.4l-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9.4l-7 7z"/>
+                  </svg>
+                } @else {
+                  <svg class="mt-[1px] h-4 w-4 shrink-0 text-[#d92d20]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.3 13.3L15 16.6 12 13.4l-3 3.2-1.3-1.3 3.2-3-3.2-3L9 7.4l3 3.2 3-3.2 1.3 1.3-3.2 3 3.2 3.2z"/>
+                  </svg>
+                }
+                <span class="min-w-0">{{ m.label }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <!-- SHIPPING REQUIREMENTS -->
+        <section>
+          <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Shipping Requirements</h3>
+          <ul class="space-y-2 list-none p-0 m-0">
+            @for (r of sel.product.shippingRequirements; track r) {
+              <li class="flex items-start gap-2 text-[13px] leading-[18px] text-[#0b1516]">
+                <svg class="mt-[1px] h-4 w-4 shrink-0 text-[#008572]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 14.4l-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9.4l-7 7z"/>
+                </svg>
+                <span>{{ r }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <!-- RETURN -->
+        <section>
+          <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Return</h3>
+          <div class="flex items-start gap-2 text-[13px] leading-[18px] text-[#0b1516]">
+            @if (!sel.product.canReturn) {
+              <svg class="mt-[1px] h-4 w-4 shrink-0 text-[#d92d20]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.3 13.3L15 16.6 12 13.4l-3 3.2-1.3-1.3 3.2-3-3.2-3L9 7.4l3 3.2 3-3.2 1.3 1.3-3.2 3 3.2 3.2z"/>
+              </svg>
+            } @else {
+              <svg class="mt-[1px] h-4 w-4 shrink-0 text-[#008572]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 14.4l-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9.4l-7 7z"/>
+              </svg>
+            }
+            <span>{{ sel.product.returnPolicy }}</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- PRODUCT IMAGES (separate card) -->
+      <section class="rounded-lg bg-[#f6f9fb] p-3">
+        <h3 class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-neutral-900">Product Images</h3>
+        <div class="grid grid-cols-3 gap-2">
+          @for (img of sel.product.images; track img; let i = $index) {
+            <div class="aspect-square overflow-hidden rounded-md border border-[#e4eaed] bg-neutral-0"
+                 [attr.data-testid]="'img-variant-' + i">
+              <div class="flex h-full w-full items-center justify-center text-[#7a8a90]">
+                <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="9" cy="9" r="2"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
     } @else {
       <div class="flex h-full items-center justify-center text-[13px] text-[#45565b]"
            data-testid="text-variant-tab-placeholder">
