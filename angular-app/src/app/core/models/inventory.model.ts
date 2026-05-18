@@ -1,5 +1,16 @@
 export type InventoryTab = 'SKUs' | 'Products';
 
+export interface WarehouseStock {
+  id: string;
+  name: string;
+  addressLine1: string;
+  addressLine2: string;
+  quantity: number;
+  active: string;
+  quarantined: string;
+  writtenOff: string;
+}
+
 export interface ProductVariant {
   id: string;
   name: string;
@@ -16,6 +27,7 @@ export interface ProductVariant {
   weight: string;
   hasInventory: boolean;
   needsAttention?: boolean;
+  warehouses: WarehouseStock[];
 }
 
 export type MaterialStatus = 'yes' | 'no';
@@ -64,6 +76,14 @@ export const DEFAULT_IMAGES = [
   'figmaAssets/product-3.png',
 ];
 
+export const DEFAULT_WAREHOUSES: WarehouseStock[] = [
+  { id: 'w-1', name: 'Dallas 01', addressLine1: '514 Jefferson Ln, Lake', addressLine2: 'Dallas, Texas(TX), 75065', quantity: 13, active: '--', quarantined: '--', writtenOff: '--' },
+  { id: 'w-2', name: 'Dallas 01', addressLine1: '514 Jefferson Ln, Lake', addressLine2: 'Dallas, Texas(TX), 75065', quantity: 13, active: '--', quarantined: '--', writtenOff: '--' },
+  { id: 'w-3', name: 'Dallas 01', addressLine1: '514 Jefferson Ln, Lake', addressLine2: 'Dallas, Texas(TX), 75065', quantity: 13, active: '--', quarantined: '--', writtenOff: '--' },
+  { id: 'w-4', name: 'Dallas 01', addressLine1: '514 Jefferson Ln, Lake', addressLine2: 'Dallas, Texas(TX), 75065', quantity: 13, active: '--', quarantined: '--', writtenOff: '--' },
+  { id: 'w-5', name: 'Dallas 01', addressLine1: '514 Jefferson Ln, Lake', addressLine2: 'Dallas, Texas(TX), 75065', quantity: 13, active: '--', quarantined: '--', writtenOff: '--' },
+];
+
 const SIZES = ['small', 'medium', 'large'];
 const COLORS = ['grey', 'black', 'blue', 'white', 'red', 'green'];
 const VALUES = ['$16.50', '$18.50', '$20.50'];
@@ -89,6 +109,7 @@ function buildVariants(productId: string, count: number): ProductVariant[] {
       weight: hasInventory ? '15' : '-',
       hasInventory,
       needsAttention,
+      warehouses: DEFAULT_WAREHOUSES.map((w) => ({ ...w, id: `${productId}-v-${i}-${w.id}` })),
     });
   }
   return variants;

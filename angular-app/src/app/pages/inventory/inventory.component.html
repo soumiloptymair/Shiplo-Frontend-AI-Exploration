@@ -272,7 +272,11 @@
   </section>
 
   <!-- Standalone right-side details panel (sibling card to the page) -->
-  <app-product-detail-panel appShellPanel />
+  @if (svc.selectedItem()?.kind === 'variant') {
+    <app-variant-detail-panel appShellPanel />
+  } @else if (svc.selectedItem()?.kind === 'product') {
+    <app-product-detail-panel appShellPanel />
+  }
 
   <app-sync-dialog />
   <app-toast />
