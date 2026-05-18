@@ -35,7 +35,18 @@
 
       <!-- Right: sync info + actions -->
       <div class="flex items-center gap-2">
-        <span class="font-['Roboto',sans-serif] text-[14px] font-normal text-[#45565b] whitespace-nowrap">Last Synced 20 min ago</span>
+        <span *ngIf="svc.warningCount() > 0"
+              class="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 font-['Roboto',sans-serif] text-[13px] font-medium text-amber-700 whitespace-nowrap"
+              data-testid="badge-warning-count">
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          {{ svc.warningCount() }} {{ svc.warningCount() === 1 ? 'warning' : 'warnings' }}
+        </span>
+
+        <span class="font-['Roboto',sans-serif] text-[14px] font-normal text-[#45565b] whitespace-nowrap"
+              data-testid="text-last-synced">{{ svc.lastSyncedLabel() }}</span>
 
         <div class="mx-1 self-stretch border-l border-[#e4eaed]"></div>
 
@@ -75,9 +86,11 @@
 
         <!-- Sync Now button -->
         <button type="button" data-testid="button-sync-now"
-          class="flex h-9 items-center gap-1 rounded-[4px] bg-[#008572] px-3 font-['Roboto',sans-serif] text-[12px] font-medium text-white hover:bg-[#006d5e] whitespace-nowrap">
+          [disabled]="svc.syncing()"
+          (click)="svc.startSync()"
+          class="flex h-9 items-center gap-1 rounded-[4px] bg-[#008572] px-3 font-['Roboto',sans-serif] text-[12px] font-medium text-white hover:bg-[#006d5e] disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap">
           Sync Now
-          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg class="h-5 w-5" [class.animate-spin]="svc.syncing()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
           </svg>
         </button>
@@ -201,7 +214,8 @@
                       <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.weight }}</td>
                       <td class="h-8 px-2 py-0 align-middle whitespace-nowrap">
                         <button *ngIf="!v.hasInventory" type="button"
-                          class="inline-flex items-center gap-1 font-['Roboto',sans-serif] text-sm font-medium text-[#2B64CB] hover:underline"
+                          [disabled]="svc.syncing()"
+                          class="inline-flex items-center gap-1 font-['Roboto',sans-serif] text-sm font-medium text-[#2B64CB] hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
                           [attr.data-testid]="'button-add-inventory-' + v.id">
                           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/>
@@ -245,4 +259,7 @@
       </div>
     </footer>
   </section>
+
+  <app-sync-dialog />
+  <app-toast />
 </app-shell>
