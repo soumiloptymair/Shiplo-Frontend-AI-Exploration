@@ -146,7 +146,9 @@
 
             <!-- Expanded variant sub-table -->
             <tr *ngIf="isExpanded(p.id) && p.variants.length > 0">
-              <td colspan="10" class="p-0">
+              <td colspan="10" class="p-0 bg-[#f7fafb]">
+                <div class="pl-9 pr-2 py-2">
+                  <div class="overflow-hidden rounded-md border border-[#e4eaed] bg-white">
                 <table class="w-full border-collapse">
                   <!-- Variant sub-header -->
                   <thead>
@@ -221,6 +223,8 @@
                     </tr>
                   </tbody>
                 </table>
+                  </div>
+                </div>
               </td>
             </tr>
           </ng-container>
