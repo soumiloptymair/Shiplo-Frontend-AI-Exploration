@@ -1,0 +1,181 @@
+<aside class="w-full h-full">
+  <div
+    class="flex h-full min-h-screen flex-col items-stretch gap-4 rounded-lg pb-2 pt-4"
+    [ngClass]="isCollapsed ? 'px-1 bg-neutral-300' : 'px-2 bg-neutral-300'"
+  >
+    <!-- Logo -->
+    <header class="flex flex-col items-center gap-4">
+      <div class="flex h-8 items-center justify-center">
+        <img
+          *ngIf="isCollapsed; else fullLogo"
+          class="h-6 w-6"
+          alt="Shiplo logo"
+          src="figmaAssets/shiplo-mark.svg"
+          data-testid="img-sidebar-logo-collapsed"
+        />
+        <ng-template #fullLogo>
+          <img
+            class="h-6 w-[84px]"
+            alt="Shiplo LT logo"
+            src="figmaAssets/shiplo-lt---logo---two-color.svg"
+          />
+        </ng-template>
+      </div>
+
+      <!-- Quick actions -->
+      <nav class="flex items-center justify-center gap-1.5" [ngClass]="isCollapsed ? 'flex-col' : ''">
+        <button
+          type="button"
+          aria-label="Import"
+          data-testid="button-import"
+          class="h-9 w-9 rounded border border-neutral-400 bg-transparent p-0 flex items-center justify-center hover:bg-neutral-300/40"
+        >
+          <img class="h-4 w-4" alt="Import" src="figmaAssets/icon-1.svg" />
+        </button>
+        <button
+          type="button"
+          aria-label="Notifications"
+          data-testid="button-notifications"
+          class="h-9 w-9 rounded border border-neutral-400 bg-transparent p-0 flex items-center justify-center hover:bg-neutral-300/40"
+        >
+          <img class="h-4 w-4" alt="Notifications" src="figmaAssets/icon.svg" />
+        </button>
+      </nav>
+    </header>
+
+    <!-- Navigation -->
+    <nav aria-label="Sidebar navigation" class="flex flex-1 flex-col">
+      <div class="flex flex-col gap-5 py-2" [ngClass]="isCollapsed ? 'px-0' : 'px-1'">
+        <!-- Divider (collapsed) -->
+        <div *ngIf="isCollapsed" class="mx-auto h-px w-8 bg-neutral-400"></div>
+
+        <!-- PLANNING section -->
+        <section class="flex flex-col gap-1">
+          <div *ngIf="!isCollapsed" class="inline-flex items-center gap-2 pb-1">
+            <img class="h-4 w-4" alt="" src="figmaAssets/chevron-down.svg" />
+            <h2 class="font-body text-sm font-normal leading-none text-neutral-900">PLANNING</h2>
+          </div>
+
+          <div class="flex flex-col" [ngClass]="isCollapsed ? 'items-center gap-1' : 'gap-1 px-2'">
+            <ng-container *ngFor="let item of planningItems">
+              <!-- Routable item -->
+              <a
+                *ngIf="item.route; else disabledItem"
+                [routerLink]="item.route"
+                [attr.data-testid]="testId(item.label)"
+                [title]="isCollapsed ? item.label : undefined"
+                [attr.aria-label]="isCollapsed ? item.label : undefined"
+                class="flex h-8 items-center gap-2 rounded no-underline transition-colors"
+                [ngClass]="[
+                  isCollapsed ? 'w-9 justify-center px-0' : 'w-full justify-start px-2 py-1',
+                  isActive(item)
+                    ? 'bg-brand-secondary text-white'
+                    : 'bg-transparent text-neutral-900 hover:bg-neutral-100'
+                ]"
+              >
+                <img
+                  *ngIf="item.iconSrc"
+                  class="h-6 w-6 shrink-0"
+                  [ngClass]="isActive(item) ? 'brightness-0 invert' : ''"
+                  [alt]="item.label"
+                  [src]="item.iconSrc"
+                />
+                <span *ngIf="!isCollapsed" class="font-body text-sm leading-none">{{ item.label }}</span>
+              </a>
+
+              <!-- Disabled placeholder item -->
+              <ng-template #disabledItem>
+                <button
+                  type="button"
+                  disabled
+                  [attr.data-testid]="testId(item.label)"
+                  [title]="isCollapsed ? item.label : undefined"
+                  class="flex h-8 cursor-not-allowed items-center gap-2 rounded opacity-60 bg-transparent text-neutral-900"
+                  [ngClass]="isCollapsed ? 'w-9 justify-center px-0' : 'w-full justify-start px-2 py-1'"
+                >
+                  <img
+                    *ngIf="item.iconSrc"
+                    class="h-6 w-6 shrink-0"
+                    [alt]="item.label"
+                    [src]="item.iconSrc"
+                  />
+                  <span *ngIf="!isCollapsed" class="font-body text-sm leading-none">{{ item.label }}</span>
+                </button>
+              </ng-template>
+            </ng-container>
+          </div>
+        </section>
+
+        <!-- Resources / Settings (collapsed icons or collapsed sections) -->
+        <ng-container *ngIf="isCollapsed">
+          <div class="mx-auto h-px w-8 bg-neutral-400"></div>
+          <section class="flex flex-col items-center gap-1">
+            <button
+              *ngFor="let r of resourceItems"
+              type="button"
+              [title]="r.label"
+              [attr.aria-label]="r.label"
+              class="h-9 w-9 flex items-center justify-center rounded text-neutral-700 hover:bg-neutral-300/40"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </button>
+          </section>
+        </ng-container>
+
+        <ng-container *ngIf="!isCollapsed">
+          <section class="flex flex-col gap-1">
+            <button type="button" class="h-auto inline-flex justify-start gap-2 self-start p-0 text-neutral-900 bg-transparent border-none cursor-pointer">
+              <img class="h-4 w-4" alt="" src="figmaAssets/chevron-right-1.svg" />
+              <span class="font-body text-sm font-normal">RESOURCES</span>
+            </button>
+          </section>
+          <section class="flex flex-col gap-1">
+            <button type="button" class="h-auto inline-flex justify-start gap-2 self-start p-0 text-neutral-900 bg-transparent border-none cursor-pointer">
+              <img class="h-4 w-4" alt="" src="figmaAssets/chevron-right-1.svg" />
+              <span class="font-body text-sm font-normal">SETTINGS</span>
+            </button>
+          </section>
+        </ng-container>
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-auto flex flex-col gap-3 pt-6" [ngClass]="isCollapsed ? 'px-0' : 'px-2'">
+        <div *ngIf="!isCollapsed" class="flex w-full items-center gap-2 rounded-lg p-1">
+          <div class="h-8 w-8 rounded-2xl bg-[hsl(322_77%_88%)] flex items-center justify-center">
+            <span class="font-body text-sm font-medium text-neutral-900">JD</span>
+          </div>
+          <span class="font-body text-base font-normal text-neutral-900">John Doe</span>
+        </div>
+        <div *ngIf="isCollapsed" class="flex justify-center">
+          <div class="h-8 w-8 rounded-2xl bg-[hsl(322_77%_88%)] flex items-center justify-center">
+            <span class="text-xs font-medium text-neutral-900">JD</span>
+          </div>
+        </div>
+
+        <div class="flex items-center" [ngClass]="isCollapsed ? 'justify-center' : 'justify-between'">
+          <button *ngIf="!isCollapsed" type="button" class="h-6 w-6 bg-transparent border-none cursor-pointer">
+            <img class="h-6 w-6" alt="Settings" src="figmaAssets/icon-settings-lightmode.svg" />
+          </button>
+          <button
+            type="button"
+            data-testid="button-toggle-sidebar"
+            (click)="toggleCollapse.emit()"
+            [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+            class="h-6 w-6 flex items-center justify-center bg-transparent border-none cursor-pointer text-neutral-700"
+          >
+            <!-- Chevron Left / Right -->
+            <svg *ngIf="!isCollapsed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            <svg *ngIf="isCollapsed" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </footer>
+    </nav>
+  </div>
+</aside>

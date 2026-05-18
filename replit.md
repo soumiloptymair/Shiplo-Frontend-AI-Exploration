@@ -1,57 +1,95 @@
 # Shiplo
 
-A pixel-faithful replica of the Shiplo dashboard modules from Figma file `7d1Ged8LHQYBV9abYhNhxG`. Currently includes the Shipments and Pick and Pack modules.
+A pixel-faithful replica of the Shiplo dashboard modules from Figma file `7d1Ged8LHQYBV9abYhNhxG`. Includes Shipments and Pick and Pack modules in both React and Angular.
 
-## Stack
+## React App (port 5000)
 
+### Stack
 - React 18 + TypeScript + Vite (client)
 - Express + Drizzle ORM + Postgres (server)
 - Tailwind CSS + shadcn/ui components
 - Wouter for routing, TanStack Query v5 for data
 - Roboto + Montserrat fonts; brand primary `#2B64CB`, secondary teal `#008280`
 
-## Layout
-
-- `client/src/components/AppShell.tsx` — shared shell with collapsible sidebar and content slot. Used by every page.
-- `client/src/pages/ShipmentsPage.tsx` — Shipments module (title bar with All/Orders/Returns tabs, status filter, search, +New Shipment, 10-column data grid). Mounted at `/` and `/shipments`.
-- `client/src/pages/OrdersDataGrid.tsx` — thin wrapper that mounts `PickPackDashboardSection` inside `AppShell`. Mounted at `/pick-and-pack`.
-- `client/src/pages/sections/PickPackDashboardSection.tsx` — Pick and Pack dashboard with Pick Lists table, Shipments table, and right detail panel with three modes (`pickList`, `shipments`, `addShipments`).
-- `client/src/pages/CodeViewerPage.tsx` — Source Code viewer with file tree sidebar, search, line-numbered code display, and copy button. Mounted at `/code`.
-- `client/src/pages/sections/NavigationSidebarSection.tsx` — sidebar; planning items with a real route render as `wouter` `Link`s with active state from `useLocation`; placeholder items (Pickup/Quotes/Wallet) render as disabled buttons. Supports both `img` and Lucide icon types.
-- `shared/schema.ts` — shared types including `Shipment`, `ShipmentStatus`, `FreightType`, `ShipmentKind`.
+### Layout
+- `client/src/components/AppShell.tsx` — shared shell with collapsible sidebar and content slot.
+- `client/src/pages/ShipmentsPage.tsx` — Shipments module. Mounted at `/` and `/shipments`.
+- `client/src/pages/OrdersDataGrid.tsx` — wrapper for `PickPackDashboardSection`. Mounted at `/pick-and-pack`.
+- `client/src/pages/sections/PickPackDashboardSection.tsx` — Pick and Pack dashboard.
+- `client/src/pages/CodeViewerPage.tsx` — Source Code viewer. Mounted at `/code`.
+- `client/src/pages/sections/NavigationSidebarSection.tsx` — collapsible sidebar.
+- `shared/schema.ts` — shared types.
 - `client/src/index.css` — design tokens (HSL custom properties).
-- `tailwind.config.ts` — exposes tokens as Tailwind color utilities.
-- `attached_assets/shiplo_design_system_extracted_*.md` — source-of-truth tokens.
+- `tailwind.config.ts` — Tailwind color utilities.
 
-## Design tokens (added)
-
-- `--status-picking` (`#FFEAC0`) for the Picking status pill in the pick-list detail panel.
-- Shipment status pill tokens: `--status-shipped`, `--status-label-created`, `--status-delayed`, `--status-delivered`, `--status-on-hold`, `--status-needs-review`, `--status-cancelled`. All available as `bg-status-*` Tailwind utilities.
-
-## Dashboard behavior
-
-- `pickPackRows` and `shipmentRows` are React state seeded from `INITIAL_*` constants so that:
-  - "Create Pick List" prepends a new row with today's date and the current warehouse, validates ID + picker + selection, blocks case-insensitive duplicate IDs with an inline error, and reassigns selected shipments' `pickListId`.
-  - "Add to Pick List" reassigns selected shipments and bumps `totalOrders`.
-- Selecting a pick list filters the shipments table to show its shipments first; shipments already assigned to the selected list are visually disabled (grey row + grey checkbox) and not togglable.
-- The right panel low-inventory alert is dismissible. Dismissal is reset whenever shipment selection changes (single, select-all, or pick-list switch) so context changes resurface the warning.
-
-## Pick list detail panel
-
-Built to match Figma node `27620-318582`:
-
-1. Optional low-inventory alert (warning soft bg, lists distinct low-inventory product names from the related shipments).
-2. ID heading + "Picking" status pill with chevron-down trigger.
-3. Inline metadata lines (Picker / Created On / Warehouse).
-4. 4-column stats row: Total Orders, Total Shipments, Shipped (`max(0, total-2)`), Remaining (`total - shipped`).
-5. Products tab + table (Ext.ID, Name, Qty) with low-inventory triangle next to qty when applicable.
-6. Footer shows `Selected Shipments: N` and `Quantity N` (mirrors shipments-mode footer).
-
-## Workflow
-
+### Workflow
 - `Start application` runs `npm run dev` (Express + Vite on port 5000).
+
+---
+
+## Angular App (port 4200)
+
+A complete Angular 18 migration of the React app. Lives in `angular-app/` — React project untouched.
+
+### Stack
+- Angular 18 standalone components (no NgModules)
+- Angular Router with lazy-loaded routes
+- Angular Signals for reactive state
+- Tailwind CSS 3 with identical design tokens
+- TypeScript 5.4
+- Roboto + Montserrat + JetBrains Mono fonts
+
+### Folder Structure
+```
+angular-app/
+  src/
+    app/
+      core/
+        models/       shipment.model.ts, pick-pack.model.ts
+        services/     shipment.service.ts, pick-pack.service.ts
+      layout/
+        app-shell/    app-shell.component.{ts,html}
+        nav-sidebar/  nav-sidebar.component.{ts,html}
+      pages/
+        shipments/
+          shipment-detail-panel/  (Label, Details w/ Documents + POD, Products, Notes tabs)
+          shipments.component.{ts,html}
+        pick-and-pack/
+          pick-and-pack.component.{ts,html}
+        not-found/
+          not-found.component.ts
+      app.component.ts
+      app.config.ts
+      app.routes.ts
+    styles.scss           (design tokens, Tailwind base)
+    index.html
+    main.ts
+    environments/
+      environment.ts
+  angular.json
+  tsconfig.json
+  tailwind.config.js
+  postcss.config.js
+  package.json
+```
+
+### Routes
+- `/` → redirects to `/shipments`
+- `/shipments` → ShipmentsComponent (lazy loaded)
+- `/pick-and-pack` → PickAndPackComponent (lazy loaded)
+- `**` → NotFoundComponent
+
+### Workflow
+- `Start Angular app` runs `NG_CLI_ANALYTICS=false npx ng serve --port 4200 --host 0.0.0.0 --disable-host-check`
+
+---
+
+## Design Tokens (shared between React and Angular)
+
+- `--status-picking` (`#FFEAC0`) — Picking status pill.
+- Shipment status pill tokens: `--status-shipped`, `--status-label-created`, `--status-delayed`, `--status-delivered`, `--status-on-hold`, `--status-needs-review`, `--status-cancelled`. Available as `bg-status-*` Tailwind utilities.
 
 ## Conventions
 
-- Every interactive or meaningful element has a stable `data-testid` (e.g. `button-change-picklist-status`, `stat-total-orders`, `text-picklist-id`).
+- Every interactive or meaningful element has a stable `data-testid`.
 - Forbidden changes: do not edit `package.json`, `vite.config.ts`, `server/vite.ts`, or `drizzle.config.ts`.

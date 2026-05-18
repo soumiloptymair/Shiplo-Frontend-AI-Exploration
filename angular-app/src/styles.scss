@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand */
+  --brand-primary: 218 65% 48%;
+  --brand-primary-contrast: 0 0% 100%;
+  --brand-secondary: 179 100% 25%;
+  --brand-secondary-contrast: 0 0% 100%;
+
+  /* Semantic — success */
+  --status-success: 85 100% 22%;
+  --status-success-soft: 85 60% 94%;
+  --status-success-strong: 85 100% 14%;
+
+  /* Semantic — warning */
+  --status-warning: 22 88% 57%;
+  --status-warning-soft: 23 90% 90%;
+  --status-warning-strong: 22 67% 34%;
+
+  /* Semantic — error */
+  --status-error: 0 90% 42%;
+  --status-error-soft: 0 96% 89%;
+  --status-error-strong: 4 60% 24%;
+
+  /* Semantic — info */
+  --status-info: 205 97% 52%;
+  --status-info-soft: 210 100% 96%;
+  --status-info-strong: 207 89% 21%;
+
+  /* Picking (yellow/cream) */
+  --status-picking: 38 100% 88%;
+  --status-picking-strong: 30 60% 25%;
+
+  /* Shipment status pill backgrounds */
+  --status-shipped: 173 50% 85%;
+  --status-label-created: 265 60% 90%;
+  --status-delayed: 28 100% 86%;
+  --status-delivered: 130 50% 86%;
+  --status-on-hold: 43 100% 84%;
+  --status-needs-review: 50 100% 84%;
+  --status-cancelled: 2 90% 90%;
+
+  /* Neutral scale */
+  --neutral-0: 0 0% 100%;
+  --neutral-50: 0 0% 97%;
+  --neutral-100: 210 33% 97%;
+  --neutral-150: 195 35% 95%;
+  --neutral-200: 200 14% 91%;
+  --neutral-250: 213 13% 91%;
+  --neutral-300: 195 17% 91%;
+  --neutral-400: 217 14% 76%;
+  --neutral-500: 200 11% 55%;
+  --neutral-600: 213 14% 63%;
+  --neutral-700: 196 14% 31%;
+  --neutral-900: 188 30% 6%;
+
+  --grey-01: hsl(195 35% 95%);
+  --grey-02: hsl(195 17% 91%);
+  --grey-11: hsl(188 30% 6%);
+
+  --font-body: "Roboto", "Helvetica", system-ui, sans-serif;
+  --font-heading: "Montserrat", "Roboto", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius: 0.5rem;
+
+  /* Sidebar tokens */
+  --sidebar: var(--neutral-300);
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background-color: hsl(var(--neutral-0));
+    color: hsl(var(--neutral-900));
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--neutral-300)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--neutral-400)); }
