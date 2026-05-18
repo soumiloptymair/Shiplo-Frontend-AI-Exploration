@@ -75,15 +75,15 @@
   <div class="flex flex-1 flex-col items-stretch overflow-y-auto p-5">
     @if (activeTab() === 'Details') {
 
-      <!-- ATTRIBUTES (filled card with internal divider) -->
-      <section class="mb-5 rounded-md border border-[#e4eaed] bg-[#f4f7f8] px-4 py-3">
+      <!-- ATTRIBUTES -->
+      <section class="mb-5">
         <h3 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#45565b]">Attributes</h3>
-        <div class="divide-y divide-[#e4eaed]">
-          <div class="flex items-center justify-between py-2">
+        <div class="space-y-1.5">
+          <div class="flex items-baseline justify-between gap-3">
             <span class="text-[13px] leading-[18px] text-[#45565b]">Color</span>
             <span class="text-[13px] leading-[18px] text-[#0b1516]" data-testid="text-attr-color">{{ sel.product.colors.join(', ') }}</span>
           </div>
-          <div class="flex items-center justify-between py-2">
+          <div class="flex items-baseline justify-between gap-3">
             <span class="text-[13px] leading-[18px] text-[#45565b]">Size</span>
             <span class="text-[13px] leading-[18px] text-[#0b1516]" data-testid="text-attr-size">{{ sel.product.sizes.join(', ') }}</span>
           </div>
