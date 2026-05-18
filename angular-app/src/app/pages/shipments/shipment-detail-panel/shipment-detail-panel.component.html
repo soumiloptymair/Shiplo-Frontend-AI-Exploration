@@ -505,7 +505,9 @@
 
     <!-- NOTES TAB -->
     <ng-container *ngIf="activeTab() === 'Notes'">
-      <div class="p-5"><p class="font-body text-sm text-[#45565b]">Notes for this shipment will appear here.</p></div>
+      <div class="p-5">
+        <app-notes-tab [resetKey]="shipment.id"></app-notes-tab>
+      </div>
     </ng-container>
 
   </div>

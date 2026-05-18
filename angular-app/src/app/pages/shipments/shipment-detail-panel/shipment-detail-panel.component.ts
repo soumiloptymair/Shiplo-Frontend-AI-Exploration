@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, HostListener, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Shipment, ShipmentStatus, STATUS_PILL_CLASS, SHIPMENT_STATUSES } from '../../../core/models/shipment.model';
+import { NotesTabComponent } from '../../../shared/notes-tab/notes-tab.component';
 
 export type PanelTab = 'Label' | 'Details' | 'Products' | 'Notes';
 
@@ -10,7 +11,7 @@ interface PodImage { id: number; dataUrl: string; name: string; }
 @Component({
   selector: 'app-shipment-detail-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NotesTabComponent],
   templateUrl: './shipment-detail-panel.component.html',
 })
 export class ShipmentDetailPanelComponent implements OnChanges {

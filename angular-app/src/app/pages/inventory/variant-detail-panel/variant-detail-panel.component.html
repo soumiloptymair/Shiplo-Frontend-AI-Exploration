@@ -329,52 +329,7 @@
 
     } @else if (activeTab() === 'Notes') {
 
-      <!-- Note composer -->
-      <div class="relative mb-4">
-        <input type="text"
-               [value]="noteDraft()"
-               (input)="onNoteInput($event)"
-               (keydown)="onNoteKeydown($event)"
-               placeholder="Type in note..."
-               aria-label="Type a note"
-               data-testid="input-note-draft"
-               class="h-9 w-full rounded border border-[#e4eaed] bg-white pl-3 pr-10 text-[13px] text-[#0b1516] placeholder:text-[#7a8a90] focus:border-[#008572] focus:outline-none" />
-        <button type="button"
-                (click)="addNote()"
-                [disabled]="!noteDraft().trim()"
-                aria-label="Send note"
-                data-testid="button-note-send"
-                class="absolute right-1 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded text-[#008572] hover:bg-[#008572]/10 disabled:cursor-not-allowed disabled:text-[#b8c6cc] disabled:hover:bg-transparent">
-          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Notes list -->
-      <ul class="flex flex-col gap-4 list-none p-0 m-0">
-        @for (n of notes(); track n.id) {
-          <li class="flex flex-col gap-1" [attr.data-testid]="'note-' + n.id">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-[#008572] text-[10px] font-medium uppercase text-white"
-                     [attr.data-testid]="'avatar-note-' + n.id">{{ n.initials }}</div>
-                <span class="text-[13px] leading-[18px] font-medium text-[#0b1516]"
-                      [attr.data-testid]="'text-note-author-' + n.id">{{ n.author }}</span>
-              </div>
-              <span class="text-[12px] leading-[16px] text-[#7a8a90]"
-                    [attr.data-testid]="'text-note-time-' + n.id">{{ n.timestamp }}</span>
-            </div>
-            <p class="text-[13px] leading-[18px] text-[#0b1516] m-0"
-               [attr.data-testid]="'text-note-body-' + n.id">{{ n.body }}</p>
-          </li>
-        } @empty {
-          <li class="flex h-32 items-center justify-center text-[13px] text-[#45565b]"
-              data-testid="text-notes-empty">
-            No notes yet.
-          </li>
-        }
-      </ul>
+      <app-notes-tab [resetKey]="svc.selectedVariantId()"></app-notes-tab>
 
     } @else {
       <div class="flex h-full items-center justify-center text-[13px] text-[#45565b]"

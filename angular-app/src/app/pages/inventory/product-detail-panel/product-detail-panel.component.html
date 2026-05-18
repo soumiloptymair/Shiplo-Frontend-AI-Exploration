@@ -185,6 +185,8 @@
         </div>
       </section>
 
+    } @else if (activeTab() === 'Notes') {
+      <app-notes-tab [resetKey]="svc.selectedProductId()"></app-notes-tab>
     } @else {
       <div class="flex h-full items-center justify-center text-[13px] text-[#45565b]"
            data-testid="text-tab-placeholder">

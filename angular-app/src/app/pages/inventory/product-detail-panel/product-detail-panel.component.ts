@@ -1,13 +1,14 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../../../core/services/inventory.service';
+import { NotesTabComponent } from '../../../shared/notes-tab/notes-tab.component';
 
 type DetailTab = 'Inventory' | 'Details' | 'Activity' | 'Notes';
 
 @Component({
   selector: 'app-product-detail-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NotesTabComponent],
   templateUrl: './product-detail-panel.component.html',
 })
 export class ProductDetailPanelComponent {
