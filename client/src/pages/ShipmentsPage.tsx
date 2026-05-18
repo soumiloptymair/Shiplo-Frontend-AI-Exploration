@@ -78,7 +78,7 @@ const SAMPLE_SHIPMENTS: Shipment[] = [
 ];
 
 const cellBase = "h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle";
-const headBase = "h-8 px-2 font-body text-sm font-medium text-neutral-900 bg-neutral-100 whitespace-nowrap";
+const headBase = "h-8 px-2 font-body text-sm font-medium text-neutral-900 bg-neutral-100 whitespace-nowrap sticky top-0 z-10";
 
 const TABS: ShipmentTab[] = ["All", "Orders", "Returns"];
 
@@ -266,7 +266,7 @@ const ShipmentsPageInner = (): JSX.Element => {
       {/* ── Data grid ── */}
       <div className="flex-1 overflow-auto">
         <Table className="w-full min-w-[1640px] border-collapse">
-          <TableHeader className="sticky top-0 z-10">
+          <TableHeader>
             <TableRow className="border-b border-[#e4eaed] bg-neutral-100 hover:bg-neutral-100">
               {/* Checkbox */}
               <TableHead className={`${headBase} w-[60px] pl-5 pr-3`}>
