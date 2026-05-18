@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter, signal, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, HostListener, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Shipment, ShipmentStatus, STATUS_PILL_CLASS } from '../../../core/models/shipment.model';
+import { Shipment, ShipmentStatus, STATUS_PILL_CLASS, SHIPMENT_STATUSES } from '../../../core/models/shipment.model';
 
 export type PanelTab = 'Label' | 'Details' | 'Products' | 'Notes';
 
@@ -13,7 +13,7 @@ interface PodImage { id: number; dataUrl: string; name: string; }
   imports: [CommonModule],
   templateUrl: './shipment-detail-panel.component.html',
 })
-export class ShipmentDetailPanelComponent {
+export class ShipmentDetailPanelComponent implements OnChanges {
   @Input({ required: true }) shipment!: Shipment;
   @Output() closePanel = new EventEmitter<void>();
 
@@ -25,8 +25,23 @@ export class ShipmentDetailPanelComponent {
   docs = signal<DocFile[]>([]);
   podImages = signal<PodImage[]>([]);
   menuOpen = signal(false);
+  statusDropdownOpen = signal(false);
+  selectedStatus = signal<ShipmentStatus | ''>('');
   private nextDocId = 1;
   private nextPodId = 1;
+
+  readonly ALL_STATUSES = SHIPMENT_STATUSES;
+
+  readonly STATUS_DOT: Record<ShipmentStatus, string> = {
+    'Shipped':       'bg-status-shipped',
+    'Pending':       'bg-status-picking',
+    'Label Created': 'bg-status-label-created',
+    'Delayed':       'bg-status-delayed',
+    'Delivered':     'bg-status-delivered',
+    'On Hold':       'bg-status-on-hold',
+    'Needs Review':  'bg-status-needs-review',
+    'Cancelled':     'bg-status-cancelled',
+  };
 
   readonly MENU_ITEMS = [
     { label: 'Split Shipment', testid: 'menu-item-split-shipment' },
@@ -35,16 +50,40 @@ export class ShipmentDetailPanelComponent {
     { label: 'View Label',     testid: 'menu-item-view-label' },
   ];
 
+  ngOnChanges() {
+    this.selectedStatus.set(this.shipment?.status ?? '');
+  }
+
   toggleMenu(event: Event) {
     event.stopPropagation();
+    this.statusDropdownOpen.set(false);
     this.menuOpen.update(v => !v);
   }
 
+  toggleStatusDropdown(event: Event) {
+    event.stopPropagation();
+    this.menuOpen.set(false);
+    this.statusDropdownOpen.update(v => !v);
+  }
+
+  selectStatus(status: ShipmentStatus, event: Event) {
+    event.stopPropagation();
+    this.selectedStatus.set(status);
+    this.statusDropdownOpen.set(false);
+  }
+
   @HostListener('document:click')
-  closeMenu() { this.menuOpen.set(false); }
+  closeAllDropdowns() {
+    this.menuOpen.set(false);
+    this.statusDropdownOpen.set(false);
+  }
 
   statusPillClass(status: ShipmentStatus | ''): string {
     return status ? (STATUS_PILL_CLASS[status as ShipmentStatus] ?? 'bg-neutral-100') : '';
+  }
+
+  statusDotClass(status: ShipmentStatus | ''): string {
+    return status ? (this.STATUS_DOT[status as ShipmentStatus] ?? '') : '';
   }
 
   setTab(tab: PanelTab) { this.activeTab.set(tab); }

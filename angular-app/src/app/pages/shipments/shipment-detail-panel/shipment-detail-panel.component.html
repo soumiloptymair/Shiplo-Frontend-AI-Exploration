@@ -29,7 +29,7 @@
             type="button"
             [attr.data-testid]="item.testid"
             class="w-full px-2 py-2 text-left font-['Roboto',sans-serif] text-sm font-normal text-[#333538] hover:bg-[#f5f7f8] transition-colors"
-            (click)="closeMenu()">
+            (click)="closeAllDropdowns()">
             {{ item.label }}
           </button>
         </div>
@@ -50,12 +50,43 @@
       <span class="font-body text-lg font-bold leading-snug text-[#0b1516]" data-testid="text-panel-shipment-id">
         ID: {{ shipment.shipmentId }}
       </span>
-      <div class="flex shrink-0 items-center gap-1 rounded-full border border-[#b8c6cc] px-2 py-0.5"
-        [ngClass]="statusPillClass(shipment.status)">
-        <span class="font-body text-sm font-normal text-[#0b1516]">{{ shipment.status }}</span>
-        <svg class="h-4 w-4 text-[#0b1516]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-        </svg>
+      <!-- Status SelectField — Figma component 44:36910 -->
+      <div class="relative shrink-0">
+        <button type="button" data-testid="button-status-select"
+          (click)="toggleStatusDropdown($event)"
+          class="flex h-10 items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 py-2 transition-colors hover:border-[#b8c6cc]"
+          [class.border-[#2B64CB]]="statusDropdownOpen()">
+          <div class="flex items-center gap-2 min-w-0">
+            <!-- status colour dot -->
+            <span *ngIf="selectedStatus()" class="h-2.5 w-2.5 shrink-0 rounded-full"
+              [ngClass]="statusDotClass(selectedStatus())"></span>
+            <span class="font-['Roboto',sans-serif] text-[14px] font-normal text-[#7f9199] whitespace-nowrap">Status</span>
+            <span class="font-['Roboto',sans-serif] text-[14px] font-medium text-[#0b1516] whitespace-nowrap">
+              {{ selectedStatus() || '—' }}
+            </span>
+          </div>
+          <!-- chevron -->
+          <svg class="h-6 w-6 shrink-0 text-[#0b1516] transition-transform"
+            [class.rotate-180]="statusDropdownOpen()"
+            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <!-- Status dropdown list -->
+        <div *ngIf="statusDropdownOpen()"
+          data-testid="status-dropdown"
+          class="absolute right-0 top-full z-50 mt-1 w-full min-w-[160px] overflow-hidden rounded-[4px] bg-white"
+          style="box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.12), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 3px 1px -2px rgba(0,0,0,0.2);"
+          (click)="$event.stopPropagation()">
+          <button *ngFor="let s of ALL_STATUSES" type="button"
+            [attr.data-testid]="'status-option-' + s.toLowerCase().replace(' ', '-')"
+            (click)="selectStatus(s, $event)"
+            class="flex w-full items-center gap-2 px-3 py-2 text-left font-['Roboto',sans-serif] text-[14px] font-normal text-[#333538] hover:bg-[#f5f7f8] transition-colors"
+            [class.bg-[#f0f4ff]]="selectedStatus() === s">
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full" [ngClass]="STATUS_DOT[s]"></span>
+            {{ s }}
+          </button>
+        </div>
       </div>
     </div>
     <div class="mt-1 flex flex-col gap-0.5">
