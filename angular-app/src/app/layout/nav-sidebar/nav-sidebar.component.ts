@@ -43,6 +43,12 @@ export class NavSidebarComponent {
     { label: 'Defaults',              icon: '⚙' },
   ];
 
+  readonly resourceNavItems: NavItem[] = [
+    { label: 'Inventory', matchPaths: ['/inventory'], route: '/inventory' },
+  ];
+
+  resourcesExpanded = true;
+
   isActive(item: NavItem): boolean {
     const url = this.router.url;
     return item.matchPaths.some((p) => p === url || (p !== '/' && url.startsWith(p)));

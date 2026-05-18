@@ -17,6 +17,11 @@ export const routes: Routes = [
       import('./pages/pick-and-pack/pick-and-pack.component').then((m) => m.PickAndPackComponent),
   },
   {
+    path: 'inventory',
+    loadComponent: () =>
+      import('./pages/inventory/inventory.component').then((m) => m.InventoryComponent),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./pages/not-found/not-found.component').then((m) => m.NotFoundComponent),

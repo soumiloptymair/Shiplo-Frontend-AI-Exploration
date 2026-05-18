@@ -1,0 +1,253 @@
+<app-shell>
+  <section class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-white">
+
+    <!-- Title Bar -->
+    <header class="flex h-[68px] shrink-0 items-center justify-between border-b border-[#eff6f9] bg-white px-5 py-4">
+      <!-- Left: icon + title + tab switch -->
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2">
+          <!-- Inventory icon -->
+          <div class="flex h-6 w-6 items-center justify-center rounded-[4px]">
+            <svg class="h-5 w-5 text-[#0b1516]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17H5a2 2 0 00-2 2v0a2 2 0 002 2h14a2 2 0 002-2v0a2 2 0 00-2-2h-4M9 17V9m0 8h6m0-8V4a1 1 0 00-1-1H5a1 1 0 00-1 1v5M15 17V9m0 0H9"/>
+            </svg>
+          </div>
+          <h1 class="font-['Montserrat',sans-serif] text-[24px] font-semibold leading-[1.4] tracking-[0.15px] text-[#0b1516] whitespace-nowrap">Inventory</h1>
+        </div>
+
+        <!-- SKUs / Products switch -->
+        <div class="flex h-8 items-center rounded-full border border-[#e4eaed] px-0.5 gap-0">
+          <button
+            *ngFor="let tab of TABS"
+            type="button"
+            class="flex h-7 items-center justify-center rounded-full px-4 font-['Roboto',sans-serif] text-base transition-colors whitespace-nowrap"
+            [class.bg-[#008572]]="svc.activeTab() === tab"
+            [class.text-white]="svc.activeTab() === tab"
+            [class.font-medium]="svc.activeTab() === tab"
+            [class.text-[#0b1516]]="svc.activeTab() !== tab"
+            [class.font-normal]="svc.activeTab() !== tab"
+            [attr.data-testid]="'tab-' + tab.toLowerCase()"
+            (click)="setTab(tab)">
+            {{ tab }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: sync info + actions -->
+      <div class="flex items-center gap-2">
+        <span class="font-['Roboto',sans-serif] text-[14px] font-normal text-[#45565b] whitespace-nowrap">Last Synced 20 min ago</span>
+
+        <div class="mx-1 self-stretch border-l border-[#e4eaed]"></div>
+
+        <!-- Search -->
+        <div class="flex h-9 w-[196px] items-center gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2">
+          <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            data-testid="input-inventory-search"
+            type="text"
+            placeholder="Search..."
+            class="flex-1 border-none bg-transparent font-['Roboto',sans-serif] text-[14px] text-[#45565b] placeholder-[#45565b] outline-none"
+            [ngModel]="svc.searchQuery()"
+            (ngModelChange)="svc.searchQuery.set($event)" />
+        </div>
+
+        <!-- Product Kits button -->
+        <button type="button" data-testid="button-product-kits"
+          class="flex h-9 items-center gap-1 rounded-[4px] border border-[#e4eaed] bg-white px-3 font-['Roboto',sans-serif] text-[14px] font-medium text-[#0b1516] hover:bg-neutral-50 whitespace-nowrap">
+          <svg class="h-5 w-5 text-[#0b1516]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
+          </svg>
+          Product Kits
+        </button>
+
+        <!-- Filters button -->
+        <button type="button" data-testid="button-inventory-filters"
+          class="flex h-9 items-center gap-1 rounded-[4px] border border-[#e4eaed] bg-white px-3 font-['Roboto',sans-serif] text-[14px] font-medium text-[#0b1516] hover:bg-neutral-50 whitespace-nowrap">
+          <svg class="h-5 w-5 text-[#0b1516]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M7 8h10M11 12h2"/>
+          </svg>
+          Filters
+        </button>
+
+        <div class="mx-1 self-stretch border-l border-[#e4eaed]"></div>
+
+        <!-- Edit button -->
+        <button type="button" data-testid="button-inventory-edit"
+          class="flex h-9 items-center gap-1 rounded-[4px] border border-[#e4eaed] bg-white px-3 font-['Roboto',sans-serif] text-[14px] font-medium text-[#0b1516] hover:bg-neutral-50 whitespace-nowrap">
+          <svg class="h-5 w-5 text-[#0b1516]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit
+        </button>
+
+        <!-- Sync Now button -->
+        <button type="button" data-testid="button-sync-now"
+          class="flex h-9 items-center gap-1 rounded-[4px] bg-[#008572] px-3 font-['Roboto',sans-serif] text-[12px] font-medium text-white hover:bg-[#006d5e] whitespace-nowrap">
+          Sync Now
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Data Grid -->
+    <div class="flex-1 overflow-auto">
+      <table class="w-full min-w-[1200px] border-collapse">
+        <thead>
+          <tr class="border-b border-[#e4eaed] bg-neutral-100">
+            <!-- expand chevron -->
+            <th class="sticky top-0 z-10 h-8 w-9 bg-neutral-100 p-0"></th>
+            <!-- attention -->
+            <th class="sticky top-0 z-10 h-8 w-8 bg-neutral-100 p-0"></th>
+            <th class="sticky top-0 z-10 h-8 w-[240px] bg-neutral-100 px-2 text-left font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] whitespace-nowrap">Product Name</th>
+            <th class="sticky top-0 z-10 h-8 w-[132px] bg-neutral-100 px-2 text-left font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] whitespace-nowrap">Ext. ID</th>
+            <th class="sticky top-0 z-10 h-8 w-[132px] bg-neutral-100 px-2 text-left font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] whitespace-nowrap">Product Type</th>
+            <th class="sticky top-0 z-10 h-8 w-[148px] bg-neutral-100 px-2 text-left font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] whitespace-nowrap">Product Attributes</th>
+            <th class="sticky top-0 z-10 h-8 w-[124px] bg-neutral-100 px-2 text-left font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] whitespace-nowrap">HS Code</th>
+            <th class="sticky top-0 z-10 h-8 w-[100px] bg-neutral-100 px-2 text-left font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] whitespace-nowrap">Origin</th>
+            <th class="sticky top-0 z-10 h-8 w-[88px] bg-neutral-100 px-2 text-left font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] whitespace-nowrap">Variants</th>
+            <th class="sticky top-0 z-10 h-8 bg-neutral-100 px-2 text-left font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] whitespace-nowrap">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let p of svc.filtered()">
+            <!-- Product row -->
+            <tr class="h-8 cursor-pointer border-b border-[#e4eaed] hover:bg-neutral-50 transition-colors"
+                [class.bg-[#f7fafb]]="isExpanded(p.id)"
+                (click)="toggleExpand(p.id)"
+                [attr.data-testid]="'row-product-' + p.id">
+              <!-- expand chevron -->
+              <td class="h-8 w-9 p-0 text-center align-middle">
+                <svg class="inline-block h-4 w-4 text-neutral-500 transition-transform"
+                  [class.rotate-90]="isExpanded(p.id)"
+                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+              </td>
+              <!-- attention icon -->
+              <td class="h-8 w-8 p-0 text-center align-middle">
+                <svg *ngIf="p.needsAttention" class="inline-block h-4 w-4 text-amber-500"
+                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+              </td>
+              <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] align-middle whitespace-nowrap">{{ p.name }}</td>
+              <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ p.extId }}</td>
+              <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ p.type }}</td>
+              <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ p.attributes }}</td>
+              <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ p.hsCode }}</td>
+              <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ p.origin }}</td>
+              <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ p.variantCount }}</td>
+              <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ p.valueRange }}</td>
+            </tr>
+
+            <!-- Expanded variant sub-table -->
+            <tr *ngIf="isExpanded(p.id) && p.variants.length > 0">
+              <td colspan="10" class="p-0">
+                <table class="w-full border-collapse">
+                  <!-- Variant sub-header -->
+                  <thead>
+                    <tr class="border-b border-[#e4eaed] bg-[#f0f5f8]">
+                      <th class="h-8 w-9 p-0"></th>
+                      <th class="h-8 w-8 p-0"></th>
+                      <th class="h-8 w-[240px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Product Variant</th>
+                      <th class="h-8 w-[132px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Ext. ID</th>
+                      <th class="h-8 w-[160px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Product SKU</th>
+                      <th class="h-8 w-[80px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Value</th>
+                      <th class="h-8 w-[120px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Tags</th>
+                      <th class="h-8 w-[72px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Size</th>
+                      <th class="h-8 w-[72px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Color</th>
+                      <th class="h-8 w-[88px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Length (in)</th>
+                      <th class="h-8 w-[84px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Width (in)</th>
+                      <th class="h-8 w-[84px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Height (in)</th>
+                      <th class="h-8 w-[96px] px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Weight (lbs)</th>
+                      <th class="h-8 px-2 text-left font-['Roboto',sans-serif] text-xs font-medium text-[#45565b] whitespace-nowrap">Inventory</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let v of p.variants"
+                      class="h-8 border-b border-[#e4eaed] bg-white hover:bg-neutral-50 transition-colors"
+                      [attr.data-testid]="'row-variant-' + v.id">
+                      <td class="h-8 w-9 p-0"></td>
+                      <td class="h-8 w-8 p-0 text-center align-middle">
+                        <svg *ngIf="v.needsAttention" class="inline-block h-4 w-4 text-amber-500"
+                          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                      </td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#0b1516] align-middle whitespace-nowrap">{{ v.name }}</td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.extId }}</td>
+                      <td class="h-8 px-2 py-0 align-middle whitespace-nowrap">
+                        <a class="font-['Roboto',sans-serif] text-sm font-medium text-[#2B64CB] hover:underline cursor-pointer"
+                          [attr.data-testid]="'link-sku-' + v.id">{{ v.sku }}</a>
+                      </td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.value }}</td>
+                      <td class="h-8 px-2 py-0 align-middle">
+                        <div class="flex items-center gap-1">
+                          <span *ngFor="let tag of v.tags"
+                            class="inline-flex items-center gap-1 rounded-full bg-[#e0f4f1] px-2 py-0.5 font-['Roboto',sans-serif] text-xs font-medium text-[#006d5e]">
+                            {{ tag }}
+                            <svg class="h-3 w-3 cursor-pointer text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                          </span>
+                          <span *ngIf="v.extraTagCount > 0"
+                            class="inline-flex items-center rounded-full bg-neutral-100 px-2 py-0.5 font-['Roboto',sans-serif] text-xs font-medium text-[#45565b]">
+                            +{{ v.extraTagCount }}
+                          </span>
+                        </div>
+                      </td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.size }}</td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.color }}</td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.length }}</td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.width }}</td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.height }}</td>
+                      <td class="h-8 px-2 py-0 font-['Roboto',sans-serif] text-sm text-[#45565b] align-middle whitespace-nowrap">{{ v.weight }}</td>
+                      <td class="h-8 px-2 py-0 align-middle whitespace-nowrap">
+                        <button *ngIf="!v.hasInventory" type="button"
+                          class="inline-flex items-center gap-1 font-['Roboto',sans-serif] text-sm font-medium text-[#2B64CB] hover:underline"
+                          [attr.data-testid]="'button-add-inventory-' + v.id">
+                          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8M8 12h8"/>
+                          </svg>
+                          Add
+                        </button>
+                        <span *ngIf="v.hasInventory" class="font-['Roboto',sans-serif] text-sm text-[#0b1516]">—</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer bar -->
+    <footer class="flex h-[52px] shrink-0 items-center justify-between border-t border-[#e4eaed] bg-white px-5">
+      <div class="flex items-center gap-4">
+        <span class="font-['Roboto',sans-serif] text-sm text-[#0b1516]">
+          Total Products <strong class="font-medium">{{ svc.filtered().length }}</strong>
+        </span>
+        <span class="font-['Roboto',sans-serif] text-sm text-[#0b1516]">
+          Total Variants <strong class="font-medium">{{ svc.totalVariants() }}</strong>
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" data-testid="button-inventory-cancel"
+          class="flex h-8 items-center justify-center rounded-[4px] border border-[#e4eaed] bg-white px-4 font-['Roboto',sans-serif] text-sm font-medium text-[#0b1516] hover:bg-neutral-50">
+          Cancel
+        </button>
+        <button type="button" data-testid="button-inventory-save"
+          class="flex h-8 items-center justify-center rounded-[4px] bg-[#008572] px-4 font-['Roboto',sans-serif] text-sm font-medium text-white hover:bg-[#006d5e]">
+          Save
+        </button>
+      </div>
+    </footer>
+  </section>
+</app-shell>
