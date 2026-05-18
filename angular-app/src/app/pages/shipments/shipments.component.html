@@ -29,34 +29,41 @@
 
         <div class="flex items-center gap-2">
           <!-- Status filter -->
-          <div class="relative h-9" (click)="$event.stopPropagation()">
+          <div class="relative" (click)="$event.stopPropagation()">
             <button
               data-testid="select-status-filter"
               type="button"
-              class="flex h-9 w-[180px] items-center justify-between gap-1 rounded border border-neutral-300 bg-white px-3 font-body text-sm text-neutral-900 cursor-pointer"
+              class="flex h-10 w-[200px] items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 py-2 cursor-pointer transition-colors hover:border-[#b8c6cc]"
               [class.border-[#2B64CB]]="statusFilterOpen()"
               (click)="statusFilterOpen.set(!statusFilterOpen())">
-              <span>Status:&nbsp;<span class="font-bold">{{ svc.statusFilter() }}</span></span>
-              <svg class="h-4 w-4 shrink-0 text-neutral-500 transition-transform"
+              <div class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+                <span class="shrink-0 font-['Roboto',sans-serif] text-[14px] font-normal leading-[1.43] text-[#7f9199] whitespace-nowrap">Status</span>
+                <span class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-['Roboto',sans-serif] text-[14px] font-medium leading-[1.43] text-[#0b1516]">{{ svc.statusFilter() }}</span>
+              </div>
+              <svg class="h-6 w-6 shrink-0 text-[#7f9199] transition-transform"
                 [class.rotate-180]="statusFilterOpen()"
-                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 10l5 5 5-5z"/>
               </svg>
             </button>
             <ul *ngIf="statusFilterOpen()"
-              class="absolute left-0 top-full z-50 mt-1 w-[180px] overflow-hidden rounded border border-neutral-200 bg-white shadow-md">
+              class="absolute left-0 top-full z-50 mt-1 w-[200px] overflow-hidden rounded-[4px] border border-[#e4eaed] bg-white shadow-md">
               <li>
                 <button type="button"
-                  class="w-full px-3 py-2 text-left font-body text-sm hover:bg-neutral-50"
-                  [class.font-bold]="svc.statusFilter() === 'All'"
+                  class="w-full px-3 py-2 text-left font-['Roboto',sans-serif] text-[14px] hover:bg-neutral-50"
+                  [class.font-medium]="svc.statusFilter() === 'All'"
                   [class.text-[#2B64CB]]="svc.statusFilter() === 'All'"
+                  [class.font-normal]="svc.statusFilter() !== 'All'"
+                  [class.text-[#0b1516]]="svc.statusFilter() !== 'All'"
                   (click)="svc.statusFilter.set('All'); statusFilterOpen.set(false)">All</button>
               </li>
               <li *ngFor="let s of SHIPMENT_STATUSES">
                 <button type="button"
-                  class="w-full px-3 py-2 text-left font-body text-sm hover:bg-neutral-50"
-                  [class.font-bold]="svc.statusFilter() === s"
+                  class="w-full px-3 py-2 text-left font-['Roboto',sans-serif] text-[14px] hover:bg-neutral-50"
+                  [class.font-medium]="svc.statusFilter() === s"
                   [class.text-[#2B64CB]]="svc.statusFilter() === s"
+                  [class.font-normal]="svc.statusFilter() !== s"
+                  [class.text-[#0b1516]]="svc.statusFilter() !== s"
                   (click)="svc.statusFilter.set(s); statusFilterOpen.set(false)">{{ s }}</button>
               </li>
             </ul>
