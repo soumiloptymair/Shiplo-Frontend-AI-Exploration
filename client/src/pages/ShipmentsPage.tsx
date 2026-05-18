@@ -296,7 +296,7 @@ const ShipmentsPageInner = (): JSX.Element => {
               {/* Source */}
               <TableHead className={`${headBase} w-[228px]`}>Source</TableHead>
               {/* Warehouse */}
-              <TableHead className={`${headBase} w-[184px]`}>Warehouse</TableHead>
+              <TableHead className={`${headBase} w-[220px]`}>Warehouse</TableHead>
               {/* Shipping */}
               <TableHead className={`${headBase} w-[124px]`}>Shipping</TableHead>
               {/* Method */}
@@ -390,7 +390,7 @@ const ShipmentsPageInner = (): JSX.Element => {
                   </TableCell>
 
                   {/* Warehouse */}
-                  <TableCell className={cellBase}>{s.warehouse}</TableCell>
+                  <TableCell className={`${cellBase} whitespace-nowrap`}>{s.warehouse}</TableCell>
 
                   {/* Shipping */}
                   <TableCell className={cellBase}>
