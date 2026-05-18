@@ -54,6 +54,9 @@ angular-app/
         shipments/
           shipment-detail-panel/  (Label, Details w/ Documents + POD, Products, Notes tabs)
           shipments.component.{ts,html}
+        inventory/
+          inventory.component.{ts,html}
+          product-detail-panel/   (right-hand details panel — PRODUCT/VARIANT header, tabs, Attributes, Dimensions, Materials, Shipping Requirements, Return, Product Images)
         pick-and-pack/
           pick-and-pack.component.{ts,html}
         not-found/

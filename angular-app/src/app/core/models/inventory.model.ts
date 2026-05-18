@@ -18,6 +18,13 @@ export interface ProductVariant {
   needsAttention?: boolean;
 }
 
+export type MaterialStatus = 'yes' | 'no';
+
+export interface MaterialFlag {
+  label: string;
+  status: MaterialStatus;
+}
+
 export interface InventoryProduct {
   id: string;
   name: string;
@@ -30,7 +37,32 @@ export interface InventoryProduct {
   valueRange: string;
   needsAttention?: boolean;
   variants: ProductVariant[];
+  // Detail-panel fields
+  colors: string[];
+  sizes: string[];
+  dimensions: { length: string; width: string; height: string; weight: string };
+  materials: MaterialFlag[];
+  shippingRequirements: string[];
+  returnPolicy: string;
+  canReturn: boolean;
+  images: string[];
 }
+
+export const DEFAULT_MATERIALS: MaterialFlag[] = [
+  { label: 'Contains lithium batteries', status: 'no' },
+  { label: 'Contains fragile items',     status: 'yes' },
+  { label: 'No hazmat',                  status: 'yes' },
+  { label: 'No perishables',             status: 'yes' },
+  { label: 'No temperature sensitive items', status: 'yes' },
+];
+
+export const DEFAULT_SHIPPING_REQS = ['Furniture dolly', 'Blankets'];
+
+export const DEFAULT_IMAGES = [
+  'figmaAssets/product-1.png',
+  'figmaAssets/product-2.png',
+  'figmaAssets/product-3.png',
+];
 
 const SIZES = ['small', 'medium', 'large'];
 const COLORS = ['grey', 'black', 'blue', 'white', 'red', 'green'];
@@ -92,5 +124,13 @@ export const SAMPLE_INVENTORY: InventoryProduct[] = PRODUCT_NAMES.map((name, idx
     valueRange: '$16.50 - $20.50',
     needsAttention: idx !== 0,
     variants: buildVariants(id, variantCount),
+    colors: ['black', 'grey', 'white'],
+    sizes: ['small', 'medium', 'large'],
+    dimensions: { length: '15 in', width: '15 in', height: '40 in', weight: '15 lbs' },
+    materials: DEFAULT_MATERIALS,
+    shippingRequirements: DEFAULT_SHIPPING_REQS,
+    returnPolicy: 'Item cannot be returned',
+    canReturn: false,
+    images: DEFAULT_IMAGES,
   };
 });

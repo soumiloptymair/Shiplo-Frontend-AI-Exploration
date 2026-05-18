@@ -6,11 +6,12 @@ import { InventoryService } from '../../core/services/inventory.service';
 import { InventoryTab } from '../../core/models/inventory.model';
 import { SyncDialogComponent } from '../../shared/sync-dialog/sync-dialog.component';
 import { ToastComponent } from '../../shared/toast/toast.component';
+import { ProductDetailPanelComponent } from './product-detail-panel/product-detail-panel.component';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppShellComponent, SyncDialogComponent, ToastComponent],
+  imports: [CommonModule, FormsModule, AppShellComponent, SyncDialogComponent, ToastComponent, ProductDetailPanelComponent],
   templateUrl: './inventory.component.html',
 })
 export class InventoryComponent {
@@ -20,5 +21,10 @@ export class InventoryComponent {
 
   setTab(tab: InventoryTab) { this.svc.activeTab.set(tab); }
   isExpanded(id: string): boolean { return this.svc.isExpanded(id); }
-  toggleExpand(id: string) { this.svc.toggleExpand(id); }
+  toggleExpand(event: Event, id: string) {
+    event.stopPropagation();
+    this.svc.toggleExpand(id);
+  }
+  selectProduct(id: string) { this.svc.selectProduct(id); }
+  selectVariant(productId: string, variantId: string) { this.svc.selectVariant(productId, variantId); }
 }

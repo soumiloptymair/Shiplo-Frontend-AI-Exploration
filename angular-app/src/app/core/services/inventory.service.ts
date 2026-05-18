@@ -1,5 +1,9 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { SAMPLE_INVENTORY, InventoryProduct, InventoryTab } from '../models/inventory.model';
+import { SAMPLE_INVENTORY, InventoryProduct, ProductVariant, InventoryTab } from '../models/inventory.model';
+
+export type SelectedItem =
+  | { kind: 'product'; product: InventoryProduct }
+  | { kind: 'variant'; product: InventoryProduct; variant: ProductVariant };
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
@@ -7,6 +11,45 @@ export class InventoryService {
   readonly activeTab = signal<InventoryTab>('Products');
   readonly searchQuery = signal('');
   readonly expandedId = signal<string | null>('p-1');
+
+  // Selection (for the right-hand details panel)
+  readonly selectedProductId = signal<string | null>('p-1');
+  readonly selectedVariantId = signal<string | null>(null);
+
+  readonly selectedItem = computed<SelectedItem | null>(() => {
+    const pid = this.selectedProductId();
+    if (!pid) return null;
+    const product = this.products().find((p) => p.id === pid);
+    if (!product) return null;
+    const vid = this.selectedVariantId();
+    if (vid) {
+      const variant = product.variants.find((v) => v.id === vid);
+      if (variant) return { kind: 'variant', product, variant };
+    }
+    return { kind: 'product', product };
+  });
+
+  selectProduct(id: string) {
+    this.selectedProductId.set(id);
+    this.selectedVariantId.set(null);
+  }
+
+  selectVariant(productId: string, variantId: string) {
+    this.selectedProductId.set(productId);
+    this.selectedVariantId.set(variantId);
+  }
+
+  closeDetails() {
+    this.selectedProductId.set(null);
+    this.selectedVariantId.set(null);
+  }
+
+  isSelectedRow(id: string): boolean {
+    return this.selectedProductId() === id && this.selectedVariantId() === null;
+  }
+  isSelectedVariant(id: string): boolean {
+    return this.selectedVariantId() === id;
+  }
 
   readonly syncing = signal(false);
   readonly syncProgress = signal(0);
