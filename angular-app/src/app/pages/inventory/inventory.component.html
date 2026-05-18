@@ -97,8 +97,7 @@
       </div>
     </header>
 
-    <!-- Body: data grid + (optional) right details panel -->
-    <div class="flex flex-1 min-h-0">
+    <!-- Body: data grid -->
     <div class="flex-1 overflow-auto">
       <table class="w-full border-collapse">
         <thead>
@@ -249,10 +248,6 @@
       </table>
     </div>
 
-      <!-- Right details panel -->
-      <app-product-detail-panel />
-    </div>
-
     <!-- Footer bar -->
     <footer class="flex h-[52px] shrink-0 items-center justify-between border-t border-neutral-200 bg-neutral-0 px-5">
       <div class="flex items-center gap-4">
@@ -275,6 +270,9 @@
       </div>
     </footer>
   </section>
+
+  <!-- Standalone right-side details panel (sibling card to the page) -->
+  <app-product-detail-panel appShellPanel />
 
   <app-sync-dialog />
   <app-toast />

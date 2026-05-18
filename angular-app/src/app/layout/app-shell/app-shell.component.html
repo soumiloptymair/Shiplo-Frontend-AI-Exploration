@@ -15,5 +15,8 @@
     <div class="min-w-0 flex-1 overflow-hidden">
       <ng-content />
     </div>
+
+    <!-- Optional right-hand panel slot (independent sibling card) -->
+    <ng-content select="[appShellPanel]" />
   </div>
 </main>
