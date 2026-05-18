@@ -32,7 +32,7 @@
           <div class="relative h-9">
             <select
               data-testid="select-status-filter"
-              class="h-9 w-[180px] appearance-none rounded border border-neutral-300 bg-white px-3 font-body text-sm text-neutral-900 cursor-pointer"
+              class="h-9 w-[180px] appearance-none rounded border border-neutral-300 bg-white px-3 font-body text-sm font-bold text-neutral-900 cursor-pointer"
               [ngModel]="svc.statusFilter()"
               (ngModelChange)="svc.statusFilter.set($event)">
               <option value="All">Status: All</option>
