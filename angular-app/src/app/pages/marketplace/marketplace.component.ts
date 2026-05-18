@@ -1,6 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppShellComponent } from '../../layout/app-shell/app-shell.component';
+import { MarketplaceDetailPanelComponent } from './marketplace-detail-panel/marketplace-detail-panel.component';
 
 export interface MarketplaceCategory {
   id: string;
@@ -85,7 +86,7 @@ function generateRows(): ConnectorRow[] {
 @Component({
   selector: 'app-marketplace',
   standalone: true,
-  imports: [CommonModule, AppShellComponent],
+  imports: [CommonModule, AppShellComponent, MarketplaceDetailPanelComponent],
   templateUrl: './marketplace.component.html',
 })
 export class MarketplaceComponent {
@@ -99,6 +100,7 @@ export class MarketplaceComponent {
   readonly selectedCategory = signal<string>('carriers');
   readonly activeTab = signal<ConnectorTab>('Connected');
   readonly search = signal('');
+  readonly selectedRowId = signal<string | null>(null);
 
   readonly rows: ConnectorRow[] = generateRows();
 
@@ -132,8 +134,15 @@ export class MarketplaceComponent {
     });
   });
 
-  selectCategory(id: string) { this.selectedCategory.set(id); }
-  setTab(t: ConnectorTab) { this.activeTab.set(t); }
+  readonly selectedRow = computed(() => {
+    const id = this.selectedRowId();
+    return id ? this.rows.find(r => r.id === id) ?? null : null;
+  });
+
+  selectCategory(id: string) { this.selectedCategory.set(id); this.selectedRowId.set(null); }
+  setTab(t: ConnectorTab) { this.activeTab.set(t); this.selectedRowId.set(null); }
   onSearch(e: Event) { this.search.set((e.target as HTMLInputElement).value); }
   tabCount(t: ConnectorTab): number { return this.tabCounts()[t]; }
+  selectRow(id: string) { this.selectedRowId.set(id); }
+  closePanel() { this.selectedRowId.set(null); }
 }

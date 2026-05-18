@@ -41,7 +41,8 @@
     </aside>
 
     <!-- MAIN: tabs + grid -->
-    <div class="flex h-full min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-neutral-0">
+    <div class="flex h-full min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-neutral-0"
+         [class.flex-1]="!selectedRow()">
 
       <!-- Top bar -->
       <header class="flex h-[68px] shrink-0 items-center justify-between border-b border-neutral-200 px-5">
@@ -118,8 +119,10 @@
           </thead>
           <tbody>
             @for (r of filteredRows(); track r.id) {
-              <tr class="h-12 border-b border-[#e4eaed] align-middle hover:bg-[#f6f9fb]"
+              <tr class="h-12 cursor-pointer border-b border-[#e4eaed] align-middle hover:bg-[#f6f9fb]"
+                  [class.bg-[#f6f9fb]]="selectedRowId() === r.id"
                   [class.opacity-50]="r.status === 'Disconnected'"
+                  (click)="selectRow(r.id)"
                   [attr.data-testid]="'row-connector-' + r.id">
                 <td class="px-2 align-middle">
                   <div class="flex items-center justify-center">
@@ -131,6 +134,7 @@
                 </td>
                 <td class="px-2 align-middle">
                   <button type="button"
+                          (click)="selectRow(r.id); $event.stopPropagation()"
                           class="block w-full truncate text-left text-[14px] leading-[1.43] text-[#008572] hover:underline focus:underline focus:outline-none"
                           [title]="r.accountName"
                           [attr.data-testid]="'link-account-' + r.id">{{ r.accountName }}</button>
@@ -172,5 +176,10 @@
         </table>
       </div>
     </div>
+
+    <!-- DRILL-DOWN PANEL -->
+    @if (selectedRow(); as row) {
+      <app-marketplace-detail-panel [row]="row" (close)="closePanel()" />
+    }
   </section>
 </app-shell>
