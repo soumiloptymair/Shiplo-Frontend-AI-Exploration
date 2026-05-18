@@ -142,7 +142,7 @@ export const SAMPLE_INVENTORY: InventoryProduct[] = PRODUCT_NAMES.map((name, idx
     hsCode: '9401.39.00',
     origin: 'Canada',
     variantCount,
-    valueRange: '$16.50 - $20.50',
+    valueRange: '16.50$ - 20.50$',
     needsAttention: idx !== 0,
     variants: buildVariants(id, variantCount),
     colors: ['black', 'grey', 'white'],
