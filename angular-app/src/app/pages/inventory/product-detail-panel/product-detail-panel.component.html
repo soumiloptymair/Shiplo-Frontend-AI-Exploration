@@ -6,8 +6,15 @@
 
   <!-- Label Bar -->
   <header class="flex h-10 shrink-0 items-center justify-between border-b border-[#b8c6cc] px-2">
-    <span class="px-2 text-[12px] font-medium uppercase leading-[1.5] text-[#45565b]"
-          data-testid="text-panel-kind">Product</span>
+    <div class="flex items-center gap-1">
+      <!-- Package / Loads icon -->
+      <svg class="h-5 w-5 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path stroke-linejoin="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+        <path stroke-linejoin="round" d="M3.27 6.96L12 12l8.73-5.04M12 22V12"/>
+      </svg>
+      <span class="text-[12px] font-medium uppercase leading-[1.5] text-[#45565b]"
+            data-testid="text-panel-kind">Product</span>
+    </div>
     <div class="flex items-center gap-2">
       <button type="button" data-testid="button-panel-menu"
               class="flex h-6 w-6 items-center justify-center rounded text-[#45565b] hover:bg-neutral-100">
