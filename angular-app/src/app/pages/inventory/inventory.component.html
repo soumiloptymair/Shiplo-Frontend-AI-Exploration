@@ -124,12 +124,14 @@
                 (click)="toggleExpand(p.id)"
                 [attr.data-testid]="'row-product-' + p.id">
               <!-- expand chevron -->
-              <td class="h-8 w-9 p-0 text-center align-middle">
-                <svg class="inline-block h-4 w-4 text-neutral-500 transition-transform"
-                  [class.rotate-90]="isExpanded(p.id)"
-                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                </svg>
+              <td class="h-8 w-9 p-0 align-middle">
+                <span class="flex h-8 w-9 items-center justify-center">
+                  <svg class="h-4 w-4 text-neutral-500 transition-transform duration-150"
+                    [class.rotate-90]="isExpanded(p.id)"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 6l8 6-8 6"/>
+                  </svg>
+                </span>
               </td>
               <!-- attention icon -->
               <td class="h-8 w-8 p-[6px] align-middle">
