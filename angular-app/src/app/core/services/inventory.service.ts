@@ -6,7 +6,7 @@ export class InventoryService {
   readonly products = signal<InventoryProduct[]>(SAMPLE_INVENTORY);
   readonly activeTab = signal<InventoryTab>('Products');
   readonly searchQuery = signal('');
-  readonly expandedIds = signal<Set<string>>(new Set(['p-1']));
+  readonly expandedId = signal<string | null>('p-1');
 
   readonly syncing = signal(false);
   readonly syncProgress = signal(0);
@@ -40,16 +40,12 @@ export class InventoryService {
   });
 
   isExpanded(id: string): boolean {
-    return this.expandedIds().has(id);
+    return this.expandedId() === id;
   }
 
   toggleExpand(id: string) {
     if (this.syncing()) return;
-    this.expandedIds.update((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    this.expandedId.update((current) => (current === id ? null : id));
   }
 
   startSync() {
