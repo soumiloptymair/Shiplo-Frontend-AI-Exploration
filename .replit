@@ -50,10 +50,10 @@ waitForPort = 5000
 name = "Start Angular app"
 author = "agent"
 
-[workflows.workflow.metadata]
-outputType = "webview"
-
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd angular-app && NG_CLI_ANALYTICS=false npx ng serve --port 4200 --host 0.0.0.0 --disable-host-check"
 waitForPort = 4200
+
+[workflows.workflow.metadata]
+outputType = "webview"
