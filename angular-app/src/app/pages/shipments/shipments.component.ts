@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppShellComponent } from '../../layout/app-shell/app-shell.component';
@@ -18,6 +18,11 @@ export class ShipmentsComponent {
   readonly TABS: ShipmentTab[] = ['All', 'Orders', 'Returns'];
   readonly SHIPMENT_STATUSES = SHIPMENT_STATUSES;
   readonly STATUS_PILL_CLASS = STATUS_PILL_CLASS;
+
+  statusFilterOpen = signal(false);
+
+  @HostListener('document:click')
+  closeStatusDropdown() { this.statusFilterOpen.set(false); }
 
   readonly allSelected = computed(() => {
     const rows = this.svc.filtered();
