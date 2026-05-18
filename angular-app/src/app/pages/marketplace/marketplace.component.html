@@ -1,0 +1,162 @@
+<app-shell>
+  <section class="flex h-full min-w-0 gap-3">
+
+    <!-- LEFT RAIL: categories -->
+    <aside class="flex h-full w-[220px] shrink-0 flex-col rounded-lg bg-neutral-0 p-3"
+           data-testid="aside-marketplace-categories">
+      <div class="mb-3 flex items-center gap-2 px-2 py-2">
+        <svg class="h-5 w-5 text-neutral-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l1.5-5h15L21 9M3 9v10a1 1 0 001 1h16a1 1 0 001-1V9M3 9h18M8 9V6m4 3V6m4 3V6"/>
+        </svg>
+        <h1 class="font-['Montserrat',sans-serif] text-[20px] font-semibold leading-[1.4] tracking-[0.15px] text-neutral-900">
+          Marketplace
+        </h1>
+      </div>
+
+      <ul role="tablist" aria-orientation="vertical" aria-label="Marketplace categories"
+          class="flex flex-col gap-1 list-none p-0 m-0">
+        @for (c of categories; track c.id) {
+          <li role="presentation">
+            <button type="button"
+                    role="tab"
+                    [attr.aria-selected]="selectedCategory() === c.id"
+                    (click)="selectCategory(c.id)"
+                    [attr.data-testid]="'category-' + c.id"
+                    class="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-[14px] leading-[20px] text-neutral-900 transition-colors"
+                    [class.bg-[#e8f5f2]]="selectedCategory() === c.id"
+                    [class.font-semibold]="selectedCategory() === c.id"
+                    [class.font-normal]="selectedCategory() !== c.id"
+                    [class.hover:bg-neutral-100]="selectedCategory() !== c.id">
+              <span>{{ c.label }}</span>
+              <span class="inline-flex h-5 min-w-[24px] items-center justify-center rounded-full px-1.5 text-[11px] font-medium"
+                    [class.bg-[#008572]]="selectedCategory() === c.id"
+                    [class.text-white]="selectedCategory() === c.id"
+                    [class.bg-neutral-100]="selectedCategory() !== c.id"
+                    [class.text-neutral-700]="selectedCategory() !== c.id"
+                    [attr.data-testid]="'category-count-' + c.id">{{ categoryCount(c.id) }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </aside>
+
+    <!-- MAIN: tabs + grid -->
+    <div class="flex h-full min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-neutral-0">
+
+      <!-- Top bar -->
+      <header class="flex h-[68px] shrink-0 items-center justify-between border-b border-neutral-200 px-5">
+        <!-- Tab switch -->
+        <div role="tablist" aria-label="Connector status"
+             class="flex h-8 items-center rounded-full border border-neutral-200 px-0.5">
+          @for (t of TABS; track t) {
+            <button type="button"
+                    role="tab"
+                    [attr.aria-selected]="activeTab() === t"
+                    [attr.aria-pressed]="activeTab() === t"
+                    (click)="setTab(t)"
+                    [attr.data-testid]="'tab-' + t.toLowerCase()"
+                    class="flex h-7 items-center justify-center gap-1 rounded-full px-4 text-[14px] transition-colors whitespace-nowrap"
+                    [class.bg-[#008572]]="activeTab() === t"
+                    [class.text-white]="activeTab() === t"
+                    [class.font-medium]="activeTab() === t"
+                    [class.text-neutral-900]="activeTab() !== t"
+                    [class.font-normal]="activeTab() !== t">
+              {{ t }} ({{ tabCount(t) }})
+            </button>
+          }
+        </div>
+
+        <!-- Search -->
+        <div class="flex h-9 w-[260px] items-center gap-2 rounded-[4px] border border-neutral-200 bg-neutral-0 pl-3 pr-2">
+          <svg class="h-5 w-5 shrink-0 text-neutral-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text"
+                 [value]="search()"
+                 (input)="onSearch($event)"
+                 placeholder="Search"
+                 aria-label="Search marketplace"
+                 data-testid="input-marketplace-search"
+                 class="h-full w-full bg-transparent text-[14px] text-neutral-900 placeholder:text-neutral-500 focus:outline-none" />
+        </div>
+      </header>
+
+      <!-- Table -->
+      <div class="min-h-0 flex-1 overflow-auto">
+        <table class="w-full border-collapse" data-testid="table-marketplace">
+          <thead>
+            <tr class="border-b border-neutral-200 bg-neutral-0">
+              <th class="w-[230px] py-2 pl-[68px] pr-3 text-left text-[12px] font-medium text-neutral-700">
+                <span class="inline-flex items-center gap-1">Account Name
+                  <svg class="h-3 w-3 text-neutral-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg>
+                </span>
+              </th>
+              <th class="w-[170px] px-3 py-2 text-left text-[12px] font-medium text-neutral-700">
+                <span class="inline-flex items-center gap-1">Installed Date
+                  <svg class="h-3 w-3 text-neutral-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg>
+                </span>
+              </th>
+              <th class="w-[110px] px-3 py-2 text-left text-[12px] font-medium text-neutral-700">Installed By</th>
+              <th class="px-3 py-2 text-left text-[12px] font-medium text-neutral-700">Description</th>
+              <th class="w-[140px] px-3 py-2 text-left text-[12px] font-medium text-neutral-700">
+                <span class="inline-flex items-center gap-1">Status
+                  <svg class="h-3 w-3 text-neutral-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg>
+                </span>
+              </th>
+              <th class="w-[36px] px-2 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of filteredRows(); track r.id) {
+              <tr class="border-b border-neutral-100 hover:bg-neutral-50"
+                  [class.opacity-50]="r.status === 'Disconnected'"
+                  [attr.data-testid]="'row-connector-' + r.id">
+                <td class="py-2 pl-3 pr-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex h-5 w-12 shrink-0 items-center justify-center rounded-sm text-[10px] font-bold tracking-tight"
+                         [style.background]="r.brandLogoBg"
+                         [style.color]="r.brandLogoColor"
+                         [attr.data-testid]="'logo-' + r.id">{{ r.brandLogoText }}</div>
+                    <button type="button"
+                            class="text-[13px] text-[#008572] hover:underline focus:underline focus:outline-none"
+                            [attr.data-testid]="'link-account-' + r.id">{{ r.accountName }}</button>
+                  </div>
+                </td>
+                <td class="px-3 py-2 text-[13px] text-neutral-900"
+                    [attr.data-testid]="'text-installed-date-' + r.id">{{ r.installedDate }}</td>
+                <td class="px-3 py-2 text-[13px] text-neutral-900"
+                    [attr.data-testid]="'text-installed-by-' + r.id">{{ r.installedBy }}</td>
+                <td class="px-3 py-2 text-[13px] text-neutral-900 truncate"
+                    [attr.data-testid]="'text-description-' + r.id">{{ r.description }}</td>
+                <td class="px-3 py-2">
+                  <span class="inline-flex items-center gap-1.5 text-[13px] text-neutral-900"
+                        [attr.data-testid]="'status-' + r.id">
+                    <span class="h-1.5 w-1.5 rounded-full"
+                          [class.bg-[#008572]]="r.status === 'Connected'"
+                          [class.bg-orange-500]="r.status === 'Disconnected'"></span>
+                    {{ r.status }}
+                  </span>
+                </td>
+                <td class="px-2 py-2">
+                  <button type="button"
+                          [attr.aria-label]="'Actions for ' + r.accountName"
+                          [attr.data-testid]="'button-row-menu-' + r.id"
+                          class="inline-flex h-6 w-6 items-center justify-center rounded text-neutral-700 hover:bg-neutral-100">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-3 py-10 text-center text-[13px] text-neutral-700"
+                    data-testid="text-no-connectors">No connectors match your filters.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</app-shell>

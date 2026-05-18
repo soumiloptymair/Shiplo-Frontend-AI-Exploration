@@ -46,7 +46,8 @@ export class NavSidebarComponent {
   ];
 
   readonly resourceNavItems: NavItem[] = [
-    { label: 'Inventory', matchPaths: ['/inventory'], route: '/inventory' },
+    { label: 'Inventory',  matchPaths: ['/inventory'],  route: '/inventory' },
+    { label: 'Marketplace',matchPaths: ['/marketplace'],route: '/marketplace' },
   ];
 
   resourcesExpanded = true;
