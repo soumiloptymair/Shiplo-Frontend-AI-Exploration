@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Shipment, ShipmentStatus, STATUS_PILL_CLASS } from '../../../core/models/shipment.model';
 
@@ -24,8 +24,24 @@ export class ShipmentDetailPanelComponent {
   activeTab = signal<PanelTab>('Label');
   docs = signal<DocFile[]>([]);
   podImages = signal<PodImage[]>([]);
+  menuOpen = signal(false);
   private nextDocId = 1;
   private nextPodId = 1;
+
+  readonly MENU_ITEMS = [
+    { label: 'Split Shipment', testid: 'menu-item-split-shipment' },
+    { label: 'Edit Shipment',  testid: 'menu-item-edit-shipment' },
+    { label: 'View Receipt',   testid: 'menu-item-view-receipt' },
+    { label: 'View Label',     testid: 'menu-item-view-label' },
+  ];
+
+  toggleMenu(event: Event) {
+    event.stopPropagation();
+    this.menuOpen.update(v => !v);
+  }
+
+  @HostListener('document:click')
+  closeMenu() { this.menuOpen.set(false); }
 
   statusPillClass(status: ShipmentStatus | ''): string {
     return status ? (STATUS_PILL_CLASS[status as ShipmentStatus] ?? 'bg-neutral-100') : '';
