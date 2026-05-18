@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../../../core/services/inventory.service';
-import { DEFAULT_VARIANT_ACTIVITY, VariantActivityEntry } from '../../../core/models/inventory.model';
+import { DEFAULT_VARIANT_ACTIVITY, DEFAULT_VARIANT_NOTES, VariantActivityEntry, VariantNote } from '../../../core/models/inventory.model';
 
 type VariantTab = 'Inventory' | 'Details' | 'Activity' | 'Notes';
 
@@ -23,11 +23,13 @@ export class VariantDetailPanelComponent {
   });
 
   constructor() {
-    // Reset tab and activity search whenever the selected variant changes.
+    // Reset tab, search, notes draft, and notes list whenever the selected variant changes.
     effect(() => {
       this.svc.selectedVariantId();
       this.activeTab.set('Inventory');
       this.activityQuery.set('');
+      this.noteDraft.set('');
+      this.notes.set([...DEFAULT_VARIANT_NOTES]);
     });
   }
 
@@ -46,6 +48,34 @@ export class VariantDetailPanelComponent {
 
   onActivityQuery(e: Event) {
     this.activityQuery.set((e.target as HTMLInputElement).value);
+  }
+
+  readonly notes = signal<VariantNote[]>([...DEFAULT_VARIANT_NOTES]);
+  readonly noteDraft = signal('');
+
+  onNoteInput(e: Event) {
+    this.noteDraft.set((e.target as HTMLInputElement).value);
+  }
+
+  addNote() {
+    const body = this.noteDraft().trim();
+    if (!body) return;
+    const entry: VariantNote = {
+      id: `n-${Date.now()}`,
+      author: 'Admin 01',
+      initials: 'A1',
+      timestamp: 'just now',
+      body,
+    };
+    this.notes.update(list => [entry, ...list]);
+    this.noteDraft.set('');
+  }
+
+  onNoteKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      this.addNote();
+    }
   }
 
   setTab(t: VariantTab) { this.activeTab.set(t); }

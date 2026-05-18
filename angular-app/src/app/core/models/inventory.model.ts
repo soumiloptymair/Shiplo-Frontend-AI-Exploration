@@ -87,6 +87,31 @@ export const DEFAULT_VARIANT_ACTIVITY: VariantActivityEntry[] = [
   { id: 'a-4', shipmentId: '220578391662185', source: 'Shopify', orderDate: 'Feb 02, 2026, 10:30 CDT', warehouse: 'Dallas 01', inventoryChange: -18, updatedStock: 18 },
 ];
 
+export interface VariantNote {
+  id: string;
+  author: string;
+  initials: string;
+  timestamp: string;
+  body: string;
+}
+
+export const DEFAULT_VARIANT_NOTES: VariantNote[] = [
+  {
+    id: 'n-1',
+    author: 'Admin 01',
+    initials: 'A1',
+    timestamp: '10 min ago',
+    body: 'One order has been delivered on 19/07/24 at 4:08 pm. Tracking info is yet to be updated.',
+  },
+  {
+    id: 'n-2',
+    author: 'Admin 01',
+    initials: 'A1',
+    timestamp: '16/07/2024',
+    body: 'Have assigned UPS expedited as customer requested for expedited over phone call',
+  },
+];
+
 export const DEFAULT_IMAGES = [
   'figmaAssets/product-1.png',
   'figmaAssets/product-2.png',
