@@ -93,3 +93,9 @@ angular-app/
 
 - Every interactive or meaningful element has a stable `data-testid`.
 - Forbidden changes: do not edit `package.json`, `vite.config.ts`, `server/vite.ts`, or `drizzle.config.ts`.
+
+## User Preferences
+
+- **Primary codebase is Angular** (`angular-app/`). All future feature requests, fixes, and UI changes must be applied to the Angular app by default.
+- The React app (`client/`) is a secondary reference — do not modify it unless the user explicitly asks.
+- The main `Start application` workflow runs the Angular app on port 5000.
