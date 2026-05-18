@@ -6,25 +6,34 @@ import {
   Package,
   ExternalLink,
   ChevronDown,
+  Clock,
+  CircleDollarSign,
+  Truck,
+  Store,
+  Warehouse,
+  Undo2,
+  Plus,
 } from "lucide-react";
 import type { Shipment, ShipmentStatus } from "@shared/schema";
 
 const CARRIER_ICON = "/figmaAssets/pngegg--2--1-1.png";
+const SOURCE_ICON = "/figmaAssets/integrations-1.png";
 
 const STATUS_PILL_BG: Record<ShipmentStatus, string> = {
-  Shipped:        "bg-status-shipped",
-  Pending:        "bg-status-picking",
-  "Label Created":"bg-status-label-created",
-  Delayed:        "bg-status-delayed",
-  Delivered:      "bg-status-delivered",
-  "On Hold":      "bg-status-on-hold",
-  "Needs Review": "bg-status-needs-review",
-  Cancelled:      "bg-status-cancelled",
+  Shipped:         "bg-status-shipped",
+  Pending:         "bg-status-picking",
+  "Label Created": "bg-status-label-created",
+  Delayed:         "bg-status-delayed",
+  Delivered:       "bg-status-delivered",
+  "On Hold":       "bg-status-on-hold",
+  "Needs Review":  "bg-status-needs-review",
+  Cancelled:       "bg-status-cancelled",
 };
 
 type PanelTab = "Label" | "Details" | "Products" | "Notes";
 const TABS: PanelTab[] = ["Label", "Details", "Products", "Notes"];
 
+/* ── Shared label/value block ── */
 const LabelField = ({
   label,
   value,
@@ -42,6 +51,52 @@ const LabelField = ({
 
 const DataRow = ({ children }: { children: React.ReactNode }) => (
   <div className="flex gap-8">{children}</div>
+);
+
+/* ── Details-tab icon row item ── */
+const IconField = ({
+  icon,
+  label,
+  value,
+  link = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  link?: boolean;
+}) => (
+  <div className="flex w-[180px] shrink-0 items-center gap-4">
+    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
+      {icon}
+    </div>
+    <div className="flex flex-col gap-1">
+      <p className="font-body text-xs text-[#45565b] whitespace-nowrap">{label}</p>
+      <div
+        className={`font-body text-sm whitespace-nowrap ${
+          link ? "font-medium text-[#2da1cb]" : "font-normal text-[#0b1516]"
+        }`}
+      >
+        {value}
+      </div>
+    </div>
+  </div>
+);
+
+/* ── Section subheader ── */
+const SectionHeader = ({
+  title,
+  action,
+}: {
+  title: string;
+  action?: React.ReactNode;
+}) => (
+  <div className="flex items-center gap-2">
+    <p className="font-body text-xs font-medium uppercase tracking-wide text-[#0b1516] whitespace-nowrap">
+      {title}
+    </p>
+    <div className="h-px flex-1 bg-[#e4eaed]" />
+    {action}
+  </div>
 );
 
 interface Props {
@@ -142,11 +197,11 @@ export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
 
       {/* ── Tab Content ── */}
       <div className="flex-1 overflow-y-auto">
+
+        {/* ── LABEL TAB ── */}
         {activeTab === "Label" && (
           <div className="flex flex-col gap-4 p-5">
-            {/* Shipping Label card */}
             <div className="flex flex-col gap-4 rounded-lg bg-[#f6f9fb] p-3">
-              {/* Card header */}
               <div className="flex items-center justify-between">
                 <span className="font-body text-base font-medium text-[#0b1516]">
                   Shipping Label
@@ -171,7 +226,6 @@ export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
                 </div>
               </div>
 
-              {/* Section 1 */}
               <div className="flex flex-col gap-4">
                 <DataRow>
                   <LabelField label="Warehouse" value={shipment.warehouse} className="w-[168px] shrink-0" />
@@ -196,7 +250,6 @@ export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
 
               <hr className="border-[#e4eaed]" />
 
-              {/* Section 2 */}
               <div className="flex flex-col gap-4">
                 <DataRow>
                   <LabelField label="Purchase Order #" value="312463USA26" className="w-[168px] shrink-0" />
@@ -214,16 +267,11 @@ export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
 
               <hr className="border-[#e4eaed]" />
 
-              {/* Section 3 */}
               <div className="flex flex-col gap-4">
                 <DataRow>
                   <LabelField
                     label="Est Delivery"
-                    value={
-                      <span>
-                        Wednesday, 01/17/2025,<br />10:00 AM EST
-                      </span>
-                    }
+                    value={<span>Wednesday, 01/17/2025,<br />10:00 AM EST</span>}
                     className="w-[168px] shrink-0"
                   />
                   <LabelField
@@ -231,11 +279,7 @@ export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
                     value={
                       <span className="flex flex-col gap-0.5">
                         <span>Covers up to $50</span>
-                        <a
-                          href="#"
-                          onClick={(e) => e.preventDefault()}
-                          className="font-body text-sm text-[#008572] hover:underline"
-                        >
+                        <a href="#" onClick={(e) => e.preventDefault()} className="font-body text-sm text-[#008572] hover:underline">
                           Increase Coverage
                         </a>
                       </span>
@@ -249,7 +293,6 @@ export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
               </div>
             </div>
 
-            {/* Schedule Pickup CTA */}
             <button
               type="button"
               data-testid="button-schedule-pickup"
@@ -261,11 +304,133 @@ export const ShipmentDetailPanel = ({ shipment, onClose }: Props) => {
           </div>
         )}
 
+        {/* ── DETAILS TAB ── */}
         {activeTab === "Details" && (
-          <div className="p-5">
-            <p className="font-body text-sm text-[#45565b]">
-              Detailed shipment information will appear here.
-            </p>
+          <div className="flex flex-col gap-5 p-5">
+
+            {/* Info rows */}
+            <div className="flex flex-col gap-4">
+              {/* Row 1 */}
+              <div className="flex items-center">
+                <IconField
+                  icon={<Clock className="h-3.5 w-3.5" />}
+                  label="Shipping Method"
+                  value={shipment.method || "Standard"}
+                />
+                <IconField
+                  icon={<CircleDollarSign className="h-3.5 w-3.5" />}
+                  label="Shipment Value"
+                  value={shipment.value}
+                />
+              </div>
+              {/* Row 2 */}
+              <div className="flex items-center">
+                <IconField
+                  icon={<Truck className="h-3.5 w-3.5" />}
+                  label="Freight Type"
+                  value={shipment.freightType || "—"}
+                />
+                <IconField
+                  icon={<Store className="h-3.5 w-3.5" />}
+                  label="Source"
+                  value={
+                    <span className="inline-flex items-center gap-1">
+                      <img src={SOURCE_ICON} alt="" className="h-4 w-4 shrink-0" />
+                      <span className="overflow-hidden text-ellipsis text-[#2da1cb]">{shipment.source}</span>
+                    </span>
+                  }
+                  link={false}
+                />
+              </div>
+              {/* Row 3 */}
+              <div className="flex items-center">
+                <IconField
+                  icon={<Warehouse className="h-3.5 w-3.5" />}
+                  label="Fulfillment"
+                  value={shipment.warehouse}
+                  link
+                />
+                <IconField
+                  icon={<Undo2 className="h-3.5 w-3.5" />}
+                  label="Return"
+                  value={shipment.warehouse}
+                  link
+                />
+              </div>
+            </div>
+
+            {/* CARRIER section */}
+            <div className="flex flex-col gap-4">
+              <SectionHeader title="Carrier" />
+              {/* Carrier name */}
+              <div className="flex items-center gap-2">
+                <img src={CARRIER_ICON} alt="UPS" className="h-5 w-5 shrink-0 rounded-sm" />
+                <span className="font-body text-sm font-medium text-[#0b1516]">UPS Kansas</span>
+              </div>
+              {/* Carrier fields */}
+              <div className="flex flex-col gap-4">
+                <DataRow>
+                  <LabelField label="Delivered On" value="01/17/2025" className="w-[168px] shrink-0" />
+                  <LabelField label="Shipped On" value="01/17/2025" />
+                </DataRow>
+                <DataRow>
+                  <LabelField label="Account Number" value="681350810" className="w-[168px] shrink-0" />
+                  <LabelField label="Freight Cost" value="$10.50" />
+                </DataRow>
+              </div>
+            </div>
+
+            {/* SHIPMENT section */}
+            <div className="flex flex-col gap-4">
+              <SectionHeader title="Shipment" />
+              <div className="flex gap-4">
+                <LabelField label="Length" value="20 in" className="flex-1" />
+                <LabelField label="Width"  value="32 in" className="flex-1" />
+                <LabelField label="Height" value="12 in" className="flex-1" />
+                <LabelField label="Weight" value="32 lbs" className="flex-1" />
+              </div>
+            </div>
+
+            {/* CUSTOMER section */}
+            <div className="flex flex-col gap-4">
+              <SectionHeader title="Customer" />
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-4">
+                  <LabelField label="Name"  value={shipment.customer} className="flex-1" />
+                  <LabelField label="Email" value="sam.pr@hp.com"     className="flex-1" />
+                  <LabelField label="Phone" value="123-456-7890"      className="flex-1" />
+                </div>
+                <LabelField
+                  label="Shipping Address"
+                  value="3672 Chesterfield Blvd., Nashville, TN 73928, US"
+                />
+              </div>
+            </div>
+
+            {/* DOCUMENTS section */}
+            <div className="flex flex-col gap-4">
+              <SectionHeader
+                title="Documents"
+                action={
+                  <button
+                    type="button"
+                    data-testid="button-add-document"
+                    className="flex items-center gap-1 rounded border border-neutral-300 bg-white px-2 py-0.5 font-body text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Add File
+                  </button>
+                }
+              />
+              <p className="font-body text-sm text-[#45565b]">No Documents Attached</p>
+            </div>
+
+            {/* PROOF OF DELIVERY section */}
+            <div className="flex flex-col gap-4">
+              <SectionHeader title="Proof of Delivery" />
+              <p className="font-body text-sm text-[#45565b]">No proof of delivery attached.</p>
+            </div>
+
           </div>
         )}
 
