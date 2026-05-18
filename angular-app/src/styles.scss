@@ -60,6 +60,17 @@
   --grey-02: hsl(195 17% 91%);
   --grey-11: hsl(188 30% 6%);
 
+  /* Surface tokens (consumed by components) */
+  --surface-app: var(--grey-02);
+  --surface-card: var(--neutral-0);
+  --surface-elevated: var(--neutral-0);
+  --surface-subtle: 210 33% 97%;
+  --surface-row-hover: 0 0% 97%;
+  --surface-row-expanded: 200 33% 97%;
+  --text-primary: var(--neutral-900);
+  --text-secondary: 196 14% 31%;
+  --border-subtle: 200 14% 91%;
+
   --font-body: "Roboto", "Helvetica", system-ui, sans-serif;
   --font-heading: "Montserrat", "Roboto", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -70,13 +81,43 @@
   --sidebar: var(--neutral-300);
 }
 
+.dark {
+  /* Neutral scale flipped for dark surfaces */
+  --neutral-0: 200 16% 10%;       /* page card surface */
+  --neutral-50: 200 14% 13%;
+  --neutral-100: 200 13% 16%;     /* subtle row stripe */
+  --neutral-150: 200 12% 18%;
+  --neutral-200: 200 11% 22%;     /* borders */
+  --neutral-250: 200 11% 24%;
+  --neutral-300: 200 12% 17%;     /* sidebar surface */
+  --neutral-400: 200 10% 32%;
+  --neutral-500: 200 8% 55%;
+  --neutral-600: 200 8% 65%;
+  --neutral-700: 200 12% 78%;     /* secondary text */
+  --neutral-900: 200 25% 96%;     /* primary text */
+
+  --grey-01: hsl(200 14% 12%);
+  --grey-02: hsl(200 16% 7%);     /* app background */
+  --grey-11: hsl(200 25% 96%);
+
+  --surface-app: var(--grey-02);
+  --surface-card: var(--neutral-0);
+  --surface-elevated: var(--neutral-50);
+  --surface-subtle: 200 13% 16%;
+  --surface-row-hover: 200 13% 16%;
+  --surface-row-expanded: 200 13% 14%;
+  --text-primary: var(--neutral-900);
+  --text-secondary: 200 12% 78%;
+  --border-subtle: 200 11% 22%;
+}
+
 @layer base {
   * { box-sizing: border-box; }
 
   body {
     font-family: var(--font-body);
-    background-color: hsl(var(--neutral-0));
-    color: hsl(var(--neutral-900));
+    background-color: hsl(var(--surface-app));
+    color: hsl(var(--text-primary));
     margin: 0;
     padding: 0;
   }

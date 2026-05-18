@@ -170,8 +170,25 @@
         </div>
 
         <div class="flex items-center" [ngClass]="isCollapsed ? 'justify-center' : 'justify-between'">
-          <button *ngIf="!isCollapsed" type="button" class="h-6 w-6 bg-transparent border-none cursor-pointer">
-            <img class="h-6 w-6" alt="Settings" src="figmaAssets/icon-settings-lightmode.svg" />
+          <button *ngIf="!isCollapsed" type="button"
+            data-testid="button-toggle-theme"
+            (click)="themeService.toggle()"
+            [attr.aria-label]="themeService.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+            class="h-6 w-6 flex items-center justify-center bg-transparent border-none cursor-pointer text-neutral-700 hover:text-neutral-900 transition-colors">
+            <!-- Sun (shown in light mode) -->
+            <svg *ngIf="themeService.theme() === 'light'"
+                 xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+              <circle cx="12" cy="12" r="4"/>
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.5 5.5l1.1 1.1M17.4 17.4l1.1 1.1M5.5 18.5l1.1-1.1M17.4 6.6l1.1-1.1"/>
+            </svg>
+            <!-- Moon (shown in dark mode) -->
+            <svg *ngIf="themeService.theme() === 'dark'"
+                 xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor"
+                 viewBox="0 0 24 24">
+              <path d="M21 12.79A9 9 0 0 1 11.21 3 7 7 0 1 0 21 12.79Z"/>
+            </svg>
           </button>
           <button
             type="button"

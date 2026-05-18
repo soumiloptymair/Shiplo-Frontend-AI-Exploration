@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { ThemeService } from '../../core/services/theme.service';
 
 interface NavItem {
   label: string;
@@ -26,6 +27,7 @@ export class NavSidebarComponent {
   @Output() toggleCollapse = new EventEmitter<void>();
 
   private router = inject(Router);
+  readonly themeService = inject(ThemeService);
 
   readonly planningItems: NavItem[] = [
     { label: 'Shipments',    iconSrc: 'figmaAssets/icon-2.svg',        matchPaths: ['/', '/shipments'],   route: '/shipments' },
