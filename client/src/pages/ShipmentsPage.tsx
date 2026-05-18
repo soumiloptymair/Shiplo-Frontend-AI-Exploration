@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AppShell } from "@/components/AppShell";
+import { ShipmentDetailPanel } from "@/pages/sections/ShipmentDetailPanel";
 import {
   SHIPMENT_STATUSES,
   type Shipment,
@@ -134,10 +135,15 @@ const TagChips = ({ tags }: { tags: string[] }) => {
 };
 
 const ShipmentsPageInner = (): JSX.Element => {
-  const [activeTab,    setActiveTab]    = useState<ShipmentTab>("All");
-  const [statusFilter, setStatusFilter] = useState<"All" | ShipmentStatus>("All");
-  const [search,       setSearch]       = useState("");
-  const [selected,     setSelected]     = useState<Set<string>>(new Set());
+  const [activeTab,          setActiveTab]          = useState<ShipmentTab>("All");
+  const [statusFilter,       setStatusFilter]       = useState<"All" | ShipmentStatus>("All");
+  const [search,             setSearch]             = useState("");
+  const [selected,           setSelected]           = useState<Set<string>>(new Set());
+  const [selectedPanelId,    setSelectedPanelId]    = useState<string | null>(null);
+
+  const selectedPanelShipment = selectedPanelId
+    ? SAMPLE_SHIPMENTS.find((s) => s.id === selectedPanelId) ?? null
+    : null;
 
   const filtered = useMemo(() => {
     return SAMPLE_SHIPMENTS.filter((s) => {
@@ -173,7 +179,8 @@ const ShipmentsPageInner = (): JSX.Element => {
   };
 
   return (
-    <section className="flex h-full flex-col overflow-hidden rounded-lg bg-neutral-0">
+    <div className="flex h-full gap-2 overflow-hidden">
+    <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-neutral-0">
 
       {/* ── Title bar ── */}
       <header className="flex items-center justify-between gap-4 rounded-t-lg border-b border-neutral-150 bg-neutral-0 px-5 py-4">
@@ -316,10 +323,14 @@ const ShipmentsPageInner = (): JSX.Element => {
                 <TableRow
                   key={s.id}
                   data-testid={`row-shipment-${s.id}`}
-                  className={`h-8 border-b border-[#e4eaed] transition-colors ${rowBg}`}
+                  className={`h-8 cursor-pointer border-b border-[#e4eaed] transition-colors ${rowBg}`}
+                  onClick={() => setSelectedPanelId((prev) => (prev === s.id ? null : s.id))}
                 >
                   {/* Checkbox */}
-                  <TableCell className="h-8 w-[60px] py-0 pl-5 pr-3">
+                  <TableCell
+                    className="h-8 w-[60px] py-0 pl-5 pr-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Checkbox
                       data-testid={`checkbox-${s.id}`}
                       checked={isSelected}
@@ -421,6 +432,15 @@ const ShipmentsPageInner = (): JSX.Element => {
         </Table>
       </div>
     </section>
+
+    {/* ── Shipment Detail Panel ── */}
+    {selectedPanelShipment && (
+      <ShipmentDetailPanel
+        shipment={selectedPanelShipment}
+        onClose={() => setSelectedPanelId(null)}
+      />
+    )}
+    </div>
   );
 };
 
