@@ -132,3 +132,44 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: hsl(var(--neutral-300)); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--neutral-400)); }
+
+/* ============================================================
+ * Figma Semantic Tokens (source: Figma file 7d1Ged8LHQYBV9abYhNhxG)
+ * See: src/app/design-system/tokens/CHANGELOG.md
+ * ============================================================ */
+:root {
+  /* Foreground / text */
+  --fg-primary:    196 36% 6%;     /* #0B1516  On White Surface / High Emphasis */
+  --fg-secondary:  199 14% 31%;    /* #45565B  On White Surface / Medium Emphasis */
+  --fg-tertiary:   199 18% 76%;    /* #B8C6CC  On White Surface / Low Emphasis */
+  --fg-link:       203 60% 49%;    /* #328AC9  Text / Link */
+  --fg-navigation: 211 67% 21%;    /* #103859  Text / Navigation */
+  --fg-on-action:  0   0%   100%;  /* #FFFFFF  On Primary */
+  --fg-positive:   85  100% 29%;   /* #4A9200  Success / Main (used for + amounts) */
+  --fg-negative:   0   65%  51%;   /* #D32F2F  Used for - amounts */
+
+  /* Surface / background */
+  --surface-default:        0   0%   100%;  /* #FFFFFF */
+  --surface-subtle:         200 22%  95%;   /* #F0F4F7  tinted panel (auto-topup body) */
+  --surface-light-primary:  205 35%  97%;   /* #F6F9FB  table header / row inset */
+
+  /* Border / divider */
+  --border-default: 200 16% 91%;            /* #E4EAED */
+
+  /* Action */
+  --action-primary:        173 100% 26%;    /* #008572 */
+  --action-primary-hover:  174 100% 21%;    /* #006A5A */
+
+  /* Status / chip backgrounds */
+  --chip-blue:   200 73% 85%;               /* #C2E3F2  Initiated / Processing */
+  --chip-green:  166 67% 85%;               /* #C4EEE6  Completed / Refunded */
+  --chip-red:    19  87% 91%;               /* #FDE2D4  Failed / Cancelled */
+  --chip-yellow: 38  100% 84%;              /* #FFEAC0  Needs Review */
+
+  /* Misc */
+  --radius-token: 4px;                       /* Figma borderRadius variable */
+  --shadow-tooltip:
+    0 3px 1px -2px rgba(0,0,0,0.20),
+    0 2px 2px 0    rgba(0,0,0,0.14),
+    0 1px 5px 0    rgba(0,0,0,0.12);
+}

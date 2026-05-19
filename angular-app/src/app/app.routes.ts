@@ -22,6 +22,11 @@ export const routes: Routes = [
       import('./pages/inventory/inventory.component').then((m) => m.InventoryComponent),
   },
   {
+    path: 'wallet',
+    loadComponent: () =>
+      import('./pages/wallet/wallet.component').then((m) => m.WalletComponent),
+  },
+  {
     path: 'marketplace',
     loadComponent: () =>
       import('./pages/marketplace/marketplace.component').then((m) => m.MarketplaceComponent),

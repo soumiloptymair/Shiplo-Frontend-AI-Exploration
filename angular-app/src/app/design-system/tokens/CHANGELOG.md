@@ -1,0 +1,60 @@
+# Design Tokens Changelog
+
+All tokens are defined as CSS custom properties in `src/styles.scss` and exposed
+to Tailwind via `tailwind.config.js`. Component code references **semantic
+Tailwind utilities** (e.g. `text-fg-primary`, `bg-surface-subtle`,
+`border-divider`), never raw hex values.
+
+---
+
+## 2026-05-19 — Wallet (Figma node `24950:231029`)
+
+### Added
+
+#### Foreground / text
+- `fg.primary`     `#0B1516` — On White Surface / High Emphasis
+- `fg.secondary`   `#45565B` — On White Surface / Medium Emphasis
+- `fg.tertiary`    `#B8C6CC` — On White Surface / Low Emphasis
+- `fg.link`        `#328AC9` — Text / Link (Shipment ID cells)
+- `fg.navigation`  `#103859` — Text / Navigation
+- `fg.on-action`   `#FFFFFF` — On Primary
+- `fg.positive`    `#4A9200` — Success / Main; used for `+` amounts
+- `fg.negative`    `#D32F2F` — Used for `-` amounts
+
+#### Surface / background
+- `surface.DEFAULT`        `#FFFFFF`
+- `surface.subtle`         `#F0F4F7` — Auto-topup body panel
+- `surface.light-primary`  `#F6F9FB` — Table header / inset rows
+
+#### Border
+- `divider` `#E4EAED` — On White Surface / Divider
+
+#### Action
+- `action.primary`        `#008572`
+- `action.primary-hover`  `#006A5A`
+
+#### Status pill backgrounds
+- `chip.blue`    `#C2E3F2` — Initiated, Processing, Scheduled
+- `chip.green`   `#C4EEE6` — Completed, Refunded, Approved
+- `chip.red`     `#FDE2D4` — Failed, Voided, Cancelled, Declined
+- `chip.yellow`  `#FFEAC0` — Needs Review
+
+#### Typography (Figma styles)
+- `text-heading-5-md`   Roboto 500 18 / 26
+- `text-subtitle-1-md`  Roboto 500 16 / 23
+- `text-subtitle-2-md`  Roboto 500 14 / 20
+- `text-subtitle-2`     Roboto 400 14 / 20
+- `text-body-md`        Roboto 500 12 / 18
+
+#### Misc
+- `radius-token` `4px` — Figma `borderRadius` variable (control radius)
+- `shadow-tooltip` — Figma `Tooltip` effect
+
+### Notes
+- Brand teal `#008572` was previously defined as `--brand-secondary` at the
+  closest HSL approximation (`hsl(179 100% 25%)` ≈ `#007F7F`). Added the
+  exact-match `action.primary` instead of mutating the existing brand token,
+  so existing surfaces are unaffected. Future work: deprecate
+  `brand.secondary` in favour of `action.primary` once all call sites are
+  migrated.
+- No values from Figma were normalised — all hex values are exact.
