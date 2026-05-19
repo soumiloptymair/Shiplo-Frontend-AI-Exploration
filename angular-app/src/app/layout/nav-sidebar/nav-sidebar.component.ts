@@ -33,7 +33,7 @@ export class NavSidebarComponent {
     { label: 'Shipments',    iconSrc: 'figmaAssets/icon-2.svg',        matchPaths: ['/', '/shipments'],   route: '/shipments' },
     { label: 'Pickup',       iconSrc: 'figmaAssets/package-2.svg',     matchPaths: [] },
     { label: 'Quotes',       iconSrc: 'figmaAssets/clipboard-list.svg',matchPaths: [] },
-    { label: 'Wallet',       iconSrc: 'figmaAssets/wallet.svg',        matchPaths: ['/wallet'],           route: '/wallet' },
+    { label: 'Wallet',       iconSrc: 'figmaAssets/wallet.svg',        matchPaths: [] },
     { label: 'Pick and Pack',iconSrc: 'figmaAssets/package-plus.svg',  matchPaths: ['/pick-and-pack'],    route: '/pick-and-pack' },
   ];
 
