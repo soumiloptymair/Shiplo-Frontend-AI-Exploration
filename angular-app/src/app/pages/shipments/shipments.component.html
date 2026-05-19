@@ -163,10 +163,11 @@
                 <ng-template #mergeOrAttention>
                   <ng-container *ngIf="s.isMerged; else attentionOrOpp">
                     <span class="inline-flex text-[#45565b]" title="Merged shipment" aria-label="Merged shipment" [attr.data-testid]="'icon-merge-' + s.id">
-                      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 3v6a6 6 0 006 6 6 6 0 006-6V3"/>
-                        <path d="M12 15v6"/>
-                        <path d="M9 18l3 3 3-3"/>
+                      <!-- Merge glyph — Figma node 27439:68543: two paths converging into an upward chevron. -->
+                      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 20 L12 12 L17 20"/>
+                        <path d="M12 12 V8"/>
+                        <path d="M9 8 L12 5 L15 8"/>
                       </svg>
                     </span>
                   </ng-container>
