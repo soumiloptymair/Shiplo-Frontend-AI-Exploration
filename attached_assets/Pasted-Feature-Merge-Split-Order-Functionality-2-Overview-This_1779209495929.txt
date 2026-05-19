@@ -1,0 +1,284 @@
+Feature: Merge/Split Order Functionality
+2. Overview
+This feature introduces tools within the Order Management Module that empower users to:
+Split Orders: Divide one order into two or more shipments, each with its own tracking and delivery details.
+Merge Orders: Combine multiple orders (with compatible delivery and customer details) into a single shipment for easier management and lower cost.
+The system ensures data integrity, inventory synchronization, and accurate cost allocation between the merged/split shipments.
+1. Business Functionality
+The Merge/Split Order Functionality allows shippers to manage complex shipment scenarios by combining multiple orders into one shipment or dividing a single order into multiple shipments. This enhances operational flexibility, optimizes shipping costs, and supports multi-location deliveries or order consolidation for customers.
+Business Objectives
+Improve shipment efficiency and cost-effectiveness.
+Allow customers to fulfill orders to multiple addresses or destinations.
+Enable consolidation of multiple small orders for bulk shipment savings.
+Reduce manual handling of shipment grouping and splitting.
+3. Functional Requirements
+ID
+Requirement
+Description
+FR-1
+Split Order
+Allow user to divide an order into multiple shipments with independent package, tracking, and label data.
+FR-2
+Merge Orders
+Allow user to select multiple compatible orders to merge into a single shipment.
+FR-3
+Compatibility Check
+System must verify that orders can be merged (same destination, carrier, service level, etc.).
+FR-4
+Label Generation
+Automatically generate updated shipping labels via HEALE API after merge/split operations.
+FR-5
+Cost Allocation
+Allocate shipping cost proportionally among split or merged orders.
+FR-6
+Wallet Debit
+Debit wallet based on the cost of the label for each shipment.
+FR-7
+Audit Trail
+Maintain logs for each merge/split action with timestamps, user ID, and system events.
+FR-8
+Split Order ID
+Use the same Order ID for multiple shipments, but add a designation (Order ID - n) (#68db87ebc0132b334435e5d8-1)
+FR-9
+Merge Shipment ID
+Use the same Shipment ID for multiple orders, but add a destination for Order ID (n combined). (3 combined)
+FR-10
+Notifications
+Notify the shipper and receiver about order structure changes (split or merged).
+FR-11
+Undo Operation
+Allow user to revert a merge/split action within a defined time window (e.g., 10 minutes).
+
+
+4. Non-Functional Requirements
+Category
+Requirement
+Performance
+Split/Merge operation should complete within n seconds under normal load.
+Reliability
+System must ensure no data loss during merge/split transactions.
+Security
+Only authenticated users with appropriate roles can perform merge/split actions.
+Scalability
+Must support up to 1,000 concurrent merge/split actions.
+Auditability
+Every operation must be traceable for compliance and debugging.
+
+
+5. Sequence Diagram
+High-Level UML Flow:
+
+https://www.figma.com/board/mprbCxn1JditjtEnqf1v1u/Shiplo-UML-Diagrams?node-id=0-1&t=yJyizmMq7JvkEJKG-1
+6. Stakeholders and System Interactions
+Stakeholder
+Role
+Shiplo
+Initiates and manages merge/split requests. Updates shipment records and UI. Makes recommendations for splitting and merging orders.
+HEALE Wallet
+Handles any payment adjustments due to new shipping costs.
+HEALE API
+Generates new shipping labels and calculates updated shipping costs via Carrier integrations. Provides authentication and audit tracking. 
+
+
+7. Assumptions and Constraints
+Assumptions
+HEALE API handles all label generation and recalculated shipping costs.
+Payment settlements for additional shipping costs are processed via HEALE Wallet.
+User has appropriate permissions for modifying shipment structures.
+Constraints
+Orders with different carriers or destinations cannot be merged.
+Splitting orders is allowed only before the label is generated.
+Merge/Split operations are not reversible after label printing.
+Product inventory levels at the fulfillment center must be sufficient to fulfill order(s).
+8. User Stories
+ID
+User Story
+Description
+Preconditions
+Acceptance Criteria
+SH-MS1
+Split Order
+As a shipper, I want to split an order into multiple shipments for separate destinations.
+User logged in, order not yet dispatched to a carrier.
+System allows splitting with unique shipment IDs, labels generated per shipment.
+SH-MS2
+Merge Orders
+As a shipper, I want to merge two or more compatible orders into one shipment.
+Orders share the same destination and delivery window. Not yet dispatched to a carrier.
+System merges successfully, cost recalculated, single label generated.
+SH-MS3
+Undo Merge/Split
+As a shipper, I want to undo a merge/split if it was done incorrectly.
+The operation is done before being dispatched to a carrier.
+System restores original order state.
+
+
+9. Technical Documentation
+API Endpoints
+API
+Method
+Description
+/orders/split
+POST
+Splits an order into multiple shipments.
+/orders/merge
+POST
+Merges selected orders into a single shipment.
+/orders/undo
+POST
+Reverts recent merge/split operations.
+
+Authentication/Authorization
+All endpoints require JWT-based authentication.
+Role-based access control ensures only users with Operations Manager, Logistics Manager, or Admin roles can merge/split.
+Data Model Adjustments
+Order Table: Added parent_order_id and split_group_id.
+Shipment Table: Modified to handle many-to-one and one-to-many relationships.
+Encryption
+Sensitive fields (e.g., cost, customer info) are encrypted at rest using AES-256.
+API calls secured via HTTPS/TLS 1.3.
+10. Test Coverage
+Test Type
+Scope
+Unit Tests
+Validate API responses, data model integrity, and merge/split logic.
+Functional Tests
+Verify end-to-end order merge/split flows in UI.
+System Tests
+Integration with HEALE API and HEALE Wallet APIs.
+Performance Tests
+Stress test with 1,000 concurrent split/merge operations.
+Security Tests
+Validate permission enforcement and encrypted data handling.
+
+Merge/Split Recommendations Engine
+Hard Constraints (HC): Must be true; otherwise the engine must not recommend.
+ (H): If true, increase a candidate’s score.
+Penalties (P): If true, decrease a candidate’s score.
+Thresholds (T): Default values you can tweak per account, lane, or carrier.
+The engine outputs:
+Action: MERGE (specific order set) or SPLIT (specific order + split plan).
+Score: 0–100 (confidence).
+Rationale: Brief, human-readable reasons + key fields used.
+Global Hard Constraints (apply to both merge and split)
+Label lockout (HC): If a shipment label is already purchased/manifested or an order is customs-locked (IOSS/HS code finalized), do not recommend changes unless reversible without fees.
+Regulatory compatibility (HC): Do not recommend if combining would mix hazmat/non-hazmat, age-restricted items, or temperature-control requirements.
+Carrier/service incompatibility (HC): Orders using incompatible carriers or service levels (e.g., Ground vs. 2-Day Air) must not be merged; split parts must each map to a valid service.
+Destination rules (HC): Never merge across different final destinations or customs jurisdictions that would require separate declarations.
+Payment status (HC): Orders with pending/failed payment, KYC flags, or fraud holds are excluded from merge; split only allowed if it isolates the blocked line items.
+SLA integrity (HC): Changes must not violate promised delivery dates/cut-offs already shown to the customer.
+Merge Recommendation Rules
+Candidate Pooling
+Build candidate sets among open, unmanifested orders sharing destination_address within the consolidation window (T1).
+T1 (default): 6 hours from firs+t qualifying order, capped by carrier pickup cut-off.
+Hard Constraints (Merge-specific)
+Same ship-to address (HC): Exact match, including apartment/suite; only if verified via address normalization.
+Service alignment (HC): Same required delivery date or compatible services that meet the earliest SLA.
+Capacity limits (HC): Sum of dims/weight must fit within one parcel/pallet under chosen service (consider dimensional weight and carrier maxes).
+Scoring Heuristics
+For each candidate set C:
+H1 Cost savings (weight 30): Estimated shipping cost reduction ≥ T2 yields linear score boost.
+T2: 10% savings minimum to recommend; +1 point per additional 2% up to 30.
+H2 Package utilization (15): Combined dims fit a package preset with utilization 70–90% (optimal) → +15; 50–70% or 90–95% → +8; else +0.
+H3 SLA alignment buffer (10): All orders in C meet the earliest promised date with ≥ T3 slack → +10; half slack → +5.
+T3: 12 hours.
+H4 Handling similarity (10): Same fragility, temperature, insurance needs → +10; minor differences → +5.
+H5 Warehouse wave efficiency (10): Orders in C pick from the same zone/bin wave within T4 → +10.
+T4: 2 hours picking window.
+H6 Returns simplification (5): Same returns address/RMA policy → +5.
+Penalties
+P1 Delay penalty (−20 to −5): If merging requires holding any order beyond T6 (but still meeting SLA), subtract up to 20 based on hold time.
+T6: 2 hours soft hold, 6 hours hard cap.
+P2 Risk mix (−10): Mixing high-value and low-value items with theft-risk uplift.
+P3 Carrier surcharge risk (−10): Likely to incur oversize/additional handling.
+P4 Packaging constraint ambiguity (−10): No preset/package confidently fits.
+Recommendation Thresholds
+Recommend MERGE if total score ≥ 65 and no penalties push SLA risk > 5% modeled probability.
+Auto-apply (optional policy): if score ≥ 85, cost savings ≥ 20%, and no P-class penalties.
+Split Recommendation Rules
+Split Triggers
+Evaluate a single order O for split when any of the following true:
+Hard Constraints enabling split
+Multi-destination (HC): Explicitly assigned to different addresses or recipients.
+Backorder/availability (HC): At least one product is not available within T7 at the fulfillment center/warehouse; others are ready.
+T7: 24 hours.
+Service incompatibility (HC): Requires different service (e.g., hazmat ground vs. air, temperature control, oversize).
+Carrier limits (HC): Combined dims/weight exceed single-package limits for chosen service.
+Split Plan Heuristics
+For each feasible split plan S = {S1…Sn}:
+H1 SLA protection (25): Delivery meeting promised date only if shipped now → +25.
+H2 Cost tradeoff (20): Incremental shipping cost per additional package ≤ T8 and/or surcharge avoided ≥ T9.
+T8: +$6 per extra package; T9: avoiding ≥ $20 oversize/ADH surcharge.
+H3 Customer experience (10): Splitting reduces delivery lead time variance (p90–p10) below T10 → +10.
+T10: 2 days.
+H4 Packaging fit (10): Each split fits optimal presets (utilization 70–90%).
+H5 Inventory locality (10): Ship available products from nearest warehouse/fulfillment center to customer; backordered from alternate warehouse/fulfillment center with ETA.
+H6 Risk isolation (5): Separate fragile/high-value or signature-required items.
+Penalties
+P1 Extra touchpoints (−15): Additional packages beyond T11 → subtract per extra package.
+T11: 2 packages included; −5 for each beyond 2.
+P2 Customer annoyance (−10): If marketing/checkout promised “one delivery,” apply penalty unless customer opted into split-shipping.
+P3 Returns complexity (−5): If split creates multiple RMA flows for the same order.
+Recommendation Thresholds
+Recommend SPLIT if plan score ≥ 60 and:
+
+
+Any line would otherwise miss SLA, or
+Splitting avoids oversize/surcharge ≥ $20, or
+Splitting isolates restricted items (hazmat, temp-control).
+
+
+Preferred Split Pattern Order:
+
+
+Ready-to-ship now vs. backordered later
+Different service requirements (e.g., cold chain vs. standard)
+Oversize isolation (one big item separate)
+Fragile/value isolation
+Conflict Resolution (Merge vs. Split)
+If both a merge candidate and a split plan exist for overlapping items:
+SLA first: Choose the option that maximizes % delivery meeting promised date (break ties by higher score).
+Cost next: Compare total landed cost (labels + materials + handling).
+CX policy: Honor storefront promise (single delivery vs. fastest delivery).
+Tiebreaker: Prefer the option with lower modeled risk (damage/theft).
+Operational Guardrails
+Cut-off awareness: Never recommend actions that cross carrier pickup cut-off without re-estimating SLA.
+Undo window: Only auto-apply actions if still within undo window (e.g., 10 minutes) and no pick has started.
+Picker state check: If any carton is scanned as “packed,” lock that carton from merge; allow split only of the remaining order.
+Explainability: Always return the top 3 reasons driving the score and which rule(s) gated the decision.
+A/B policy flags: Allow per-merchant toggles: “cost-first,” “SLA-first,” “CX-first,” which adjust weights by ±10%.
+Data Inputs Needed
+Order: SKU, qty, dims/weight, handling tags (fragile, hazmat, temp-control), value, signature requirement.
+Address normalization & geocode; customer ID.
+Inventory by FC with ATS and ETA.
+Carrier matrix: limits, surcharges, cut-offs, service SLAs, dimensional weight rules.
+Package presets & materials cost.
+Promised delivery date per order (from checkout).
+Risk and emissions models (or default heuristics).
+Scoring Pseudocode (illustrative)
+if violates_any(HC_global or HC_action_specific): return REJECT
+
+score = 0
+for h in applicable_heuristics: score += h.weight * h.value   # normalized 0–1
+for p in applicable_penalties: score -= p.weight * p.value
+if action == MERGE and score >= 65: recommend
+if action == SPLIT and score >= 60: recommend
+Default Thresholds (tunable)
+T1 consolidation window: 6h
+T2 minimum savings to suggest merge: 10%
+T3 SLA slack buffer: 12h
+T4 same-wave pick window: 2h
+T5 emissions reduction target (merge): 15%
+T6 max hold for consolidation: 6h (soft 2h)
+T7 availability tolerance before split: 24h
+T8 acceptable extra package cost: $6
+T9 surcharge avoided: $20
+T10 delivery variance target: ≤ 2 days
+T11 included packages before penalty: 2
+T12 emissions increase ceiling (split): 10%
+Quick Examples
+Recommend MERGE (Score 88): Two orders to same address within 90 minutes, combined fits “Medium Box,” saves 22%, meets 2-Day SLA with 18h slack,  no risk flags.
+
+
+Recommend SPLIT (Score 79): One order with a backordered item (3 days ETA) and two ready items; split ships readies now to meet 2-Day promise; backorder later; +$4 extra label cost, avoids $28 oversize fee on combined carton.
+
