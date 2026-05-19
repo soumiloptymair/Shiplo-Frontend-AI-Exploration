@@ -20,9 +20,31 @@ export class ShipmentsComponent {
   readonly STATUS_PILL_CLASS = STATUS_PILL_CLASS;
 
   statusFilterOpen = signal(false);
+  /** Id of the row whose 3-dot action menu is open; null when no menu is open. */
+  openMenuId = signal<string | null>(null);
 
   @HostListener('document:click')
-  closeStatusDropdown() { this.statusFilterOpen.set(false); }
+  closeStatusDropdown() {
+    this.statusFilterOpen.set(false);
+    this.openMenuId.set(null);
+  }
+
+  toggleRowMenu(id: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.openMenuId.update((cur) => (cur === id ? null : id));
+  }
+
+  onUnmerge(id: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.openMenuId.set(null);
+    this.svc.unmergeShipment(id);
+  }
+
+  onUnsplit(id: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.openMenuId.set(null);
+    this.svc.unsplitShipment(id);
+  }
 
   readonly allSelected = computed(() => {
     const rows = this.svc.filtered();

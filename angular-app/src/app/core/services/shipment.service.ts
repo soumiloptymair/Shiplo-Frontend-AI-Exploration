@@ -88,6 +88,9 @@ export class ShipmentService {
     const nonEmpty = buckets.filter((b) => b.items.length > 0);
     if (nonEmpty.length < 2) return null;
 
+    // Snapshot of the pre-split row so each child can carry it and `unsplitShipment` can restore it.
+    const originalSnapshot: Shipment = { ...original, products: original.products?.map((p) => ({ ...p })) };
+
     const newRows: Shipment[] = nonEmpty.map((bucket, i) => {
       const totalValue = bucket.items.reduce((sum, it) => sum + it.qty * it.unitValue, 0);
       return {
@@ -107,6 +110,8 @@ export class ShipmentService {
         // Splitting a previously-merged row must clear merge state so the grid badges stay mutually exclusive.
         isMerged: false,
         originalIds: undefined,
+        mergedSources: undefined,
+        splitOriginal: originalSnapshot,
       };
     });
 
@@ -195,6 +200,9 @@ export class ShipmentService {
       isSplit: false,
       isMerged: true,
       originalIds: sources.map((s) => s.id),
+      // Deep-copy snapshots of the source rows so `unmergeShipment` can restore them later.
+      mergedSources: sources.map((s) => ({ ...s, products: s.products?.map((p) => ({ ...p })) })),
+      splitOriginal: undefined,
     };
 
     // Insert the merged row at the position of `sourceIds[0]` (the user-selected primary), and
@@ -219,5 +227,70 @@ export class ShipmentService {
     this.panelShipmentId.set(null);
 
     return { newId, originalLabels: sources.map((s) => s.shipmentId) };
+  }
+
+  /**
+   * Reverse a merge: replace the merged row at its current grid position with the snapshotted source rows.
+   * No-op (returns null) if the row isn't a merged row or its snapshot is missing.
+   */
+  unmergeShipment(mergedId: string): { restoredIds: string[]; mergedLabel: string } | null {
+    const all = this.allShipments();
+    const idx = all.findIndex((s) => s.id === mergedId);
+    if (idx < 0) return null;
+    const row = all[idx];
+    if (!row.isMerged || !row.mergedSources || row.mergedSources.length < 2) return null;
+
+    const restored = row.mergedSources.map((src) => ({ ...src, products: src.products?.map((p) => ({ ...p })) }));
+    const next = [...all.slice(0, idx), ...restored, ...all.slice(idx + 1)];
+    this.allShipments.set(next);
+
+    // Update selection: drop merged id, select restored rows so the user sees what came back.
+    this.selectedIds.update((prev) => {
+      const sel = new Set(prev);
+      sel.delete(mergedId);
+      restored.forEach((r) => sel.add(r.id));
+      return sel;
+    });
+    if (this.panelShipmentId() === mergedId) this.panelShipmentId.set(null);
+
+    return { restoredIds: restored.map((r) => r.id), mergedLabel: row.shipmentId };
+  }
+
+  /**
+   * Reverse a split: remove every split child that shares the same `splitOriginal.id` as `splitChildId`
+   * and reinsert the original pre-split row at the first child's grid position.
+   */
+  unsplitShipment(splitChildId: string): { restoredId: string; childCount: number } | null {
+    const all = this.allShipments();
+    const child = all.find((s) => s.id === splitChildId);
+    if (!child || !child.isSplit || !child.splitOriginal) return null;
+    const originalId = child.splitOriginal.id;
+
+    const firstIdx = all.findIndex((s) => s.isSplit && s.splitOriginal?.id === originalId);
+    if (firstIdx < 0) return null;
+    const childIds = new Set(
+      all.filter((s) => s.isSplit && s.splitOriginal?.id === originalId).map((s) => s.id),
+    );
+
+    const restored: Shipment = {
+      ...child.splitOriginal,
+      products: child.splitOriginal.products?.map((p) => ({ ...p })),
+    };
+    const next: Shipment[] = [];
+    for (let i = 0; i < all.length; i++) {
+      if (i === firstIdx) next.push(restored);
+      else if (!childIds.has(all[i].id)) next.push(all[i]);
+    }
+    this.allShipments.set(next);
+
+    this.selectedIds.update((prev) => {
+      const sel = new Set(prev);
+      childIds.forEach((cid) => sel.delete(cid));
+      sel.add(restored.id);
+      return sel;
+    });
+    if (childIds.has(this.panelShipmentId() ?? '')) this.panelShipmentId.set(null);
+
+    return { restoredId: restored.id, childCount: childIds.size };
   }
 }

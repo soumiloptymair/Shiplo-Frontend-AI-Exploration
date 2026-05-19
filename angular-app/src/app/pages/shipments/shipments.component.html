@@ -106,7 +106,7 @@
 
       <!-- Data grid -->
       <div class="flex-1 overflow-auto">
-        <table class="w-full min-w-[1640px] border-collapse">
+        <table class="w-full min-w-[1684px] border-collapse">
           <thead>
             <tr class="border-b border-[#e4eaed] bg-neutral-100">
               <th class="sticky top-0 z-10 h-8 w-[60px] bg-neutral-100 px-2 pl-5 pr-3 font-body text-sm font-medium text-neutral-900">
@@ -130,6 +130,7 @@
               <th class="sticky top-0 z-10 h-8 w-[124px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Method</th>
               <th class="sticky top-0 z-10 h-8 w-[140px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Customer</th>
               <th class="sticky top-0 z-10 h-8 w-[168px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Tags</th>
+              <th class="sticky top-0 z-10 h-8 w-[44px] bg-neutral-100 p-0" aria-label="Row actions"></th>
             </tr>
           </thead>
           <tbody>
@@ -271,6 +272,40 @@
                     </svg>
                   </button>
                 </span>
+              </td>
+
+              <!-- Row actions (3-dot menu). Only rendered for merged or split rows for now. -->
+              <td class="h-8 w-[44px] p-0 text-center align-middle" (click)="$event.stopPropagation()">
+                <div *ngIf="s.isMerged || s.isSplit" class="relative inline-block">
+                  <button type="button"
+                    [attr.data-testid]="'button-row-menu-' + s.id"
+                    [attr.aria-label]="'Actions for ' + s.shipmentId"
+                    aria-haspopup="menu"
+                    [attr.aria-expanded]="openMenuId() === s.id"
+                    (click)="toggleRowMenu(s.id, $event)"
+                    class="flex h-7 w-7 items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-200">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <circle cx="12" cy="5" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="12" cy="19" r="1.75"/>
+                    </svg>
+                  </button>
+                  <div *ngIf="openMenuId() === s.id"
+                    role="menu"
+                    [attr.data-testid]="'menu-row-' + s.id"
+                    class="absolute right-0 top-7 z-20 min-w-[160px] rounded-md border border-[#b8c6cc] bg-white py-1 shadow-lg">
+                    <button *ngIf="s.isMerged" type="button" role="menuitem"
+                      [attr.data-testid]="'menu-unmerge-' + s.id"
+                      (click)="onUnmerge(s.id, $event)"
+                      class="block w-full px-3 py-2 text-left font-body text-sm text-neutral-900 hover:bg-neutral-100">
+                      Unmerge
+                    </button>
+                    <button *ngIf="s.isSplit" type="button" role="menuitem"
+                      [attr.data-testid]="'menu-unsplit-' + s.id"
+                      (click)="onUnsplit(s.id, $event)"
+                      class="block w-full px-3 py-2 text-left font-body text-sm text-neutral-900 hover:bg-neutral-100">
+                      Unsplit
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>

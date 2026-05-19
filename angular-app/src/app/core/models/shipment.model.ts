@@ -84,6 +84,10 @@ export interface Shipment {
   isMerged?: boolean;
   /** Original shipment ids that were combined into this merged row (only set when `isMerged` is true). */
   originalIds?: string[];
+  /** Snapshot of the source shipments that were merged into this row — used by `unmergeShipment` to restore them. */
+  mergedSources?: Shipment[];
+  /** Snapshot of the pre-split shipment — set on every split child so `unsplitShipment` can restore the original row. */
+  splitOriginal?: Shipment;
   log?: ShipmentLogEntry[];
 }
 
