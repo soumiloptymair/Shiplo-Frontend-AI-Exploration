@@ -1,5 +1,10 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Status pill-select in detail panel (Figma node `27437-68533`)
+
+### Changed (component pattern, reuses existing `--status-*` tokens)
+- `pages/shipments/shipment-detail-panel/shipment-detail-panel.component.html` — Status field in the panel header changed from a bordered 40px select to a pill-shaped chip that still functions as a dropdown. Pattern: `h-6 rounded-full pl-3 pr-1 py-1`, background driven by `STATUS_PILL_CLASS[status]` (reuses `bg-status-*` Tailwind utilities backed by `--status-shipped`, `--status-picking`, `--status-label-created`, `--status-delayed`, `--status-delivered`, `--status-on-hold`, `--status-needs-review`, `--status-cancelled`). Status label is shown on its own (no "Status" prefix word, no dot — the colored pill itself conveys status). Right cluster is a 1px vertical divider (`bg-[#0b1516]/30`) + 16px chevron-down that rotates 180° when the menu is open. No new color tokens; the existing status palette is reused.
+
 ## 2026-05-19 — Split badge on split rows (Figma node `24091-104124`)
 
 ### Added (model field + icon, no new tokens)
