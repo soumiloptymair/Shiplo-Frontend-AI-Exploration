@@ -1,6 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppShellComponent } from '../../layout/app-shell/app-shell.component';
+import { ToastService } from '../../core/services/toast.service';
 import { MarketplaceDetailPanelComponent } from './marketplace-detail-panel/marketplace-detail-panel.component';
 import { ConnectIntegrationModalComponent, ConnectFormValue } from './connect-modal/connect-integration-modal.component';
 import { ConfigureStoreModalComponent, ConfigureStoreFormValue } from './configure-store-modal/configure-store-modal.component';
@@ -181,8 +182,9 @@ export class MarketplaceComponent {
   readonly selectedRowId = signal<string | null>(null);
   readonly connectModalOpen = signal(false);
   readonly configureStoreOpen = signal(false);
-  readonly toast = signal<string | null>(null);
   readonly openRowMenuId = signal<string | null>(null);
+
+  private readonly toastSvc = inject(ToastService);
 
   readonly rows = signal<ConnectorRow[]>(generateRows());
 
@@ -250,8 +252,7 @@ export class MarketplaceComponent {
     const target = this.selectedRow();
     if (!target) return;
     this.configureStoreOpen.set(false);
-    this.toast.set(`Draft saved for “${target.accountName}”`);
-    setTimeout(() => this.toast.set(null), 4000);
+    this.toastSvc.show(`Draft saved for “${target.accountName}”`);
   }
 
   confirmStore(value: ConfigureStoreFormValue) {
@@ -270,8 +271,7 @@ export class MarketplaceComponent {
           }
         : r));
     this.configureStoreOpen.set(false);
-    this.toast.set(`Successfully connected “${accountName}”`);
-    setTimeout(() => this.toast.set(null), 4000);
+    this.toastSvc.show(`Successfully connected “${accountName}”`);
   }
 
   confirmConnect(form: ConnectFormValue) {
@@ -290,11 +290,8 @@ export class MarketplaceComponent {
           }
         : r));
     this.connectModalOpen.set(false);
-    this.toast.set(`Successfully connected “${accountName}”`);
-    setTimeout(() => this.toast.set(null), 4000);
+    this.toastSvc.show(`Successfully connected “${accountName}”`);
   }
-
-  dismissToast() { this.toast.set(null); }
 
   requestAccess(id: string) {
     const target = this.rows().find(r => r.id === id);
@@ -302,8 +299,7 @@ export class MarketplaceComponent {
     const name = target.accountName;
     this.rows.update(list => list.map(r =>
       r.id === id ? { ...r, status: 'Requested' as ConnectorStatus } : r));
-    this.toast.set(`Access requested for “${name}”. Our team will reach out shortly.`);
-    setTimeout(() => this.toast.set(null), 4000);
+    this.toastSvc.show(`Access requested for “${name}”. Our team will reach out shortly.`);
   }
 
   toggleRowMenu(id: string, ev?: Event) {
@@ -323,7 +319,6 @@ export class MarketplaceComponent {
         : r));
     this.openRowMenuId.set(null);
     if (this.selectedRowId() === id) this.selectedRowId.set(null);
-    this.toast.set(`Disconnected “${name}”`);
-    setTimeout(() => this.toast.set(null), 4000);
+    this.toastSvc.show(`Disconnected “${name}”`);
   }
 }

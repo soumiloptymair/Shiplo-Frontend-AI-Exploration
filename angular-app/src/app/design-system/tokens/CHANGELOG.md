@@ -1,5 +1,12 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Global Toast component (Figma node `25949-1336122`)
+
+### Added (component, no new tokens)
+- `core/services/toast.service.ts` — single source of truth for action-completion toasts. Exposes `show(message, detail?)`, `dismiss()`, and a `TOAST_DURATION_MS = 5000` constant.
+- `shared/toast/toast.component.ts` — Figma-spec toast (384×84, green `#2e7d32`, check icon, optional detail line, X dismiss, bottom progress bar that animates from full → 0 over 5s). Auto-vanishes after 5s; progress bar restarts when a new toast fires (DOM keyed by toast id).
+- Mounted once globally in `app.component`. Inline page toasts in `pages/marketplace` and `pages/wallet` were removed; both now call `ToastService.show()`. `InventoryService.showToast/dismissToast` delegates to the same service so all action notifications share one queue and visual treatment.
+
 ## 2026-05-19 — Configure Store wizard (Figma node `27841-533726`)
 
 ### Changed

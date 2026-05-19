@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AppShellComponent } from '../../layout/app-shell/app-shell.component';
 import { StatusPillComponent } from '../../shared/components/status-pill/status-pill.component';
 import { WalletService } from '../../core/services/wallet.service';
+import { ToastService } from '../../core/services/toast.service';
 import { DateRangePreset, WalletTransaction } from '../../core/models/wallet.model';
 
 @Component({
@@ -15,6 +16,7 @@ import { DateRangePreset, WalletTransaction } from '../../core/models/wallet.mod
 })
 export class WalletComponent {
   private readonly wallet = inject(WalletService);
+  private readonly toastSvc = inject(ToastService);
 
   // Reactive state from service
   readonly balance        = this.wallet.currentBalance;
@@ -26,7 +28,6 @@ export class WalletComponent {
   readonly search        = signal<string>('');
   readonly dateRange     = signal<DateRangePreset>('Last 30 days');
   readonly dateMenuOpen  = signal<boolean>(false);
-  readonly toast         = signal<string | null>(null);
 
   /** Filtered transactions for the table (search across IDs + type). */
   readonly filteredTxns = computed<WalletTransaction[]>(() => {
@@ -40,12 +41,8 @@ export class WalletComponent {
     );
   });
 
-  // --- Toast helpers ---
-  private showToast(message: string): void {
-    this.toast.set(message);
-    setTimeout(() => this.toast.set(null), 4000);
-  }
-  dismissToast(): void { this.toast.set(null); }
+  // --- Toast helper (delegates to global service) ---
+  private showToast(message: string): void { this.toastSvc.show(message); }
 
   // --- Filter bar handlers ---
   onSearch(event: Event): void {

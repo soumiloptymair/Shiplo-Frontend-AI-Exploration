@@ -1,5 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { SAMPLE_INVENTORY, InventoryProduct, ProductVariant, InventoryTab } from '../models/inventory.model';
+import { ToastService } from './toast.service';
 
 export type SelectedItem =
   | { kind: 'product'; product: InventoryProduct }
@@ -53,12 +54,11 @@ export class InventoryService {
 
   readonly syncing = signal(false);
   readonly syncProgress = signal(0);
-  readonly toast = signal<{ title: string; message: string } | null>(null);
   readonly lastSyncedLabel = signal('Last Synced 20 min ago');
 
+  private readonly toastSvc = inject(ToastService);
   private syncTimer: ReturnType<typeof setInterval> | null = null;
   private finishTimer: ReturnType<typeof setTimeout> | null = null;
-  private toastTimer: ReturnType<typeof setTimeout> | null = null;
   private syncRunId = 0;
 
   readonly filtered = computed(() => {
@@ -134,14 +134,10 @@ export class InventoryService {
   }
 
   showToast(title: string, message: string) {
-    this.toast.set({ title, message });
-    if (this.toastTimer) clearTimeout(this.toastTimer);
-    this.toastTimer = setTimeout(() => this.toast.set(null), 4000);
+    this.toastSvc.show(title, message);
   }
 
   dismissToast() {
-    if (this.toastTimer) clearTimeout(this.toastTimer);
-    this.toastTimer = null;
-    this.toast.set(null);
+    this.toastSvc.dismiss();
   }
 }

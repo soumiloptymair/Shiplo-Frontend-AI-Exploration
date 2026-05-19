@@ -16,5 +16,6 @@ Living document mapping Figma components / instances to Angular components.
 | Download Report button (text)         | inline `<button>` in Wallet filter bar                               | h=36, ghost style |
 | Column header / Grid cell             | Native `<thead>` / `<tbody>` rows                                    | Column widths copied from Figma column-header instances |
 | Configure Store wizard (5 steps)      | `pages/marketplace/configure-store-modal`                            | Figma node `27841-533726` (frames 1171276832 → 1171276836). 720×~700 modal: left-rail stepper + step pane + footer (Cancel ‖ Back · Continue · Save Draft (step 1) · Connect). Steps: 1 Connect Account, 2 Shipping Accounts, 3 Warehouse Settings, 4 Addresses, 5 Extras. Opens for `category === 'ecommerce'` only; other categories still use `connect-modal`. |
+| Toast (action completion)             | `shared/toast/toast.component` + `core/services/toast.service`       | Figma node `25949-1336122`. 384×84 green `#2e7d32`, check icon, message + optional detail, X close, bottom progress bar that shrinks over 5s. Mounted once globally in `app.component`; pages call `inject(ToastService).show(msg, detail?)`. |
 
 When a new Figma component shows up, add a row before writing code.
