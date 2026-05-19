@@ -131,7 +131,7 @@
   <!-- Tabs -->
   <div class="flex shrink-0 border-b border-[#e4eaed]">
     <button *ngFor="let tab of TABS" type="button"
-      [attr.data-testid]="'tab-panel-' + tab.toLowerCase()"
+      [attr.data-testid]="'tab-panel-' + tab.toLowerCase().replace(' ', '-')"
       (click)="setTab(tab)"
       class="px-3 py-2.5 font-body text-sm whitespace-nowrap transition-colors"
       [ngClass]="activeTab() === tab

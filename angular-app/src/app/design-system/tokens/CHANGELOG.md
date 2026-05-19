@@ -9,8 +9,8 @@
 - `core/models/shipment.model.ts` — new types `ShipmentProduct`, `MaterialFlags`, `SplitRecommendation` (discriminated union), `ShipmentLogEntry`. Seeded s-4 (low-inventory @ `ABC12345SBL`, `KS Fulfillment center`), s-5 (faster-delivery), s-6 (lower-cost, $4.50 savings) with shared default products / materials / log.
 
 ### Tokens
-- No new tokens introduced. Banner background `#FDE2D4` already exists as the `chip.red` token; used as an arbitrary hex inline because it is consumed in a single component-local context.
-- Reused `action.primary` (`#008572`) for the modal Confirm button.
+- No new tokens introduced. Banner background and "only N left" badge background both reuse the existing `chip.red` token value (`#FDE2D4`). These are currently written inline as the hex literal pending the broader migration away from raw hex; once that pass lands, both call sites should switch to the `bg-chip-red` Tailwind utility.
+- Reused `action.primary` (`#008572`) for the modal Confirm button — also currently inline pending the same migration.
 
 ## 2026-05-19 — Global Toast component (Figma node `25949-1336122`)
 
