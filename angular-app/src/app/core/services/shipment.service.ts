@@ -126,14 +126,14 @@ export class ShipmentService {
   }
 
   /**
-   * Find merge-eligible peers for `id`: same customer (used as the destination proxy — the model
-   * has no explicit destination address field), compatible status, and not already split/merged.
-   * Statuses incompatible with merging: Cancelled, Delivered, Delayed.
+   * Find merge-eligible peers for `id`: same customer + same destination ZIP, compatible status,
+   * and not already split/merged. Statuses incompatible with merging: Cancelled, Delivered, Delayed.
+   * A shipment with no `destinationZip` has no candidates (cannot establish the destination match).
    */
   mergeCandidatesFor(id: string): Shipment[] {
     const all = this.allShipments();
     const me = all.find((s) => s.id === id);
-    if (!me) return [];
+    if (!me || !me.destinationZip) return [];
     const blockedStatuses = new Set<ShipmentStatus | ''>(['Cancelled', 'Delivered', 'Delayed', '']);
     if (blockedStatuses.has(me.status)) return [];
     return all.filter((s) =>
@@ -141,7 +141,9 @@ export class ShipmentService {
       !s.isSplit &&
       !s.isMerged &&
       !blockedStatuses.has(s.status) &&
-      s.customer === me.customer
+      s.customer === me.customer &&
+      !!s.destinationZip &&
+      s.destinationZip === me.destinationZip
     );
   }
 
@@ -151,13 +153,16 @@ export class ShipmentService {
    * - Status reset to "Pending"; the merged row's `isMerged` + `originalIds` are set so the grid can render the merge badge.
    * - The new id is added to `selectedIds` so the grid highlights it; the side panel is closed.
    */
-  mergeShipments(sourceIds: string[]): { newId: string; originalLabels: string[] } | null {
+  mergeShipments(sourceIds: string[], keptWarehouse?: string): { newId: string; originalLabels: string[] } | null {
     if (sourceIds.length < 2) return null;
     const all = this.allShipments();
     const sources = sourceIds.map((sid) => all.find((s) => s.id === sid)).filter(Boolean) as Shipment[];
     if (sources.length < 2) return null;
     const firstIdx = all.findIndex((s) => s.id === sources[0].id);
     if (firstIdx < 0) return null;
+    // The kept warehouse must be one of the source warehouses; fall back to the first source's.
+    const warehouseChoices = new Set(sources.map((s) => s.warehouse));
+    const warehouse = keptWarehouse && warehouseChoices.has(keptWarehouse) ? keptWarehouse : sources[0].warehouse;
 
     // De-dupe products by SKU, summing qty; keep first occurrence's unitValue + name.
     const productMap = new Map<string, ShipmentProduct>();
@@ -180,6 +185,7 @@ export class ShipmentService {
       orderRefKind: 'combined',
       combinedCount: sources.length,
       status: 'Pending' as ShipmentStatus,
+      warehouse,
       value: `$${totalValue.toFixed(2)}`,
       products: mergedProducts,
       splitRecommendation: undefined,

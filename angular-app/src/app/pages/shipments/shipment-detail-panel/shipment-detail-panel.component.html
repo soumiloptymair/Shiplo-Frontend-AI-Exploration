@@ -53,10 +53,14 @@
     class="block pt-3"
   />
 
-  <!-- Merge recommendation banner (Figma file unEpC0FcuWKbB5yO1m7OyX / section 23011:103329) -->
+  <!-- Merge recommendation banner (Figma file unEpC0FcuWKbB5yO1m7OyX / section 23011:103329).
+       Surfaced LIVE off mergeCandidatesFor — any shipment with ≥1 eligible peer shows it,
+       even without a pre-seeded `mergeRecommendation` (which only customizes the copy/savings). -->
   <app-merge-recommendation-banner
-    *ngIf="showMergeBanner && shipment.mergeRecommendation"
+    *ngIf="showMergeBanner"
     [recommendation]="shipment.mergeRecommendation"
+    [peerCount]="mergeCandidates.length"
+    [destination]="bannerDestination"
     (merge)="openMergeModal()"
     (dismiss)="dismissMergeBanner()"
     class="block pt-3"

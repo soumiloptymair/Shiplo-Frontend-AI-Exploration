@@ -37,4 +37,11 @@ export class ShipmentsComponent {
   kindIcon(kind: string): 'order' | 'return' | 'combined' {
     return kind as 'order' | 'return' | 'combined';
   }
+
+  /** True when a row has at least one live merge candidate — drives the alert triangle. */
+  hasMergeOpportunity(id: string): boolean {
+    // Read the signal so the computation tracks grid mutations.
+    void this.svc.allShipments();
+    return this.svc.mergeCandidatesFor(id).length > 0;
+  }
 }

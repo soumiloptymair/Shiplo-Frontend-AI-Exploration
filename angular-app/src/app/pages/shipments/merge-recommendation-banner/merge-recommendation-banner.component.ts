@@ -53,14 +53,23 @@ import { MergeRecommendation } from '../../../core/models/shipment.model';
   `,
 })
 export class MergeRecommendationBannerComponent {
-  @Input({ required: true }) recommendation!: MergeRecommendation;
+  /** Optional explicitly-seeded copy. If absent the banner generates copy from `peerCount` + `destination`. */
+  @Input() recommendation?: MergeRecommendation;
+  /** Number of live merge candidates (the panel computes this off the service). Used when no `recommendation` is provided. */
+  @Input() peerCount = 0;
+  /** Live destination string (e.g. the ZIP). Used when no `recommendation` is provided. */
+  @Input() destination = '';
   @Output() merge = new EventEmitter<void>();
   @Output() dismiss = new EventEmitter<void>();
 
   get body(): string {
     const r = this.recommendation;
-    const n = r.peerCount;
+    const n = r?.peerCount ?? this.peerCount;
+    const dest = r?.destination ?? this.destination;
     const peers = `${n} shipment${n === 1 ? '' : 's'}`;
-    return `Found ${peers} going to ${r.destination}. Merging could save you $${r.savings.toFixed(2)}.`;
+    if (r?.savings != null) {
+      return `Found ${peers} going to ${dest}. Merging could save you $${r.savings.toFixed(2)}.`;
+    }
+    return `Found ${peers} going to ${dest}. Merge them into a single shipment.`;
   }
 }

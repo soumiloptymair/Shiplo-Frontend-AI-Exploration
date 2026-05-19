@@ -7,17 +7,22 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="merge-shipment-modal-title"
-    class="flex h-[812px] max-h-[95vh] w-[1324px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg bg-white"
+    class="flex h-[680px] max-h-[95vh] w-[1024px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg bg-white"
     style="box-shadow: 0 1px 16px 0 rgba(0,0,0,0.25);"
     (click)="$event.stopPropagation()"
   >
     <!-- Header -->
     <header class="flex shrink-0 items-center justify-between border-b border-[#b8c6cc] px-6 py-4">
-      <p id="merge-shipment-modal-title"
-        class="font-body text-[18px] font-bold leading-tight text-[#0b1516]"
-        data-testid="text-merge-modal-title">
-        Merge Shipments ({{ sources().length }} orders)
-      </p>
+      <div class="flex flex-col gap-0.5">
+        <p id="merge-shipment-modal-title"
+          class="font-body text-[18px] font-bold leading-tight text-[#0b1516]"
+          data-testid="text-merge-modal-title">
+          Merge Shipments
+        </p>
+        <p class="font-body text-xs text-[#45565b]" data-testid="text-merge-modal-subtitle">
+          {{ selectedShipments().length }} of {{ allShipments().length }} orders going to ZIP {{ destinationZip() }}
+        </p>
+      </div>
       <button type="button" aria-label="Close merge modal" data-testid="button-close-merge-modal"
         (click)="cancel.emit()"
         class="flex h-8 w-8 items-center justify-center rounded-full text-[#324147] hover:bg-neutral-100">
@@ -27,221 +32,123 @@
       </button>
     </header>
 
-    <!-- Body: cards grid -->
-    <section class="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#f6f9fb] px-5 pb-4 pt-4">
-      <div class="grid min-h-0 flex-1 grid-cols-2 content-start items-start gap-5 overflow-y-auto pb-2"
-        data-testid="row-merge-cards">
+    <!-- Body: left summary + right source cards -->
+    <section class="flex min-h-0 flex-1 overflow-hidden">
 
-        <article *ngFor="let s of sources(); let i = index"
-          [attr.data-testid]="'card-merge-source-' + (i + 1)"
-          class="flex w-full flex-col rounded border border-[#b8c6cc] bg-white">
+      <!-- LEFT: summary + warehouse picker + merged preview -->
+      <aside class="flex w-[380px] shrink-0 flex-col overflow-y-auto border-r border-[#b8c6cc] bg-[#f6f9fb] px-5 py-5">
+        <p class="font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Destination</p>
+        <p class="mt-1 font-body text-sm text-[#0b1516]" data-testid="text-merge-summary-destination">
+          {{ primary.customer }} &middot; ZIP {{ destinationZip() }}
+        </p>
 
-          <!-- Card header: "Order N: #ID" + optional remove -->
-          <header class="flex items-center justify-between gap-2 px-5 pt-4 pb-2">
-            <p class="font-body text-base font-bold text-[#0b1516]"
-              [attr.data-testid]="'text-merge-card-title-' + (i + 1)">
-              Order {{ i + 1 }}: {{ s.shipmentId }}
-            </p>
-            <button *ngIf="canRemove(s.id)"
-              type="button"
-              [attr.data-testid]="'button-remove-merge-card-' + s.id"
-              [attr.aria-label]="'Remove ' + s.shipmentId + ' from merge'"
-              (click)="removeCard(s.id, $event)"
-              class="flex h-6 w-6 items-center justify-center rounded text-[#5b6b72] hover:bg-neutral-100">
-              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </header>
+        <!-- Warehouse radio picker -->
+        <p class="mt-5 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Keep warehouse</p>
+        <div class="mt-2 flex flex-col gap-2" data-testid="group-merge-warehouse">
+          <label *ngFor="let w of warehouseOptions(); let i = index"
+            [attr.data-testid]="'radio-merge-warehouse-' + i"
+            class="flex cursor-pointer items-start gap-2 rounded border border-[#e4eaed] bg-white px-3 py-2 hover:border-[#008572]">
+            <input type="radio" name="kept-warehouse"
+              [value]="w"
+              [checked]="keptWarehouse() === w"
+              (change)="setWarehouse(w)"
+              class="mt-0.5 h-4 w-4 accent-[#008572]"/>
+            <span class="font-body text-sm text-[#0b1516]">{{ w }}</span>
+          </label>
+        </div>
 
-          <!-- Tabs -->
-          <div class="flex border-b border-[#e4eaed] px-5">
-            <button *ngFor="let tab of TABS" type="button"
-              [attr.data-testid]="'tab-merge-' + (i + 1) + '-' + tab.toLowerCase().replace(' ', '-')"
-              (click)="setTab(s.id, tab, $event)"
-              class="px-3 py-2 font-body text-sm transition-colors"
-              [ngClass]="tabOf(s.id) === tab
-                ? 'border-b-2 border-[#008572] font-medium text-[#008572] -mb-px'
-                : 'font-normal text-[#0b1516] hover:bg-neutral-50'">
-              {{ tab }}
-            </button>
+        <!-- Merged preview card -->
+        <div class="mt-6 rounded border border-[#008572] bg-white p-4" data-testid="card-merge-preview">
+          <p class="font-body text-xs font-medium uppercase tracking-wide text-[#008572]">Merged preview</p>
+          <p class="mt-1 font-body text-sm font-bold text-[#0b1516]" data-testid="text-merge-preview-title">
+            1 combined shipment &middot; {{ totalQty() }} items
+          </p>
+          <p class="mt-0.5 font-body text-sm text-[#0b1516]" data-testid="text-merge-preview-total">
+            Total value: ${{ totalValue().toFixed(2) }}
+          </p>
+          <p class="mt-0.5 font-body text-xs text-[#45565b]">
+            Warehouse: {{ keptWarehouse() || '—' }}
+          </p>
+
+          <div *ngIf="mergedProducts().length > 0" class="mt-3 border-t border-[#e4eaed] pt-3">
+            <p class="font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Combined products</p>
+            <ul class="mt-2 flex flex-col gap-1" data-testid="list-merge-preview-products">
+              <li *ngFor="let p of mergedProducts()"
+                [attr.data-testid]="'preview-product-' + p.sku"
+                class="flex items-center justify-between font-body text-sm text-[#0b1516]">
+                <span class="truncate pr-2">{{ p.sku }}</span>
+                <span class="shrink-0 text-[#45565b]">×{{ p.qty }} · ${{ (p.qty * p.unitValue).toFixed(2) }}</span>
+              </li>
+            </ul>
           </div>
+          <p *ngIf="mergedProducts().length === 0"
+            class="mt-3 font-body text-xs italic text-[#5b6b72]">
+            Select at least one peer to preview combined products.
+          </p>
+        </div>
+      </aside>
 
-          <!-- Tab body -->
-          <div class="flex flex-col gap-4 px-5 py-4">
+      <!-- RIGHT: source cards with checkboxes -->
+      <div class="flex min-w-0 flex-1 flex-col overflow-y-auto bg-white px-5 py-5"
+        data-testid="list-merge-source-cards">
+        <p class="font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Source shipments</p>
+        <p class="mt-1 font-body text-xs text-[#5b6b72]">Uncheck to exclude from the merge (minimum 2).</p>
 
-            <!-- DETAILS -->
-            <ng-container *ngIf="tabOf(s.id) === 'Details'">
-              <div class="flex flex-col gap-4">
-                <div class="flex items-start">
-                  <div class="flex w-1/2 items-start gap-3">
-                    <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
-                      <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                      <p class="font-body text-xs text-[#45565b]">Shipping Method</p>
-                      <p class="font-body text-sm text-[#0b1516]">{{ s.method || 'Standard' }}</p>
-                    </div>
-                  </div>
-                  <div class="flex w-1/2 items-start gap-3">
-                    <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
-                      <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                      <p class="font-body text-xs text-[#45565b]">Order Total</p>
-                      <p class="font-body text-sm text-[#0b1516]">{{ s.value }}</p>
-                    </div>
-                  </div>
+        <div class="mt-3 flex flex-col gap-3">
+          <article *ngFor="let s of allShipments(); let i = index"
+            [attr.data-testid]="'card-merge-source-' + s.id"
+            class="rounded border bg-white px-4 py-3 transition-colors"
+            [ngClass]="isSelected(s.id) ? 'border-[#008572]' : 'border-[#e4eaed] opacity-60'">
+            <label class="flex cursor-pointer items-start gap-3"
+              [class.cursor-not-allowed]="isPrimary(s.id)">
+              <input type="checkbox"
+                [attr.data-testid]="'checkbox-merge-source-' + s.id"
+                [checked]="isSelected(s.id)"
+                [disabled]="isPrimary(s.id)"
+                (change)="toggle(s.id, $event)"
+                class="mt-1 h-4 w-4 accent-[#008572]"/>
+              <div class="flex flex-1 flex-col gap-1">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="font-body text-sm font-bold text-[#0b1516]">
+                    {{ s.shipmentId }}
+                    <span *ngIf="isPrimary(s.id)" class="ml-1 font-body text-xs font-normal text-[#008572]">(primary)</span>
+                  </p>
+                  <span class="font-body text-sm font-medium text-[#0b1516]">{{ s.value }}</span>
                 </div>
-                <div class="flex items-start">
-                  <div class="flex w-1/2 items-start gap-3">
-                    <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
-                      <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/></svg>
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                      <p class="font-body text-xs text-[#45565b]">Shipment Type</p>
-                      <p class="font-body text-sm text-[#0b1516]">{{ s.freightType || '—' }}</p>
-                    </div>
-                  </div>
-                  <div class="flex w-1/2 items-start gap-3">
-                    <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
-                      <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                      <p class="font-body text-xs text-[#45565b]">Source</p>
-                      <span class="inline-flex items-center gap-1">
-                        <img [src]="SOURCE_ICON" alt="" class="h-4 w-4 shrink-0" />
-                        <span class="font-body text-sm font-medium text-[#2da1cb] truncate max-w-[140px]">{{ s.source }}</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-start">
-                  <div class="flex w-1/2 items-start gap-3">
-                    <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
-                      <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 14L4 9l5-5M20 20v-7a4 4 0 00-4-4H4"/></svg>
-                    </div>
-                    <div class="flex flex-col gap-0.5">
-                      <p class="font-body text-xs text-[#45565b]">Return</p>
-                      <p class="font-body text-sm text-[#0b1516]">{{ s.warehouse }}</p>
-                    </div>
-                  </div>
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-xs text-[#45565b]">
+                  <span>{{ s.status }}</span>
+                  <span>·</span>
+                  <span>{{ s.warehouse }}</span>
+                  <span>·</span>
+                  <span>{{ productsQty(s) }} items</span>
+                  <span>·</span>
+                  <span>{{ s.freightType || 'No freight type' }}</span>
                 </div>
               </div>
-
-              <!-- SHIPMENT -->
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center gap-2">
-                  <p class="font-body text-xs font-medium uppercase tracking-wide text-[#0b1516] whitespace-nowrap">Shipment</p>
-                  <div class="h-px flex-1 bg-[#e4eaed]"></div>
-                </div>
-                <div class="flex gap-6">
-                  <div class="flex flex-col gap-0.5">
-                    <p class="font-body text-xs text-[#45565b]">Shipment Size</p>
-                    <p class="font-body text-sm text-[#0b1516]">1 Large Box</p>
-                  </div>
-                  <div class="flex flex-col gap-0.5">
-                    <p class="font-body text-xs text-[#45565b]">Weight</p>
-                    <p class="font-body text-sm text-[#0b1516]">32 lbs</p>
-                  </div>
-                </div>
-                <div class="flex gap-6">
-                  <div *ngFor="let dim of [['Length','20 in'],['Width','32 in'],['Height','12 in']]" class="flex flex-col gap-0.5">
-                    <p class="font-body text-xs text-[#45565b]">{{ dim[0] }}</p>
-                    <p class="font-body text-sm text-[#0b1516]">{{ dim[1] }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- CUSTOMER -->
-              <div class="flex flex-col gap-3">
-                <div class="flex items-center gap-2">
-                  <p class="font-body text-xs font-medium uppercase tracking-wide text-[#0b1516] whitespace-nowrap">Customer</p>
-                  <div class="h-px flex-1 bg-[#e4eaed]"></div>
-                </div>
-                <div class="flex gap-4">
-                  <div class="flex flex-1 flex-col gap-0.5">
-                    <p class="font-body text-xs text-[#45565b]">Name</p>
-                    <p class="font-body text-sm text-[#0b1516]">{{ s.customer }}</p>
-                  </div>
-                  <div class="flex flex-1 flex-col gap-0.5">
-                    <p class="font-body text-xs text-[#45565b]">Email</p>
-                    <p class="font-body text-sm text-[#0b1516]">sam.pr&#64;hp.com</p>
-                  </div>
-                  <div class="flex flex-1 flex-col gap-0.5">
-                    <p class="font-body text-xs text-[#45565b]">Phone</p>
-                    <p class="font-body text-sm text-[#0b1516]">123-456-7890</p>
-                  </div>
-                </div>
-                <div class="flex flex-col gap-0.5">
-                  <p class="font-body text-xs text-[#45565b]">Shipping Address</p>
-                  <p class="font-body text-sm text-[#0b1516]">3672 Chesterfield Blvd., Nashville, TN 73928, US</p>
-                </div>
-              </div>
-            </ng-container>
-
-            <!-- PRODUCTS -->
-            <ng-container *ngIf="tabOf(s.id) === 'Products'">
-              <div *ngIf="(s.products ?? []).length === 0; else productList"
-                class="rounded border border-dashed border-[#b8c6cc] bg-[#f6f9fb] p-4 text-center font-body text-sm italic text-[#5b6b72]">
-                No products on this shipment
-              </div>
-              <ng-template #productList>
-                <div class="flex flex-col">
-                  <div class="grid grid-cols-[1fr_56px_72px_72px] gap-2 border-b border-[#e4eaed] pb-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">
-                    <span>Item</span><span class="text-right">Qty</span><span class="text-right">Value</span><span class="text-right">Total</span>
-                  </div>
-                  <div *ngFor="let p of (s.products ?? [])"
-                    class="grid grid-cols-[1fr_56px_72px_72px] gap-2 border-b border-[#e4eaed] py-2 font-body text-sm text-[#0b1516]">
-                    <span class="truncate">{{ p.sku }}</span>
-                    <span class="text-right">{{ p.qty }}</span>
-                    <span class="text-right">${{ p.unitValue.toFixed(2) }}</span>
-                    <span class="text-right">${{ (p.qty * p.unitValue).toFixed(2) }}</span>
-                  </div>
-                  <div class="grid grid-cols-[1fr_56px_72px_72px] gap-2 pt-2 font-body text-sm font-bold text-[#0b1516]">
-                    <span></span><span></span><span class="text-right">Total</span>
-                    <span class="text-right">${{ productsTotal(s).toFixed(2) }}</span>
-                  </div>
-                </div>
-              </ng-template>
-            </ng-container>
-
-            <!-- NOTES -->
-            <ng-container *ngIf="tabOf(s.id) === 'Notes'">
-              <p class="font-body text-sm italic text-[#5b6b72]">No notes on this shipment</p>
-            </ng-container>
-
-            <!-- SHIPMENT LOG -->
-            <ng-container *ngIf="tabOf(s.id) === 'Shipment Log'">
-              <ul *ngIf="(s.log ?? []).length > 0; else noLog" class="flex flex-col gap-2">
-                <li *ngFor="let entry of (s.log ?? [])" class="flex flex-col gap-0.5 border-l-2 border-[#e4eaed] pl-3">
-                  <p class="font-body text-xs text-[#45565b]">{{ entry.at }}</p>
-                  <p class="font-body text-sm text-[#0b1516]">{{ entry.label }}</p>
-                </li>
-              </ul>
-              <ng-template #noLog>
-                <p class="font-body text-sm italic text-[#5b6b72]">No log entries</p>
-              </ng-template>
-            </ng-container>
-
-          </div>
-        </article>
+            </label>
+          </article>
+        </div>
       </div>
     </section>
 
     <!-- Footer -->
-    <footer class="flex shrink-0 items-center justify-end gap-4 border-t border-[#b8c6cc] bg-white px-6 py-4">
-      <button type="button" data-testid="button-cancel-merge"
-        (click)="cancel.emit()"
-        class="rounded-md px-3 py-2 font-body text-sm font-bold leading-5 text-[#0b1516] hover:bg-neutral-100">
-        Cancel
-      </button>
-      <button type="button" data-testid="button-confirm-merge"
-        (click)="onConfirm()"
-        [disabled]="!canConfirm()"
-        class="rounded-md bg-[#008572] px-3 py-2 font-body text-sm font-bold leading-5 text-white transition-colors hover:bg-[#006A5A] disabled:cursor-not-allowed disabled:bg-[#b8c6cc]">
-        Merge Shipments
-      </button>
+    <footer class="flex shrink-0 items-center justify-between gap-4 border-t border-[#b8c6cc] bg-white px-6 py-4">
+      <p class="font-body text-xs text-[#45565b]" data-testid="text-merge-footer-summary">
+        Merging {{ selectedShipments().length }} shipments into 1
+      </p>
+      <div class="flex items-center gap-3">
+        <button type="button" data-testid="button-cancel-merge"
+          (click)="cancel.emit()"
+          class="rounded-md px-3 py-2 font-body text-sm font-bold leading-5 text-[#0b1516] hover:bg-neutral-100">
+          Cancel
+        </button>
+        <button type="button" data-testid="button-confirm-merge"
+          (click)="onConfirm()"
+          [disabled]="!canConfirm()"
+          class="rounded-md bg-[#008572] px-3 py-2 font-body text-sm font-bold leading-5 text-white transition-colors hover:bg-[#006A5A] disabled:cursor-not-allowed disabled:bg-[#b8c6cc]">
+          Merge Shipments
+        </button>
+      </div>
     </footer>
   </div>
 </div>

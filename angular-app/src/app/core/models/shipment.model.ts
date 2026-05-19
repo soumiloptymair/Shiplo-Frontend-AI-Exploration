@@ -71,6 +71,8 @@ export interface Shipment {
   shipping: string;
   method: string;
   customer: string;
+  /** ZIP/postal portion of the destination address. Used by the merge flow to group eligible peers. */
+  destinationZip?: string;
   tags: string[];
   products?: ShipmentProduct[];
   materials?: MaterialFlags;
@@ -136,12 +138,15 @@ export const SAMPLE_SHIPMENTS: Shipment[] = [
   { id: 's-12', shipmentId: '#20230101180003', freightType: '',           orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Pending', needsAttention: true, createdOn: '12/02/2024', value: '$41.99', source: 'Express - 1 day', warehouse: 'KS Fulfilment center', shipping: 'UPS', method: 'Standard', customer: 'Carter, Mike', tags: [] },
   { id: 's-13', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'combined', combinedCount: 2, status: 'Shipped', createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS', method: 'Standard', customer: 'Carter, Mike', tags: ['Tag'] },
   { id: 's-14', shipmentId: '#20230101180003', freightType: 'LTL',        orderRefId: '#20230101180003', orderRefKind: 'return',   status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  tags: ['Tag'] },
-  { id: 's-15', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  tags: ['Tag'],
+  { id: 's-15', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  destinationZip: '73928', tags: ['Tag'],
     products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG,
     mergeRecommendation: { peerCount: 2, destination: 'Nashville, TN 73928', savings: 6.40 } },
   { id: 's-16', shipmentId: '#20230101180003', freightType: '',           orderRefId: '#20230101180003', orderRefKind: 'return',   status: 'Pending',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  tags: [] },
-  { id: 's-17', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  tags: ['Tag'] },
-  { id: 's-18', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  tags: ['Tag'] },
-  { id: 's-19', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'return',   status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  tags: ['Tag'] },
+  { id: 's-17', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  destinationZip: '73928', tags: ['Tag'],
+    products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG },
+  { id: 's-18', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Pending',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  destinationZip: '30303', tags: ['Tag'],
+    products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG },
+  { id: 's-19', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Pending',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'TX Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  destinationZip: '30303', tags: ['Tag'],
+    products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG },
   { id: 's-20', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  tags: ['Tag'] },
 ];

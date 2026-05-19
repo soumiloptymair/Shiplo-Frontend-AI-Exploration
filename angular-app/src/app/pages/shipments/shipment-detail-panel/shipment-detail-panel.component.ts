@@ -5,7 +5,7 @@ import { NotesTabComponent } from '../../../shared/notes-tab/notes-tab.component
 import { SplitRecommendationBannerComponent } from '../split-recommendation-banner/split-recommendation-banner.component';
 import { SplitShipmentModalComponent, SplitConfirmPayload } from '../split-shipment-modal/split-shipment-modal.component';
 import { MergeRecommendationBannerComponent } from '../merge-recommendation-banner/merge-recommendation-banner.component';
-import { MergeShipmentModalComponent } from '../merge-shipment-modal/merge-shipment-modal.component';
+import { MergeShipmentModalComponent, MergeConfirmPayload } from '../merge-shipment-modal/merge-shipment-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
 import { ShipmentService } from '../../../core/services/shipment.service';
 
@@ -107,7 +107,14 @@ export class ShipmentDetailPanelComponent implements OnChanges {
     const s = this.shipment;
     if (!s) return false;
     if (this.dismissedMergeBanners().has(s.id)) return false;
-    return !!s.mergeRecommendation && this.mergeCandidates.length > 0;
+    // Live trigger: any shipment with at least one eligible peer shows the banner.
+    return this.mergeCandidates.length > 0;
+  }
+
+  /** Live destination string for the banner: prefer the seeded copy, fall back to the ZIP. */
+  get bannerDestination(): string {
+    return this.shipment?.mergeRecommendation?.destination
+      ?? (this.shipment?.destinationZip ? `ZIP ${this.shipment.destinationZip}` : 'the same destination');
   }
 
   readonly productsTotal = computed(() => {
@@ -180,8 +187,8 @@ export class ShipmentDetailPanelComponent implements OnChanges {
 
   closeMergeModal() { this.mergeModalOpen.set(false); }
 
-  confirmMerge(payload: { sourceIds: string[] }) {
-    const result = this.shipmentSvc.mergeShipments(payload.sourceIds);
+  confirmMerge(payload: MergeConfirmPayload) {
+    const result = this.shipmentSvc.mergeShipments(payload.sourceIds, payload.keptWarehouse);
     this.mergeModalOpen.set(false);
     if (result) {
       this.toast.show(`Shipments merged into ${result.newId}`);
