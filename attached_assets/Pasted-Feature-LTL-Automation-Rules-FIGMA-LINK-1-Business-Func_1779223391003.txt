@@ -1,0 +1,78 @@
+Feature: LTL > Automation Rules
+FIGMA LINK
+
+1. Business Functionality
+This feature extends Shiplo’s existing statement-based automation engine so LTL decisions can be automated using freight-aware conditions and actions. The business goal is to reduce manual routing effort, improve consistency, and encode institutional knowledge about lanes, pallets, density, and accessorial complexity into reusable rules.
+For LTL specifically, automation must evaluate freight class, total pallets, density, accessorial flags, location type, appointment requirements, origin-destination region, and lane preferences before assigning an LTL carrier.
+
+
+
+
+2. Overview
+The user experience should remain no-code and statement-driven. Business users create ordered if-then rules that evaluate shipment attributes and execute actions such as assigning an LTL carrier. LTL conditions should be available alongside existing parcel conditions, with first-match-wins behavior and clear audit logging.
+Rules should be testable before activation and should degrade gracefully to configured defaults if no rule matches or if the rules engine is unavailable.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. Functional Requirements
+
+ID
+Requirement
+Description
+Preconditions
+Acceptance Criteria
+AUT-LTL-01
+LTL condition support
+System shall extend automation conditions to include freight class, total pallets, density, accessorial flags, residential/commercial location type, delivery appointment needed, lane/origin-destination region, and lane preferences.
+Automation feature is enabled and user can edit rules.
+LTL-specific operands are available in the rule builder with compatible operators and validation.
+AUT-LTL-02
+LTL carrier assignment action
+System shall support an action that assigns an LTL carrier when rule conditions match.
+At least one LTL carrier is configured for the tenant.
+Matched rule returns chosen LTL carrier to rating or booking flow and logs the decision.
+
+
+
+
+
+4. Use Cases / User Stories
+
+ID
+User Story
+Description
+Preconditions
+Acceptance Criteria
+US-AUT-01
+Route by freight class
+As a shipper, I want to create a rule based on freight class so the right carrier is chosen for the freight profile.
+User can edit automation rules; LTL carriers configured.
+Rule builder supports freight class operand and assigned carrier action.
+US-AUT-02
+Route by pallets and density
+As a shipper, I want total pallets and density to influence carrier assignment so multi-pallet freight routes consistently.
+Shipment can calculate pallets and density before evaluation.
+Automation evaluates pallet and density values and applies matching carrier rule.
+US-AUT-03
+Account for accessorial complexity
+As a shipper, I want accessorial flags and appointment requirements considered in automation so carriers are chosen based on operational complexity.
+Shipment contains accessorial and appointment indicators.
+Rule engine can evaluate those flags and log the matched logic path.
+US-AUT-04
+Fallback to default
+As a shipper, I want unmatched shipments to fall back to default logic so automation gaps do not block booking.
+No enabled rule matches shipment.
+Default outcome is applied and trace clearly states fallback reason.
+
+
