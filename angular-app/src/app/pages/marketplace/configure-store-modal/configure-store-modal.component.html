@@ -8,11 +8,11 @@
   (click)="cancel.emit()">
 
   <div
-    class="flex max-h-[calc(100vh-48px)] w-full max-w-[720px] flex-col overflow-hidden rounded-lg bg-surface shadow-xl"
+    class="flex max-h-[calc(100vh-48px)] h-[732px] w-full max-w-[1004px] flex-col overflow-hidden rounded-lg bg-surface shadow-xl"
     (click)="$event.stopPropagation()">
 
-    <!-- Header -->
-    <header class="flex h-[60px] shrink-0 items-center justify-between border-b border-divider px-5">
+    <!-- Header (64px) -->
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-divider pl-6 pr-3">
       <h2 class="font-heading text-[18px] font-semibold leading-[1.4] text-fg-primary"
           data-testid="text-modal-title">{{ modalTitle() }}</h2>
       <button
@@ -29,9 +29,9 @@
 
     <div class="flex min-h-0 flex-1">
 
-      <!-- Stepper rail -->
+      <!-- Stepper rail (300px, subtle blue-grey bg) -->
       <aside
-        class="flex w-[220px] shrink-0 flex-col gap-1 border-r border-divider bg-surface px-4 py-5"
+        class="flex w-[300px] shrink-0 flex-col gap-1 bg-surface-subtle px-6 py-6"
         aria-label="Configure store steps"
         data-testid="stepper">
         @for (s of STEPS; track s.num; let i = $index, last = $last) {
@@ -40,7 +40,7 @@
             (click)="currentStep.set(s.num)"
             [attr.aria-current]="currentStep() === s.num ? 'step' : null"
             [attr.data-testid]="'step-' + s.num"
-            class="relative flex items-start gap-3 rounded px-1 py-2 text-left transition-colors hover:bg-surface-light-primary">
+            class="relative flex items-start gap-3 rounded px-1 py-2 text-left transition-colors hover:bg-white/60">
 
             <!-- Step indicator -->
             <span class="relative flex h-7 w-7 shrink-0 items-center justify-center">
@@ -51,19 +51,14 @@
                   </svg>
                 </span>
               } @else {
-                <span
-                  class="flex h-7 w-7 items-center justify-center rounded-full border text-[14px] font-medium"
-                  [class.border-action-primary]="currentStep() === s.num"
-                  [class.text-action-primary]="currentStep() === s.num"
-                  [class.border-divider]="currentStep() !== s.num"
-                  [class.text-fg-secondary]="currentStep() !== s.num">{{ s.num }}</span>
+                <span class="flex h-7 w-7 items-center justify-center rounded-full border border-action-primary text-[14px] font-medium text-action-primary">{{ s.num }}</span>
               }
               @if (!last) {
-                <span class="absolute left-1/2 top-7 h-[28px] w-px -translate-x-1/2 border-l border-dashed border-divider"></span>
+                <span class="absolute left-1/2 top-8 h-[44px] w-px -translate-x-1/2 border-l border-dashed border-action-primary"></span>
               }
             </span>
 
-            <span class="flex flex-col leading-tight">
+            <span class="flex flex-col gap-0.5 leading-tight">
               <span
                 class="text-[14px] font-semibold"
                 [class.text-fg-primary]="currentStep() === s.num || isCompleted(s.num)"
@@ -76,12 +71,12 @@
         }
       </aside>
 
-      <!-- Step content -->
-      <div class="flex min-h-0 flex-1 flex-col overflow-y-auto p-5" data-testid="step-content">
+      <!-- Step content (16px gap from stepper, 20px top, 24px right) -->
+      <div class="flex min-h-0 flex-1 flex-col overflow-y-auto pl-4 pr-6 pt-5 pb-5" data-testid="step-content">
 
         <!-- ============ Step 1: Connect Account ============ -->
         @if (currentStep() === 1) {
-          <div class="flex flex-col gap-4" data-testid="step-1-panel">
+          <div class="flex flex-col gap-5" data-testid="step-1-panel">
             <label class="flex flex-col gap-1">
               <span class="text-[13px] text-fg-primary">{{ brand || 'Domain' }} Domain URL <span class="text-fg-negative">*</span></span>
               <input
@@ -551,22 +546,22 @@
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="flex h-[64px] shrink-0 items-center justify-between border-t border-divider px-5">
+    <!-- Footer (68px) -->
+    <footer class="flex h-[68px] shrink-0 items-center justify-between border-t border-divider px-6">
       <button
         type="button"
         (click)="cancel.emit()"
         data-testid="button-cancel"
-        class="inline-flex h-10 items-center rounded-token border border-divider bg-surface px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary">
+        class="inline-flex h-9 items-center rounded-token border border-divider bg-surface px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary">
         Cancel
       </button>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-4">
         <button
           type="button"
           (click)="goBack()"
           [disabled]="isFirstStep()"
           data-testid="button-back"
-          class="inline-flex h-10 items-center rounded-token border border-divider bg-surface px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary disabled:opacity-50">
+          class="inline-flex h-9 items-center rounded-token px-3 text-[13px] font-medium text-fg-secondary hover:bg-surface-light-primary disabled:opacity-50">
           Back
         </button>
         <button
@@ -574,7 +569,7 @@
           (click)="goContinue()"
           [disabled]="isLastStep()"
           data-testid="button-continue"
-          class="inline-flex h-10 items-center rounded-token border border-divider bg-surface px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary disabled:opacity-50">
+          class="inline-flex h-9 items-center rounded-token border border-divider bg-surface px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary disabled:opacity-50">
           Continue
         </button>
         @if (isFirstStep()) {
@@ -582,7 +577,7 @@
             type="button"
             (click)="onSaveDraft()"
             data-testid="button-save-draft"
-            class="inline-flex h-10 items-center rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action hover:bg-action-primary-hover">
+            class="inline-flex h-9 items-center rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action hover:bg-action-primary-hover">
             Save Draft
           </button>
         }
@@ -590,7 +585,7 @@
           type="button"
           (click)="onConnect()"
           data-testid="button-connect"
-          class="inline-flex h-10 items-center rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action hover:bg-action-primary-hover">
+          class="inline-flex h-9 items-center rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action hover:bg-action-primary-hover">
           Connect
         </button>
       </div>
