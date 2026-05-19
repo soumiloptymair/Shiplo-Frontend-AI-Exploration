@@ -236,9 +236,17 @@
                     [class.border-[#e4eaed]]="selectedRowId() !== r.id"
                     [class.border-[#008572]]="selectedRowId() === r.id"
                     [class.bg-[#e8f5f2]]="selectedRowId() === r.id">
-              <img [src]="r.logoUrl" [alt]="r.brand + ' logo'"
-                   loading="lazy"
-                   class="mb-2 h-7 w-auto max-w-[112px] object-contain object-left" />
+              <div class="mb-2 flex items-start justify-between gap-2">
+                <img [src]="r.logoUrl" [alt]="r.brand + ' logo'"
+                     loading="lazy"
+                     class="h-7 w-auto max-w-[112px] object-contain object-left" />
+                @if (r.status === 'Requested') {
+                  <span class="inline-flex h-5 items-center rounded-[14px] bg-[#fde2d4] px-2 py-1 text-[12px] leading-[1.43] text-[#0b1516]"
+                        [attr.data-testid]="'card-status-requested-' + r.id">
+                    Requested
+                  </span>
+                }
+              </div>
               <p class="text-[14px] font-bold leading-[1.43] text-[#0b1516]">{{ r.brand }}</p>
               <p class="mt-1 line-clamp-2 text-[12px] leading-[1.43] text-[#45565b]">{{ r.description }}</p>
               <div class="mt-auto pt-2">
@@ -255,7 +263,8 @@
       <app-marketplace-detail-panel [row]="row"
                                     (close)="closePanel()"
                                     (connect)="openConnectModal()"
-                                    (disconnect)="disconnect(row.id)" />
+                                    (disconnect)="disconnect(row.id)"
+                                    (requestAccess)="requestAccess(row.id)" />
     }
 
     <!-- CONNECT MODAL -->

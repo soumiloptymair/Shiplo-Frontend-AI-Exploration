@@ -55,7 +55,7 @@
       <span
         class="inline-flex h-5 items-center gap-1 rounded-[14px] px-2 py-1 text-[14px] leading-[1.43] text-[#0b1516]"
         [class.bg-[#daeec4]]="row.status === 'Connected'"
-        [class.bg-[#fde2d4]]="row.status === 'Disconnected'"
+        [class.bg-[#fde2d4]]="row.status !== 'Connected'"
         data-testid="panel-status">
         {{ statusLabel }}
       </span>
@@ -102,20 +102,36 @@
     <p class="text-[12px] leading-[1.43] text-[#45565b]" data-testid="panel-overview">{{ overview }}</p>
   </div>
 
-  <!-- Connect button -->
+  <!-- Connect / Request button -->
   <div class="shrink-0 px-5 pb-5">
-    <button type="button"
-            [disabled]="row.status === 'Connected'"
-            (click)="connect.emit()"
-            data-testid="button-connect"
-            class="flex h-10 w-full items-center justify-center rounded-[4px] px-6 py-2 text-[16px] font-medium leading-[1.43] transition-colors"
-            [class.bg-[#008572]]="row.status !== 'Connected'"
-            [class.text-white]="row.status !== 'Connected'"
-            [class.hover:bg-[#006a5a]]="row.status !== 'Connected'"
-            [class.bg-[rgba(69,86,91,0.12)]]="row.status === 'Connected'"
-            [class.text-[rgba(69,86,91,0.38)]]="row.status === 'Connected'"
-            [class.cursor-not-allowed]="row.status === 'Connected'">
-      Connect
-    </button>
+    @if (isRequestBucket) {
+      <button type="button"
+              [disabled]="row.status !== 'Disconnected'"
+              (click)="requestAccess.emit()"
+              data-testid="button-request-access"
+              class="flex h-10 w-full items-center justify-center rounded-[4px] px-6 py-2 text-[16px] font-medium leading-[1.43] transition-colors"
+              [class.bg-[#008572]]="row.status === 'Disconnected'"
+              [class.text-white]="row.status === 'Disconnected'"
+              [class.hover:bg-[#006a5a]]="row.status === 'Disconnected'"
+              [class.bg-[rgba(69,86,91,0.12)]]="row.status !== 'Disconnected'"
+              [class.text-[rgba(69,86,91,0.38)]]="row.status !== 'Disconnected'"
+              [class.cursor-not-allowed]="row.status !== 'Disconnected'">
+        {{ row.status === 'Requested' ? 'Request Access' : 'Request for Access' }}
+      </button>
+    } @else {
+      <button type="button"
+              [disabled]="row.status === 'Connected'"
+              (click)="connect.emit()"
+              data-testid="button-connect"
+              class="flex h-10 w-full items-center justify-center rounded-[4px] px-6 py-2 text-[16px] font-medium leading-[1.43] transition-colors"
+              [class.bg-[#008572]]="row.status !== 'Connected'"
+              [class.text-white]="row.status !== 'Connected'"
+              [class.hover:bg-[#006a5a]]="row.status !== 'Connected'"
+              [class.bg-[rgba(69,86,91,0.12)]]="row.status === 'Connected'"
+              [class.text-[rgba(69,86,91,0.38)]]="row.status === 'Connected'"
+              [class.cursor-not-allowed]="row.status === 'Connected'">
+        Connect
+      </button>
+    }
   </div>
 </aside>

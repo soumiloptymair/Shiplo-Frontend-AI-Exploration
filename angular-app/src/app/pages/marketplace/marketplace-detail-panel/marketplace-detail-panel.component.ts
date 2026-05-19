@@ -13,6 +13,7 @@ export class MarketplaceDetailPanelComponent {
   @Output() close = new EventEmitter<void>();
   @Output() connect = new EventEmitter<void>();
   @Output() disconnect = new EventEmitter<void>();
+  @Output() requestAccess = new EventEmitter<void>();
 
   readonly menuOpen = signal(false);
 
@@ -40,5 +41,11 @@ export class MarketplaceDetailPanelComponent {
 
   get lastSynced(): string { return '20 Feb 2026, 11:32 CST'; }
 
-  get statusLabel(): string { return this.row.status === 'Connected' ? 'Connected' : 'Not Connected'; }
+  get isRequestBucket(): boolean { return this.row.availableBucket === 'request'; }
+
+  get statusLabel(): string {
+    if (this.row.status === 'Connected') return 'Connected';
+    if (this.row.status === 'Requested') return 'Requested';
+    return this.isRequestBucket ? 'Unavailable' : 'Not Connected';
+  }
 }

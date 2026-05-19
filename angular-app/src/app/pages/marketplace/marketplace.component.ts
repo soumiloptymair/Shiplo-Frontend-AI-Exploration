@@ -9,7 +9,7 @@ export interface MarketplaceCategory {
   label: string;
 }
 
-export type ConnectorStatus = 'Connected' | 'Disconnected';
+export type ConnectorStatus = 'Connected' | 'Disconnected' | 'Requested';
 export type ConnectorTab = 'Connected' | 'Available';
 export type AvailableBucket = 'connect' | 'request';
 
@@ -193,7 +193,7 @@ export class MarketplaceComponent {
     const inCat = this.rows().filter(r => r.category === cat);
     return {
       Connected: inCat.filter(r => r.status === 'Connected').length,
-      Available: inCat.filter(r => r.status === 'Disconnected').length,
+      Available: inCat.filter(r => r.status === 'Disconnected' || r.status === 'Requested').length,
     } as Record<ConnectorTab, number>;
   });
 
@@ -201,10 +201,11 @@ export class MarketplaceComponent {
     const cat = this.selectedCategory();
     const tab = this.activeTab();
     const q = this.search().trim().toLowerCase();
-    const wantStatus: ConnectorStatus = tab === 'Connected' ? 'Connected' : 'Disconnected';
     return this.rows().filter(r => {
       if (r.category !== cat) return false;
-      if (r.status !== wantStatus) return false;
+      const inAvailable = r.status === 'Disconnected' || r.status === 'Requested';
+      if (tab === 'Connected' && r.status !== 'Connected') return false;
+      if (tab === 'Available' && !inAvailable) return false;
       if (!q) return true;
       return (
         r.accountName.toLowerCase().includes(q) ||
@@ -215,9 +216,9 @@ export class MarketplaceComponent {
   });
 
   readonly availableConnect = computed(() =>
-    this.filteredRows().filter(r => r.availableBucket === 'connect'));
+    this.filteredRows().filter(r => r.availableBucket === 'connect' && r.status !== 'Connected'));
   readonly availableRequest = computed(() =>
-    this.filteredRows().filter(r => r.availableBucket === 'request'));
+    this.filteredRows().filter(r => r.availableBucket === 'request' && r.status !== 'Connected'));
 
   readonly selectedRow = computed(() => {
     const id = this.selectedRowId();
@@ -259,6 +260,16 @@ export class MarketplaceComponent {
   }
 
   dismissToast() { this.toast.set(null); }
+
+  requestAccess(id: string) {
+    const target = this.rows().find(r => r.id === id);
+    if (!target) return;
+    const name = target.accountName;
+    this.rows.update(list => list.map(r =>
+      r.id === id ? { ...r, status: 'Requested' as ConnectorStatus } : r));
+    this.toast.set(`Access requested for “${name}”. Our team will reach out shortly.`);
+    setTimeout(() => this.toast.set(null), 4000);
+  }
 
   toggleRowMenu(id: string, ev?: Event) {
     ev?.stopPropagation();
