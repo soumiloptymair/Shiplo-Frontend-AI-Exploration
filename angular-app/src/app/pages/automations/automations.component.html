@@ -105,8 +105,20 @@
               </svg>
             </button>
 
-            <!-- IF column: Match All + condition chips -->
-            <div class="flex flex-wrap items-center gap-1.5 pr-4" [attr.data-testid]="'cell-if-' + rule.id">
+            <!-- IF column: rule name + Match All + condition chips -->
+            <div class="flex flex-col gap-1.5 pr-4" [attr.data-testid]="'cell-if-' + rule.id">
+              <!-- Rule name + Disabled pill -->
+              <div class="flex items-center gap-2">
+                <span class="font-body text-[13px] font-medium text-fg-primary" [attr.data-testid]="'text-rule-name-' + rule.id">
+                  {{ rule.name }}
+                </span>
+                <span *ngIf="!rule.enabled"
+                  class="inline-flex h-[18px] items-center rounded-token bg-chip-yellow px-1.5 text-[10px] font-medium uppercase tracking-wide text-fg-primary"
+                  [attr.data-testid]="'pill-disabled-' + rule.id">
+                  Disabled
+                </span>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5">
               <span class="inline-flex h-[26px] items-center rounded-token border border-divider bg-surface px-2 text-[12px] font-medium text-fg-primary"
                 data-testid="chip-match">
                 {{ rule.conditionMatch === 'all' ? 'Match All' : 'Match Any' }}
@@ -124,6 +136,7 @@
                 [attr.data-testid]="'link-more-conditions-' + rule.id">
                 {{ hiddenChipCount(rule.conditions) }} more...
               </button>
+              </div>
             </div>
 
             <!-- THEN column: action chips -->
@@ -207,18 +220,30 @@
           </div>
         </ng-template>
 
-        <!-- ============ Default Fallback card ============ -->
+        <!-- ============ Default Fallback card (collapsible) ============ -->
         <div class="m-5 rounded-token border border-divider bg-surface-light-primary p-4"
           data-testid="card-default-fallback">
-          <div class="mb-2 flex items-center justify-between">
-            <h2 class="font-heading text-[14px] font-semibold text-fg-primary">Default Fallback</h2>
-            <button *ngIf="!fallbackEditing()" type="button"
+          <div class="flex items-center justify-between" [class.mb-2]="!fallbackCollapsed()">
+            <button type="button"
+              (click)="toggleFallbackCollapsed()"
+              class="inline-flex items-center gap-2 text-left"
+              data-testid="button-toggle-fallback"
+              [attr.aria-expanded]="!fallbackCollapsed()">
+              <svg class="h-3.5 w-3.5 text-fg-secondary transition-transform"
+                [class.-rotate-90]="fallbackCollapsed()"
+                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+              <h2 class="font-heading text-[14px] font-semibold text-fg-primary">Default Fallback</h2>
+            </button>
+            <button *ngIf="!fallbackEditing() && !fallbackCollapsed()" type="button"
               (click)="startEditFallback()"
               data-testid="button-edit-fallback"
               class="inline-flex h-7 items-center gap-1 rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-primary hover:bg-surface">
               Edit
             </button>
           </div>
+          <div *ngIf="!fallbackCollapsed()">
           <p class="mb-3 text-[12px] text-fg-secondary">
             Applied when no enabled rule matches a shipment (US-AUT-04).
           </p>
@@ -268,10 +293,39 @@
               </div>
             </div>
           </ng-template>
+          </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- ============ Delete confirmation modal ============ -->
+  <div *ngIf="pendingDeleteId()"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-8"
+    (click)="cancelDelete()"
+    data-testid="modal-confirm-delete">
+    <div class="w-[420px] max-w-[92vw] rounded-md bg-surface p-5 shadow-2xl"
+      (click)="$event.stopPropagation()">
+      <h2 class="mb-2 font-heading text-[16px] font-semibold text-fg-primary">Delete this rule?</h2>
+      <p class="mb-4 text-[13px] text-fg-secondary">
+        <span class="font-medium text-fg-primary">{{ pendingDeleteName() }}</span> will be permanently removed. This can't be undone.
+      </p>
+      <div class="flex justify-end gap-2">
+        <button type="button"
+          (click)="cancelDelete()"
+          data-testid="button-cancel-delete"
+          class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary">
+          Cancel
+        </button>
+        <button type="button"
+          (click)="confirmDelete()"
+          data-testid="button-confirm-delete"
+          class="h-9 rounded-token bg-status-error px-3 text-[13px] font-medium text-fg-on-action hover:opacity-90">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Builder modal -->
   <app-automation-rule-modal *ngIf="modalOpen()"

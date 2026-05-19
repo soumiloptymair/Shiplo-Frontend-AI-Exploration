@@ -27,6 +27,19 @@
       </button>
     </header>
 
+    <!-- ============ Rule name input ============ -->
+    <div class="px-6 pb-3">
+      <label class="mb-1 block text-[12px] font-medium text-fg-secondary" for="rule-name-input">Rule name</label>
+      <input
+        id="rule-name-input"
+        type="text"
+        [value]="name()"
+        (input)="name.set($any($event.target).value)"
+        placeholder="e.g. Heavy parcels → UPS Priority"
+        class="h-9 w-full rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"
+        data-testid="input-rule-name"/>
+    </div>
+
     <!-- ============ Match All / Match Any segmented toggle ============ -->
     <div class="flex items-center justify-center gap-4 pb-2">
       <button

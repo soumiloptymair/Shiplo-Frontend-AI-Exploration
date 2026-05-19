@@ -46,9 +46,13 @@ export class AutomationsComponent {
   editing = signal<AutomationRule | null>(null);
   /** Id of the row whose ⋮ menu is open. */
   openMenuId = signal<string | null>(null);
+  /** Id of the rule pending a delete confirmation, or null when no prompt is open. */
+  pendingDeleteId = signal<string | null>(null);
 
   fallbackDraft = signal<DefaultFallback>({ ...this.svc.defaultFallback() });
   fallbackEditing = signal<boolean>(false);
+  /** Collapsed (true) hides the body of the Default Fallback card. */
+  fallbackCollapsed = signal<boolean>(false);
 
   /** Search filter across rule name + chip labels. */
   readonly filtered = computed<AutomationRule[]>(() => {
@@ -114,11 +118,30 @@ export class AutomationsComponent {
     this.openMenuId.set(null);
     this.svc.toggleEnabled(id);
   }
+  /** Opens the inline delete confirmation modal; actual deletion runs in `confirmDelete`. */
   remove(id: string, evt: MouseEvent) {
     evt.stopPropagation();
     this.openMenuId.set(null);
+    this.pendingDeleteId.set(id);
+  }
+  confirmDelete() {
+    const id = this.pendingDeleteId();
+    if (!id) return;
     this.svc.deleteRule(id);
+    this.pendingDeleteId.set(null);
     this.toastSvc.show('Rule deleted');
+  }
+  cancelDelete() {
+    this.pendingDeleteId.set(null);
+  }
+  /** Name of the rule pending deletion, for the confirmation prompt copy. */
+  pendingDeleteName(): string {
+    const id = this.pendingDeleteId();
+    return id ? (this.svc.rules().find((r) => r.id === id)?.name ?? '') : '';
+  }
+
+  toggleFallbackCollapsed() {
+    this.fallbackCollapsed.update((v) => !v);
   }
   moveUp(id: string, evt: MouseEvent) {
     evt.stopPropagation();
