@@ -1,5 +1,18 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Split Shipment workflow behavior (Figma workflow `27432-68529` / file `unEpC0FcuWKbB5yO1m7OyX`)
+
+### Changed (behavior + supporting UI states, no new tokens)
+- `pages/shipments/split-shipment-modal` — added the per-row editable Qty stepper (`qty / max` input shown when a row is checked) so a single source row can be partially moved between buckets; selecting a row no longer forces moving the whole line.
+- `pages/shipments/split-shipment-modal` — added the orange impact-preview banner (`#fbe9e2` bg, `#f1b5a5` border) that appears above the shipment cards whenever any bucket ships from a non-original warehouse. Copy mirrors Figma: "This split could increase delivery time for Shipment {N} due to low inventory of product {SKU} at {warehouse}. This split could increase total cost by $3.80."
+- `pages/shipments/split-shipment-modal` — Recommendation 1 now routes Shipment 2 to `PA Fulfillment Center` (matching the Figma reference) so the impact banner fires by default; Rec 3 routes the three buckets to KS / PA / TX.
+- `pages/shipments/split-shipment-modal` — the per-card "Move to Shipment N" button becomes a "Move to ▾" dropdown listing every other shipment when N ≥ 3; selection counter copy is now `1 product, 2 items selected` (rows + units).
+- `pages/shipments/split-shipment-modal` — the trash icon on extra shipments (N ≥ 3) opens a dark `#0b1516` popover "Delete Shipment? · No · Delete" (red `#cc2c2c` Delete) anchored to the icon; confirming re-homes the bucket's items to a sibling.
+- `pages/shipments/split-shipment-modal` — `confirm` now emits a `SplitConfirmPayload` (bucket warehouses + items with `sku/name/qty/unitValue`) instead of `void`.
+- `core/services/shipment.service.ts` — new `splitShipment(originalId, buckets)` method: replaces the original row at its grid index with N new `Pending` shipments labelled `${shipmentId} - 1 … N`, each with the bucket's warehouse, products (qty × unitValue → `value`), and reset annotations; the new ids are added to `selectedIds` so the grid highlights them, the side panel is closed, and the original row is removed in place.
+- `pages/shipments/shipment-detail-panel` — `confirmSplit(payload)` now calls `ShipmentService.splitShipment(...)` and fires the global toast `Shipment ${shipmentId} split successfully` (replaces the previous `Shipment split into 2` UI-only toast).
+- No new design tokens introduced; banner uses the existing peach `#fbe9e2`/`#f1b5a5` pair already in use elsewhere; delete popover reuses neutral `#0b1516` and chip-red `#cc2c2c`.
+
 ## 2026-05-19 — Split Shipment modal (Figma node `23008-101209` / file `unEpC0FcuWKbB5yO1m7OyX`)
 
 ### Changed (no new tokens)

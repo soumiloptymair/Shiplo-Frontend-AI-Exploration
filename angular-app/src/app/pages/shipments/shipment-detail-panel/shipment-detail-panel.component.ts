@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Shipment, ShipmentStatus, STATUS_PILL_CLASS, SHIPMENT_STATUSES, MaterialFlags } from '../../../core/models/shipment.model';
 import { NotesTabComponent } from '../../../shared/notes-tab/notes-tab.component';
 import { SplitRecommendationBannerComponent } from '../split-recommendation-banner/split-recommendation-banner.component';
-import { SplitShipmentModalComponent } from '../split-shipment-modal/split-shipment-modal.component';
+import { SplitShipmentModalComponent, SplitConfirmPayload } from '../split-shipment-modal/split-shipment-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
+import { ShipmentService } from '../../../core/services/shipment.service';
 
 export type PanelTab = 'Label' | 'Details' | 'Products' | 'Notes' | 'Shipment Log';
 
@@ -28,6 +29,7 @@ export class ShipmentDetailPanelComponent implements OnChanges {
   @Output() closePanel = new EventEmitter<void>();
 
   private toast = inject(ToastService);
+  private shipmentSvc = inject(ShipmentService);
 
   readonly CARRIER_ICON = 'figmaAssets/pngegg--2--1-1.png';
   readonly SOURCE_ICON  = 'figmaAssets/integrations-1.png';
@@ -131,9 +133,12 @@ export class ShipmentDetailPanelComponent implements OnChanges {
 
   closeSplitModal() { this.splitModalOpen.set(false); }
 
-  confirmSplit() {
+  confirmSplit(payload: SplitConfirmPayload) {
+    const result = this.shipmentSvc.splitShipment(this.shipment.id, payload.buckets);
     this.splitModalOpen.set(false);
-    this.toast.show('Shipment split into 2', `${this.shipment.shipmentId} - 1 and ${this.shipment.shipmentId} - 2`);
+    if (result) {
+      this.toast.show(`Shipment ${result.originalLabel} split successfully`);
+    }
   }
 
   dismissBanner() {
