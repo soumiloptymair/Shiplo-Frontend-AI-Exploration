@@ -15,5 +15,6 @@ Living document mapping Figma components / instances to Angular components.
 | Filters button                        | inline `<button>` in Wallet filter bar                               | h=36, w=92 |
 | Download Report button (text)         | inline `<button>` in Wallet filter bar                               | h=36, ghost style |
 | Column header / Grid cell             | Native `<thead>` / `<tbody>` rows                                    | Column widths copied from Figma column-header instances |
+| Configure Store wizard (5 steps)      | `pages/marketplace/configure-store-modal`                            | Figma node `27841-533726` (frames 1171276832 → 1171276836). 720×~700 modal: left-rail stepper + step pane + footer (Cancel ‖ Back · Continue · Save Draft (step 1) · Connect). Steps: 1 Connect Account, 2 Shipping Accounts, 3 Warehouse Settings, 4 Addresses, 5 Extras. Opens for `category === 'ecommerce'` only; other categories still use `connect-modal`. |
 
 When a new Figma component shows up, add a row before writing code.

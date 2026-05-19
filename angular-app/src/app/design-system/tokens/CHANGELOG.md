@@ -1,5 +1,14 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Configure Store wizard (Figma node `27841-533726`)
+
+### Changed
+- Marketplace "E-Commerce" category label → **"Stores"** to match Figma copy.
+
+### Added (components, no new tokens)
+- `pages/marketplace/configure-store-modal` — 5-step Configure Store wizard. Uses existing semantic tokens only (`fg.*`, `surface.*`, `divider`, `action.*`, `radius-token`). No new design tokens introduced.
+
+
 All tokens are defined as CSS custom properties in `src/styles.scss` and exposed
 to Tailwind via `tailwind.config.js`. Component code references **semantic
 Tailwind utilities** (e.g. `text-fg-primary`, `bg-surface-subtle`,

@@ -1,0 +1,599 @@
+
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center bg-fg-primary/30 px-4 py-6"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="modalTitle()"
+  data-testid="configure-store-modal"
+  (click)="cancel.emit()">
+
+  <div
+    class="flex max-h-[calc(100vh-48px)] w-full max-w-[720px] flex-col overflow-hidden rounded-lg bg-surface shadow-xl"
+    (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <header class="flex h-[60px] shrink-0 items-center justify-between border-b border-divider px-5">
+      <h2 class="font-heading text-[18px] font-semibold leading-[1.4] text-fg-primary"
+          data-testid="text-modal-title">{{ modalTitle() }}</h2>
+      <button
+        type="button"
+        aria-label="Close"
+        (click)="cancel.emit()"
+        data-testid="button-close"
+        class="inline-flex h-8 w-8 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
+        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="flex min-h-0 flex-1">
+
+      <!-- Stepper rail -->
+      <aside
+        class="flex w-[220px] shrink-0 flex-col gap-1 border-r border-divider bg-surface px-4 py-5"
+        aria-label="Configure store steps"
+        data-testid="stepper">
+        @for (s of STEPS; track s.num; let i = $index, last = $last) {
+          <button
+            type="button"
+            (click)="currentStep.set(s.num)"
+            [attr.aria-current]="currentStep() === s.num ? 'step' : null"
+            [attr.data-testid]="'step-' + s.num"
+            class="relative flex items-start gap-3 rounded px-1 py-2 text-left transition-colors hover:bg-surface-light-primary">
+
+            <!-- Step indicator -->
+            <span class="relative flex h-7 w-7 shrink-0 items-center justify-center">
+              @if (isCompleted(s.num) && currentStep() !== s.num) {
+                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-action-primary text-fg-on-action">
+                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </span>
+              } @else {
+                <span
+                  class="flex h-7 w-7 items-center justify-center rounded-full border text-[14px] font-medium"
+                  [class.border-action-primary]="currentStep() === s.num"
+                  [class.text-action-primary]="currentStep() === s.num"
+                  [class.border-divider]="currentStep() !== s.num"
+                  [class.text-fg-secondary]="currentStep() !== s.num">{{ s.num }}</span>
+              }
+              @if (!last) {
+                <span class="absolute left-1/2 top-7 h-[28px] w-px -translate-x-1/2 border-l border-dashed border-divider"></span>
+              }
+            </span>
+
+            <span class="flex flex-col leading-tight">
+              <span
+                class="text-[14px] font-semibold"
+                [class.text-fg-primary]="currentStep() === s.num || isCompleted(s.num)"
+                [class.text-fg-secondary]="currentStep() !== s.num && !isCompleted(s.num)">
+                {{ s.title }}
+              </span>
+              <span class="text-[12px] text-fg-secondary">{{ s.subtitle }}</span>
+            </span>
+          </button>
+        }
+      </aside>
+
+      <!-- Step content -->
+      <div class="flex min-h-0 flex-1 flex-col overflow-y-auto p-5" data-testid="step-content">
+
+        <!-- ============ Step 1: Connect Account ============ -->
+        @if (currentStep() === 1) {
+          <div class="flex flex-col gap-4" data-testid="step-1-panel">
+            <label class="flex flex-col gap-1">
+              <span class="text-[13px] text-fg-primary">{{ brand || 'Domain' }} Domain URL <span class="text-fg-negative">*</span></span>
+              <input
+                #firstField
+                type="text"
+                [value]="domainUrl()"
+                (input)="setStr(domainUrl, $event)"
+                placeholder="Enter URL"
+                data-testid="input-domain-url"
+                class="h-10 rounded-token border border-divider bg-surface px-3 text-[14px] text-fg-primary placeholder:text-fg-tertiary focus:border-action-primary focus:outline-none" />
+            </label>
+
+            <label class="flex flex-col gap-1">
+              <span class="text-[13px] text-fg-primary">Store Name <span class="text-fg-negative">*</span></span>
+              <input
+                type="text"
+                [value]="storeName()"
+                (input)="setStr(storeName, $event)"
+                placeholder="Enter Name"
+                data-testid="input-store-name"
+                class="h-10 rounded-token border border-divider bg-surface px-3 text-[14px] text-fg-primary placeholder:text-fg-tertiary focus:border-action-primary focus:outline-none" />
+            </label>
+
+            <label class="flex flex-col gap-1">
+              <span class="text-[13px] text-fg-primary">Authentication Key <span class="text-fg-negative">*</span></span>
+              <input
+                type="text"
+                [value]="authKey()"
+                (input)="setStr(authKey, $event)"
+                placeholder="Enter Key"
+                data-testid="input-auth-key"
+                class="h-10 rounded-token border border-divider bg-surface px-3 text-[14px] text-fg-primary placeholder:text-fg-tertiary focus:border-action-primary focus:outline-none" />
+            </label>
+
+            <label class="flex flex-col gap-1">
+              <span class="text-[13px] text-fg-primary">Placeholder</span>
+              <input
+                type="text"
+                [value]="extraField()"
+                (input)="setStr(extraField, $event)"
+                placeholder="Text"
+                data-testid="input-extra-field"
+                class="h-10 rounded-token border border-divider bg-surface px-3 text-[14px] text-fg-primary placeholder:text-fg-tertiary focus:border-action-primary focus:outline-none" />
+            </label>
+          </div>
+        }
+
+        <!-- ============ Step 2: Shipping Accounts ============ -->
+        @if (currentStep() === 2) {
+          <div class="flex flex-col gap-4" data-testid="step-2-panel">
+            <!-- Account tabs -->
+            <div class="flex items-center gap-1 border-b border-divider" role="tablist" aria-label="Shipping accounts">
+              @for (t of shippingTabs(); track t; let i = $index) {
+                <button
+                  type="button"
+                  role="tab"
+                  [attr.aria-selected]="activeShippingTab() === i"
+                  (click)="selectShippingTab(i)"
+                  [attr.data-testid]="'tab-shipping-' + i"
+                  class="-mb-px inline-flex h-9 max-w-[200px] items-center truncate border-b-2 px-3 text-[13px] transition-colors"
+                  [class.border-action-primary]="activeShippingTab() === i"
+                  [class.text-action-primary]="activeShippingTab() === i"
+                  [class.font-medium]="activeShippingTab() === i"
+                  [class.border-transparent]="activeShippingTab() !== i"
+                  [class.text-fg-secondary]="activeShippingTab() !== i">{{ t }}</button>
+              }
+              <button
+                type="button"
+                (click)="addShippingTab()"
+                data-testid="button-add-shipping-tab"
+                class="-mb-px inline-flex h-9 items-center gap-1 px-3 text-[13px] text-action-primary hover:bg-surface-light-primary">
+                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/></svg>
+                Add
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <label class="flex flex-col gap-1">
+                <span class="text-[13px] text-fg-primary">Carrier</span>
+                <div class="relative">
+                  <select
+                    [value]="carrier()"
+                    (change)="setStr(carrier, $event)"
+                    data-testid="select-carrier"
+                    class="h-10 w-full appearance-none rounded-token border border-divider bg-surface px-3 pr-9 text-[14px] text-fg-primary focus:border-action-primary focus:outline-none">
+                    <option value="UPS">UPS</option>
+                    <option value="FedEx">FedEx</option>
+                    <option value="DHL">DHL</option>
+                    <option value="USPS">USPS</option>
+                  </select>
+                  <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </div>
+              </label>
+
+              <label class="flex flex-col gap-1">
+                <span class="text-[13px] text-fg-primary">Carrier Account Name</span>
+                <div class="relative">
+                  <select
+                    [value]="carrierAccountName()"
+                    (change)="setStr(carrierAccountName, $event)"
+                    data-testid="select-carrier-account"
+                    class="h-10 w-full appearance-none rounded-token border border-divider bg-surface px-3 pr-9 text-[14px] text-fg-primary focus:border-action-primary focus:outline-none">
+                    <option>Default UPS Account Name</option>
+                    <option>Backup UPS Account</option>
+                  </select>
+                  <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </div>
+              </label>
+            </div>
+
+            <!-- Warehouses multi-select -->
+            <div class="flex flex-col gap-2">
+              <span class="text-[13px] text-fg-primary">Warehouses</span>
+              <div class="flex h-10 items-center rounded-token border border-divider bg-surface px-3 text-[14px] text-fg-tertiary">
+                Select
+                <svg class="ml-auto h-4 w-4 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="text-[12px] text-fg-secondary">Selected ({{ selectedWarehouses().length }} of 8)</span>
+                <div class="flex flex-wrap gap-2">
+                  @for (w of selectedWarehouses(); track w) {
+                    <span class="inline-flex h-6 items-center gap-1 rounded-token border border-divider bg-surface-light-primary px-2 text-[12px] text-fg-primary">
+                      {{ w }}
+                      <button type="button" (click)="removeWarehouseChip(w)" [attr.aria-label]="'Remove ' + w" class="text-fg-secondary hover:text-fg-primary">
+                        <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+                      </button>
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Shipping Methods -->
+            <div class="flex flex-col gap-2">
+              <span class="text-[13px] text-fg-primary">Shipping Methods</span>
+              <div class="inline-flex h-9 w-fit items-center rounded-full border border-divider p-0.5" role="tablist">
+                <button type="button"
+                        role="tab"
+                        [attr.aria-selected]="shippingMethodMode() === 'include'"
+                        (click)="shippingMethodMode.set('include')"
+                        data-testid="tab-include"
+                        class="h-7 rounded-full px-3 text-[13px] transition-colors"
+                        [class.bg-action-primary]="shippingMethodMode() === 'include'"
+                        [class.text-fg-on-action]="shippingMethodMode() === 'include'"
+                        [class.text-fg-primary]="shippingMethodMode() !== 'include'">Include the following</button>
+                <button type="button"
+                        role="tab"
+                        [attr.aria-selected]="shippingMethodMode() === 'exclude'"
+                        (click)="shippingMethodMode.set('exclude')"
+                        data-testid="tab-exclude"
+                        class="h-7 rounded-full px-3 text-[13px] transition-colors"
+                        [class.bg-action-primary]="shippingMethodMode() === 'exclude'"
+                        [class.text-fg-on-action]="shippingMethodMode() === 'exclude'"
+                        [class.text-fg-primary]="shippingMethodMode() !== 'exclude'">Exclude the following</button>
+              </div>
+
+              <span class="text-[13px] text-fg-primary">Select Shipping Methods <span class="text-fg-negative">*</span></span>
+              <div class="flex h-10 items-center rounded-token border border-divider bg-surface px-3 text-[14px] text-fg-tertiary">
+                Select
+                <svg class="ml-auto h-4 w-4 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                @for (m of selectedShippingMethods(); track m) {
+                  <span class="inline-flex h-6 items-center gap-1 rounded-token border border-divider bg-surface-light-primary px-2 text-[12px] text-fg-primary">
+                    {{ m }}
+                    <button type="button" (click)="removeShippingMethod(m)" [attr.aria-label]="'Remove ' + m" class="text-fg-secondary hover:text-fg-primary">
+                      <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ============ Step 3: Warehouse Settings ============ -->
+        @if (currentStep() === 3) {
+          <div class="flex flex-col gap-4" data-testid="step-3-panel">
+            <label class="flex flex-col gap-1">
+              <span class="text-[13px] text-fg-primary">Default Warehouse <span class="text-fg-negative">*</span></span>
+              <div class="relative">
+                <div class="flex h-10 items-center rounded-token border border-divider bg-surface px-3 text-[14px] text-fg-tertiary">
+                  Select
+                  <svg class="ml-auto h-4 w-4 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </div>
+              </div>
+            </label>
+
+            <label class="flex flex-col gap-1">
+              <span class="text-[13px] text-fg-primary">Select Warehouses to Fulfill Shipments <span class="text-fg-negative">*</span></span>
+              <div class="flex h-10 items-center rounded-token border border-divider bg-surface px-3 text-[14px] text-fg-tertiary">
+                Select
+                <svg class="ml-auto h-4 w-4 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </label>
+
+            <!-- Warehouses table -->
+            <table class="w-full table-fixed border-collapse" data-testid="table-warehouses">
+              <colgroup><col><col style="width:120px"><col style="width:200px"><col style="width:32px"></colgroup>
+              <thead>
+                <tr class="h-8 border-b border-divider text-left text-[12px] font-medium text-fg-primary">
+                  <th class="px-2">Warehouse Name</th>
+                  <th class="px-2">Warehouse Code</th>
+                  <th class="px-2">Carriers</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (w of warehouses(); track w.name) {
+                  <tr class="h-10 border-b border-divider text-[13px] text-fg-primary">
+                    <td class="px-2">{{ w.name }}</td>
+                    <td class="px-2">{{ w.code }}</td>
+                    <td class="px-2">
+                      <div class="flex flex-wrap gap-1">
+                        @for (c of w.carriers; track c) {
+                          <span class="inline-flex h-5 items-center gap-1 rounded-full border border-divider bg-surface px-2 text-[11px] text-fg-primary">
+                            <span class="inline-flex h-3 w-3 items-center justify-center rounded-full bg-[#8B5A2B] text-[0px]">U</span>
+                            {{ c }}
+                          </span>
+                        }
+                      </div>
+                    </td>
+                    <td class="px-2 text-right">
+                      <button type="button" aria-label="Row actions" class="inline-flex h-6 w-6 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <button type="button"
+                    data-testid="button-add-warehouse"
+                    class="inline-flex h-9 w-fit items-center gap-1 rounded-token border border-action-primary px-3 text-[13px] text-action-primary hover:bg-surface-light-primary">
+              <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/></svg>
+              Add Warehouse
+            </button>
+
+            <!-- Warehouse Groups -->
+            <div class="mt-2 border-t border-divider pt-3">
+              <p class="mb-2 text-[13px] font-medium text-fg-primary">Warehouse Groups</p>
+              <table class="w-full table-fixed border-collapse" data-testid="table-warehouse-groups">
+                <colgroup><col><col style="width:120px"><col style="width:140px"><col><col style="width:60px"></colgroup>
+                <thead>
+                  <tr class="h-8 border-b border-divider text-left text-[12px] font-medium text-fg-primary">
+                    <th class="px-2">Name</th>
+                    <th class="px-2">Destinations</th>
+                    <th class="px-2">Warehouses</th>
+                    <th class="px-2">Fallback Warehouse</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (groupEditing()) {
+                    <tr class="h-10 border-b border-divider text-[13px] text-fg-primary" data-testid="row-edit-group">
+                      <td class="px-2"><input placeholder="Enter Name" class="h-7 w-full rounded-token border border-divider bg-surface px-2 text-[12px] focus:border-action-primary focus:outline-none" /></td>
+                      <td class="px-2"><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
+                      <td class="px-2"><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
+                      <td class="px-2"><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
+                      <td class="px-2">
+                        <div class="flex items-center gap-1">
+                          <button type="button" (click)="confirmAddGroup()" aria-label="Save group" data-testid="button-save-group" class="inline-flex h-6 w-6 items-center justify-center rounded text-action-primary hover:bg-surface-light-primary">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                          </button>
+                          <button type="button" (click)="cancelAddGroup()" aria-label="Cancel group" data-testid="button-cancel-group" class="inline-flex h-6 w-6 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                  @for (g of warehouseGroups(); track g.name) {
+                    <tr class="h-10 border-b border-divider text-[13px] text-fg-primary">
+                      <td class="px-2">{{ g.name }}</td>
+                      <td class="px-2">
+                        <span class="inline-flex items-center gap-1">{{ g.destinations }}
+                          <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
+                        </span>
+                      </td>
+                      <td class="px-2">
+                        <span class="inline-flex items-center gap-1">{{ g.warehouses }}
+                          <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
+                        </span>
+                      </td>
+                      <td class="px-2">{{ g.fallback }}</td>
+                      <td class="px-2 text-right">
+                        <button type="button" aria-label="Group actions" class="inline-flex h-6 w-6 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
+                          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <button type="button"
+                      (click)="startAddGroup()"
+                      [disabled]="groupEditing()"
+                      data-testid="button-add-group"
+                      class="mt-3 inline-flex h-9 w-fit items-center gap-1 rounded-token border border-action-primary px-3 text-[13px] text-action-primary hover:bg-surface-light-primary disabled:opacity-50">
+                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/></svg>
+                Add Group
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ============ Step 4: Addresses ============ -->
+        @if (currentStep() === 4) {
+          <div class="flex flex-col gap-5" data-testid="step-4-panel">
+            <!-- Ship-From -->
+            <fieldset class="flex flex-col gap-2">
+              <legend class="text-[14px] font-medium text-fg-primary">Ship-From Address</legend>
+              <p class="text-[12px] text-fg-secondary">Used for Shipping Labels</p>
+              @for (opt of [{v:'best',l:'Best Warehouse (Used for Optimization)'},{v:'default',l:'Default Warehouse'},{v:'unique',l:'Unique Address'}]; track opt.v) {
+                <label class="inline-flex items-center gap-2 text-[13px] text-fg-primary">
+                  <input type="radio" name="shipFromMode" [value]="opt.v" [checked]="shipFromMode() === opt.v" (change)="shipFromMode.set($any(opt.v))" [attr.data-testid]="'radio-shipfrom-' + opt.v" class="h-4 w-4 accent-action-primary" />
+                  {{ opt.l }}
+                </label>
+              }
+              <label class="inline-flex items-center gap-2 text-[13px] text-fg-primary">
+                <input type="checkbox" [checked]="shipFromUseCompanyName()" (change)="shipFromUseCompanyName.set(!shipFromUseCompanyName())" data-testid="checkbox-shipfrom-company" class="h-4 w-4 accent-action-primary" />
+                Use Unique Company Name
+              </label>
+
+              @if (shipFromMode() === 'unique') {
+                <div class="mt-2 flex flex-col gap-3 rounded border border-divider bg-surface p-3" data-testid="form-shipfrom-address">
+                  <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Company Name</span><input type="text" [value]="shipFromAddress().companyName" (input)="updateAddress(shipFromAddress, 'companyName', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Phone (optional)</span><input type="text" [value]="shipFromAddress().phone" (input)="updateAddress(shipFromAddress, 'phone', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Email</span><input type="email" [value]="shipFromAddress().email" (input)="updateAddress(shipFromAddress, 'email', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                  </div>
+                  <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Address Line 1</span><input type="text" [value]="shipFromAddress().line1" (input)="updateAddress(shipFromAddress, 'line1', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Address Line 2</span><input type="text" [value]="shipFromAddress().line2" (input)="updateAddress(shipFromAddress, 'line2', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Country</span><select [value]="shipFromAddress().country" (change)="updateAddress(shipFromAddress, 'country', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none"><option>United States</option><option>Canada</option><option>Mexico</option></select></label>
+                  </div>
+                  <div class="grid grid-cols-3 gap-3">
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">City</span><input type="text" [value]="shipFromAddress().city" (input)="updateAddress(shipFromAddress, 'city', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">State</span><input type="text" [value]="shipFromAddress().state" (input)="updateAddress(shipFromAddress, 'state', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Zip Code</span><input type="text" [value]="shipFromAddress().zip" (input)="updateAddress(shipFromAddress, 'zip', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                  </div>
+                </div>
+              }
+            </fieldset>
+
+            <!-- Return -->
+            <fieldset class="flex flex-col gap-2">
+              <legend class="text-[14px] font-medium text-fg-primary">Return Address</legend>
+              <p class="text-[12px] text-fg-secondary">Used for Shipping Labels</p>
+              @for (opt of [{v:'best',l:'Best Warehouse (Used for Optimization)'},{v:'default',l:'Default Address'},{v:'unique',l:'Unique Address'}]; track opt.v) {
+                <label class="inline-flex items-center gap-2 text-[13px] text-fg-primary">
+                  <input type="radio" name="returnMode" [value]="opt.v" [checked]="returnMode() === opt.v" (change)="returnMode.set($any(opt.v))" [attr.data-testid]="'radio-return-' + opt.v" class="h-4 w-4 accent-action-primary" />
+                  {{ opt.l }}
+                </label>
+              }
+              <label class="inline-flex items-center gap-2 text-[13px] text-fg-primary">
+                <input type="checkbox" [checked]="returnUseCompanyName()" (change)="returnUseCompanyName.set(!returnUseCompanyName())" data-testid="checkbox-return-company" class="h-4 w-4 accent-action-primary" />
+                Use Unique Company Name
+              </label>
+
+              @if (returnMode() === 'unique') {
+                <div class="mt-2 flex flex-col gap-3 rounded border border-divider bg-surface p-3" data-testid="form-return-address">
+                  <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Company Name</span><input type="text" [value]="returnAddress().companyName" (input)="updateAddress(returnAddress, 'companyName', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Phone (optional)</span><input type="text" [value]="returnAddress().phone" (input)="updateAddress(returnAddress, 'phone', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Email</span><input type="email" [value]="returnAddress().email" (input)="updateAddress(returnAddress, 'email', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                  </div>
+                  <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Address Line 1</span><input type="text" [value]="returnAddress().line1" (input)="updateAddress(returnAddress, 'line1', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Address Line 2</span><input type="text" [value]="returnAddress().line2" (input)="updateAddress(returnAddress, 'line2', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Country</span><select [value]="returnAddress().country" (change)="updateAddress(returnAddress, 'country', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none"><option>United States</option><option>Canada</option><option>Mexico</option></select></label>
+                  </div>
+                  <div class="grid grid-cols-3 gap-3">
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">City</span><input type="text" [value]="returnAddress().city" (input)="updateAddress(returnAddress, 'city', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">State</span><input type="text" [value]="returnAddress().state" (input)="updateAddress(returnAddress, 'state', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                    <label class="flex flex-col gap-1"><span class="text-[12px] text-fg-secondary">Zip Code</span><input type="text" [value]="returnAddress().zip" (input)="updateAddress(returnAddress, 'zip', $event)" class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] focus:border-action-primary focus:outline-none" /></label>
+                  </div>
+                </div>
+              }
+            </fieldset>
+          </div>
+        }
+
+        <!-- ============ Step 5: Extras ============ -->
+        @if (currentStep() === 5) {
+          <div class="flex flex-col gap-5" data-testid="step-5-panel">
+            <section>
+              <p class="mb-3 text-[14px] font-medium text-fg-primary">Printer Settings</p>
+              <div class="grid grid-cols-[1fr_120px] gap-3">
+                <label class="flex flex-col gap-1">
+                  <span class="text-[12px] text-fg-secondary">Label Size</span>
+                  <div class="relative">
+                    <select [value]="labelSize()" (change)="setStr(labelSize, $event)" data-testid="select-label-size" class="h-10 w-full appearance-none rounded-token border border-divider bg-surface px-3 pr-9 text-[14px] text-fg-primary focus:border-action-primary focus:outline-none"><option>Standard 4x6</option><option>Compact 2x4</option></select>
+                    <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="text-[12px] text-fg-secondary">Copies</span>
+                  <div class="relative">
+                    <input type="number" min="1" [value]="labelCopies()" (input)="setNum(labelCopies, $event)" data-testid="input-label-copies" class="h-10 w-full rounded-token border border-divider bg-surface px-3 pr-9 text-[14px] focus:border-action-primary focus:outline-none" />
+                    <div class="absolute right-1 top-1 flex flex-col">
+                      <button type="button" (click)="incCopies(labelCopies, 1)" aria-label="Increase copies" class="inline-flex h-4 w-5 items-center justify-center text-fg-secondary hover:bg-surface-light-primary"><svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 15l6-6 6 6"/></svg></button>
+                      <button type="button" (click)="incCopies(labelCopies, -1)" aria-label="Decrease copies" class="inline-flex h-4 w-5 items-center justify-center text-fg-secondary hover:bg-surface-light-primary"><svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></button>
+                    </div>
+                  </div>
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="text-[12px] text-fg-secondary">Packing Slip</span>
+                  <div class="relative">
+                    <select [value]="packingSlip()" (change)="setStr(packingSlip, $event)" data-testid="select-packing-slip" class="h-10 w-full appearance-none rounded-token border border-divider bg-surface px-3 pr-9 text-[14px] text-fg-primary focus:border-action-primary focus:outline-none"><option>Default Name</option><option>Custom Name</option></select>
+                    <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="text-[12px] text-fg-secondary">Copies</span>
+                  <input type="number" min="1" [value]="packingCopies()" (input)="setNum(packingCopies, $event)" data-testid="input-packing-copies" class="h-10 w-full rounded-token border border-divider bg-surface px-3 text-[14px] focus:border-action-primary focus:outline-none" />
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="text-[12px] text-fg-secondary">Bill of Lading</span>
+                  <div class="relative">
+                    <select [value]="bolName()" (change)="setStr(bolName, $event)" data-testid="select-bol" class="h-10 w-full appearance-none rounded-token border border-divider bg-surface px-3 pr-9 text-[14px] text-fg-primary focus:border-action-primary focus:outline-none"><option>Default Name</option><option>Custom Name</option></select>
+                    <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="text-[12px] text-fg-secondary">Copies</span>
+                  <input type="number" min="1" [value]="bolCopies()" (input)="setNum(bolCopies, $event)" data-testid="input-bol-copies" class="h-10 w-full rounded-token border border-divider bg-surface px-3 text-[14px] focus:border-action-primary focus:outline-none" />
+                </label>
+              </div>
+            </section>
+
+            <section>
+              <p class="mb-2 text-[14px] font-medium text-fg-primary">Attachments</p>
+              <table class="w-full table-fixed border-collapse" data-testid="table-attachments">
+                <colgroup><col><col style="width:200px"><col style="width:32px"></colgroup>
+                <thead><tr class="h-8 border-b border-divider text-left text-[12px] font-medium text-fg-primary"><th class="px-2">File Name</th><th class="px-2">Upload Date</th><th></th></tr></thead>
+                <tbody>
+                  @for (a of attachments(); track a.name) {
+                    <tr class="h-9 border-b border-divider text-[13px] text-fg-primary">
+                      <td class="px-2"><a class="text-action-primary hover:underline" href="javascript:void(0)">{{ a.name }}</a></td>
+                      <td class="px-2 text-fg-secondary">{{ a.uploaded }}</td>
+                      <td class="px-2 text-right"><button type="button" aria-label="File actions" class="inline-flex h-6 w-6 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary"><svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <button type="button"
+                      data-testid="button-upload-attachment"
+                      class="mt-3 inline-flex h-9 w-fit items-center gap-1 rounded-token border border-action-primary px-3 text-[13px] text-action-primary hover:bg-surface-light-primary">
+                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/></svg>
+                Upload
+              </button>
+            </section>
+
+            <label class="flex flex-col gap-1">
+              <span class="text-[14px] font-medium text-fg-primary">Add Notes</span>
+              <textarea
+                rows="4"
+                [value]="notes()"
+                (input)="setStr(notes, $event)"
+                placeholder="Enter Notes"
+                data-testid="input-notes"
+                class="rounded-token border border-divider bg-surface px-3 py-2 text-[13px] text-fg-primary placeholder:text-fg-tertiary focus:border-action-primary focus:outline-none"></textarea>
+            </label>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="flex h-[64px] shrink-0 items-center justify-between border-t border-divider px-5">
+      <button
+        type="button"
+        (click)="cancel.emit()"
+        data-testid="button-cancel"
+        class="inline-flex h-10 items-center rounded-token border border-divider bg-surface px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary">
+        Cancel
+      </button>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="goBack()"
+          [disabled]="isFirstStep()"
+          data-testid="button-back"
+          class="inline-flex h-10 items-center rounded-token border border-divider bg-surface px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary disabled:opacity-50">
+          Back
+        </button>
+        <button
+          type="button"
+          (click)="goContinue()"
+          [disabled]="isLastStep()"
+          data-testid="button-continue"
+          class="inline-flex h-10 items-center rounded-token border border-divider bg-surface px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary disabled:opacity-50">
+          Continue
+        </button>
+        @if (isFirstStep()) {
+          <button
+            type="button"
+            (click)="onSaveDraft()"
+            data-testid="button-save-draft"
+            class="inline-flex h-10 items-center rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action hover:bg-action-primary-hover">
+            Save Draft
+          </button>
+        }
+        <button
+          type="button"
+          (click)="onConnect()"
+          data-testid="button-connect"
+          class="inline-flex h-10 items-center rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action hover:bg-action-primary-hover">
+          Connect
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>

@@ -267,12 +267,22 @@
                                     (requestAccess)="requestAccess(row.id)" />
     }
 
-    <!-- CONNECT MODAL -->
+    <!-- CONNECT MODAL (non-store categories) -->
     @if (connectModalOpen() && selectedRow(); as row) {
       <app-connect-integration-modal
         [brand]="row.brand"
         (cancel)="closeConnectModal()"
         (confirm)="confirmConnect($event)" />
+    }
+
+    <!-- CONFIGURE STORE WIZARD (Stores / e-commerce category) -->
+    @if (configureStoreOpen() && selectedRow(); as row) {
+      <app-configure-store-modal
+        [brand]="row.brand"
+        [storeTitle]="row.brand + ' VSV USA'"
+        (cancel)="closeConfigureStore()"
+        (saveDraft)="saveStoreDraft($event)"
+        (confirm)="confirmStore($event)" />
     }
 
     <!-- TOAST -->

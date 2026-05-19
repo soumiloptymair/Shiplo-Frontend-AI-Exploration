@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AppShellComponent } from '../../layout/app-shell/app-shell.component';
 import { MarketplaceDetailPanelComponent } from './marketplace-detail-panel/marketplace-detail-panel.component';
 import { ConnectIntegrationModalComponent, ConnectFormValue } from './connect-modal/connect-integration-modal.component';
+import { ConfigureStoreModalComponent, ConfigureStoreFormValue } from './configure-store-modal/configure-store-modal.component';
 
 export interface MarketplaceCategory {
   id: string;
@@ -31,7 +32,7 @@ export interface ConnectorRow {
 
 const CATEGORY_LABELS: Record<string, string> = {
   carriers:   'Carriers',
-  ecommerce:  'E-Commerce',
+  ecommerce:  'Stores',
   erp:        'ERP',
   oms:        'OMS',
   wms:        'WMS',
@@ -163,7 +164,7 @@ function generateRows(): ConnectorRow[] {
 @Component({
   selector: 'app-marketplace',
   standalone: true,
-  imports: [CommonModule, AppShellComponent, MarketplaceDetailPanelComponent, ConnectIntegrationModalComponent],
+  imports: [CommonModule, AppShellComponent, MarketplaceDetailPanelComponent, ConnectIntegrationModalComponent, ConfigureStoreModalComponent],
   templateUrl: './marketplace.component.html',
 })
 export class MarketplaceComponent {
@@ -179,6 +180,7 @@ export class MarketplaceComponent {
   readonly search = signal('');
   readonly selectedRowId = signal<string | null>(null);
   readonly connectModalOpen = signal(false);
+  readonly configureStoreOpen = signal(false);
   readonly toast = signal<string | null>(null);
   readonly openRowMenuId = signal<string | null>(null);
 
@@ -225,19 +227,52 @@ export class MarketplaceComponent {
     return id ? this.rows().find(r => r.id === id) ?? null : null;
   });
 
-  selectCategory(id: string) { this.selectedCategory.set(id); this.selectedRowId.set(null); this.connectModalOpen.set(false); }
-  setTab(t: ConnectorTab) { this.activeTab.set(t); this.selectedRowId.set(null); this.connectModalOpen.set(false); }
+  selectCategory(id: string) { this.selectedCategory.set(id); this.selectedRowId.set(null); this.connectModalOpen.set(false); this.configureStoreOpen.set(false); }
+  setTab(t: ConnectorTab) { this.activeTab.set(t); this.selectedRowId.set(null); this.connectModalOpen.set(false); this.configureStoreOpen.set(false); }
   onSearch(e: Event) { this.search.set((e.target as HTMLInputElement).value); }
   tabCount(t: ConnectorTab): number { return this.tabCounts()[t]; }
   selectRow(id: string) { this.selectedRowId.set(id); }
-  closePanel() { this.selectedRowId.set(null); this.connectModalOpen.set(false); }
+  closePanel() { this.selectedRowId.set(null); this.connectModalOpen.set(false); this.configureStoreOpen.set(false); }
 
   openConnectModal() {
-    if (this.selectedRow()?.status !== 'Connected') {
+    const row = this.selectedRow();
+    if (!row || row.status === 'Connected') return;
+    if (row.category === 'ecommerce') {
+      this.configureStoreOpen.set(true);
+    } else {
       this.connectModalOpen.set(true);
     }
   }
   closeConnectModal() { this.connectModalOpen.set(false); }
+  closeConfigureStore() { this.configureStoreOpen.set(false); }
+
+  saveStoreDraft(_value: ConfigureStoreFormValue) {
+    const target = this.selectedRow();
+    if (!target) return;
+    this.configureStoreOpen.set(false);
+    this.toast.set(`Draft saved for “${target.accountName}”`);
+    setTimeout(() => this.toast.set(null), 4000);
+  }
+
+  confirmStore(value: ConfigureStoreFormValue) {
+    const target = this.selectedRow();
+    if (!target) return;
+    const accountName = value.storeName.trim() || target.accountName;
+    this.rows.update(list => list.map(r =>
+      r.id === target.id
+        ? {
+            ...r,
+            accountName,
+            status: 'Connected' as ConnectorStatus,
+            availableBucket: undefined,
+            installedDate: '19 Feb 2026, 18:32 CST',
+            installedBy: 'Shipper 1',
+          }
+        : r));
+    this.configureStoreOpen.set(false);
+    this.toast.set(`Successfully connected “${accountName}”`);
+    setTimeout(() => this.toast.set(null), 4000);
+  }
 
   confirmConnect(form: ConnectFormValue) {
     const target = this.selectedRow();
