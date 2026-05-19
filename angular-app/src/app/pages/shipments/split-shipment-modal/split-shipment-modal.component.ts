@@ -119,6 +119,10 @@ export class SplitShipmentModalComponent implements OnChanges {
   openDeleteConfirmIdx = signal<number>(-1);
   private nextShipmentNum = 3;
 
+  readonly selectedRec = computed<Recommendation | undefined>(() =>
+    this.recommendations.find(r => r.id === this.selectedRecId())
+  );
+
   readonly selectedCountTotal = computed(() => this.selectedKeys().size);
   readonly canConfirm = computed(() => {
     const buckets = this.shipments();

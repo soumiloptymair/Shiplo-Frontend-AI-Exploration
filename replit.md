@@ -102,3 +102,9 @@ angular-app/
 - **Primary codebase is Angular** (`angular-app/`). All future feature requests, fixes, and UI changes must be applied to the Angular app by default.
 - The React app (`client/`) is a secondary reference — do not modify it unless the user explicitly asks.
 - The main `Start application` workflow runs the Angular app on port 5000.
+
+## Figma MCP guardrails
+
+- **Always fetch a screenshot before generating code.** Before calling `mcpFigma_getDesignContext` (or writing any code derived from a Figma node), call `mcpFigma_getScreenshot` for the same `nodeId` / `fileKey` so there is visual ground truth to compare against. The only exception is when the user has just provided a screenshot themselves.
+- **Prefer `getDesignContext` over `getMetadata` for design-to-code work.** Use `mcpFigma_getMetadata` only to discover node structure or page IDs when no node id is known yet; once a target node is identified, switch to `mcpFigma_getDesignContext` for the actual implementation reference.
+- **Match the existing UI system, don't import Figma styling blindly.** Any color, font, spacing, radius, shadow, or component style derived from Figma must be reconciled with the design tokens and components already defined in this project (see `angular-app/src/styles.scss`, `client/src/index.css`, `tailwind.config.ts`, and the shared component patterns in `angular-app/src/app/`). Reuse existing tokens and shadcn/Angular components instead of introducing one-off values; only add new tokens when the Figma design clearly requires something not already covered, and call that out explicitly.
