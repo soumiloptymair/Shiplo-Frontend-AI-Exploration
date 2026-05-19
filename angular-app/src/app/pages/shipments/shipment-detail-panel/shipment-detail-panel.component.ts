@@ -52,7 +52,6 @@ export class ShipmentDetailPanelComponent implements OnChanges {
   /** Per-session set of shipment ids whose banner the user dismissed. */
   dismissedBanners = signal<Set<string>>(new Set());
   splitModalOpen = signal(false);
-  splitTooltipOpen = signal(false);
 
   private nextDocId = 1;
   private nextPodId = 1;

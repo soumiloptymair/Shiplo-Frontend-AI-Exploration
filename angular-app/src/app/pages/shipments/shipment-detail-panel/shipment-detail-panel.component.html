@@ -34,30 +34,6 @@
           </button>
         </div>
       </div>
-      <!-- Split Shipment quick-icon with tooltip (Figma node 23008-101045) -->
-      <div class="relative"
-        (mouseenter)="splitTooltipOpen.set(true)"
-        (mouseleave)="splitTooltipOpen.set(false)">
-        <button type="button" aria-label="Split Shipment" data-testid="button-panel-split"
-          aria-describedby="tooltip-panel-split"
-          (click)="openSplitModal(); splitTooltipOpen.set(false)"
-          (focus)="splitTooltipOpen.set(true)"
-          (blur)="splitTooltipOpen.set(false)"
-          (keydown.escape)="splitTooltipOpen.set(false)"
-          class="flex h-6 w-6 items-center justify-center rounded text-neutral-600 hover:bg-neutral-100">
-          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 3v4a2 2 0 002 2h8a2 2 0 002 2v4M6 21h.01M18 21h.01"/>
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 15l-3 3 3 3M18 15l3 3-3 3"/>
-          </svg>
-        </button>
-        <div *ngIf="splitTooltipOpen()"
-          id="tooltip-panel-split"
-          data-testid="tooltip-panel-split"
-          role="tooltip"
-          class="absolute right-0 top-full z-50 mt-1 whitespace-nowrap rounded bg-[#333538] px-2 py-1 font-body text-xs font-medium text-white shadow-md">
-          Split Shipment
-        </div>
-      </div>
       <button type="button" aria-label="Close panel" data-testid="button-close-panel"
         (click)="closePanel.emit()"
         class="flex h-6 w-6 items-center justify-center rounded text-neutral-600 hover:bg-neutral-100">
