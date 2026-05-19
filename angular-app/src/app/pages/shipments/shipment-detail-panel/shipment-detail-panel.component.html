@@ -29,9 +29,33 @@
             type="button"
             [attr.data-testid]="item.testid"
             class="w-full px-2 py-2 text-left font-['Roboto',sans-serif] text-sm font-normal text-[#333538] hover:bg-[#f5f7f8] transition-colors"
-            (click)="closeAllDropdowns()">
+            (click)="onMenuItem(item.action, $event)">
             {{ item.label }}
           </button>
+        </div>
+      </div>
+      <!-- Split Shipment quick-icon with tooltip (Figma node 23008-101045) -->
+      <div class="relative"
+        (mouseenter)="splitTooltipOpen.set(true)"
+        (mouseleave)="splitTooltipOpen.set(false)">
+        <button type="button" aria-label="Split Shipment" data-testid="button-panel-split"
+          aria-describedby="tooltip-panel-split"
+          (click)="openSplitModal(); splitTooltipOpen.set(false)"
+          (focus)="splitTooltipOpen.set(true)"
+          (blur)="splitTooltipOpen.set(false)"
+          (keydown.escape)="splitTooltipOpen.set(false)"
+          class="flex h-6 w-6 items-center justify-center rounded text-neutral-600 hover:bg-neutral-100">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 3v4a2 2 0 002 2h8a2 2 0 002 2v4M6 21h.01M18 21h.01"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 15l-3 3 3 3M18 15l3 3-3 3"/>
+          </svg>
+        </button>
+        <div *ngIf="splitTooltipOpen()"
+          id="tooltip-panel-split"
+          data-testid="tooltip-panel-split"
+          role="tooltip"
+          class="absolute right-0 top-full z-50 mt-1 whitespace-nowrap rounded bg-[#333538] px-2 py-1 font-body text-xs font-medium text-white shadow-md">
+          Split Shipment
         </div>
       </div>
       <button type="button" aria-label="Close panel" data-testid="button-close-panel"
@@ -43,6 +67,15 @@
       </button>
     </div>
   </div>
+
+  <!-- Split recommendation banner (Figma node 23008-101023) -->
+  <app-split-recommendation-banner
+    *ngIf="showRecommendationBanner() && shipment.splitRecommendation"
+    [recommendation]="shipment.splitRecommendation"
+    (split)="openSplitModal()"
+    (dismiss)="dismissBanner()"
+    class="block pt-3"
+  />
 
   <!-- Shipment Header -->
   <div class="shrink-0 bg-white px-4 py-4">
@@ -500,7 +533,75 @@
 
     <!-- PRODUCTS TAB -->
     <ng-container *ngIf="activeTab() === 'Products'">
-      <div class="p-5"><p class="font-body text-sm text-[#45565b]">Products for this shipment will appear here.</p></div>
+      <div class="flex flex-col gap-5 p-5" data-testid="tab-content-products">
+        <ng-container *ngIf="(shipment.products?.length ?? 0) > 0; else productsEmpty">
+          <!-- Products table -->
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-[#e4eaed]">
+                <th class="pb-2 text-left font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Item</th>
+                <th class="pb-2 pr-2 text-right font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Qty</th>
+                <th class="pb-2 pr-2 text-right font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Value</th>
+                <th class="pb-2 text-right font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of shipment.products; let i = index"
+                [attr.data-testid]="'row-product-' + i"
+                class="border-b border-[#e4eaed] last:border-0 align-top">
+                <td class="py-2 pr-2">
+                  <div class="flex flex-col gap-0.5">
+                    <div class="flex items-center gap-1.5">
+                      <svg class="h-3.5 w-3.5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                      </svg>
+                      <span class="font-body text-sm font-medium text-[#2da1cb]">{{ p.sku }}</span>
+                      <span *ngIf="p.lowInventoryRemaining"
+                        [attr.data-testid]="'badge-low-inventory-' + i"
+                        class="inline-flex items-center gap-1 rounded-full bg-[#FDE2D4] px-2 py-0.5 font-body text-[10px] font-medium text-[#0b1516]">
+                        only {{ p.lowInventoryRemaining }} left
+                        <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
+                      </span>
+                    </div>
+                    <p class="font-body text-xs text-[#45565b] truncate">{{ p.name }}</p>
+                  </div>
+                </td>
+                <td class="py-2 pr-2 text-right font-body text-sm text-[#0b1516]">{{ p.qty }}</td>
+                <td class="py-2 pr-2 text-right font-body text-sm text-[#0b1516]">${{ p.unitValue.toFixed(2) }}</td>
+                <td class="py-2 text-right font-body text-sm text-[#0b1516]">${{ (p.qty * p.unitValue).toFixed(2) }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="bg-[#f6f9fb]">
+                <td colspan="3" class="px-2 py-2 font-body text-sm font-medium text-[#0b1516]">Total Value</td>
+                <td class="px-0 py-2 text-right font-body text-sm font-medium text-[#0b1516]" data-testid="text-products-total">
+                  ${{ productsTotal().toFixed(2) }}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Materials -->
+          <div *ngIf="shipment.materials as mats" class="flex flex-col gap-3" data-testid="section-materials">
+            <div class="flex items-center gap-2">
+              <p class="font-body text-xs font-medium uppercase tracking-wide text-[#0b1516] whitespace-nowrap">Materials</p>
+              <div class="h-px flex-1 bg-[#e4eaed]"></div>
+            </div>
+            <ul class="flex flex-col gap-1.5">
+              <li *ngFor="let row of MATERIAL_ROWS" class="flex items-center gap-2">
+                <span class="h-2 w-2 shrink-0 rounded-full"
+                  [ngClass]="mats[row.key] ? 'bg-[#D32F2F]' : 'bg-[#4A9200]'"></span>
+                <span class="font-body text-sm text-[#0b1516]">
+                  {{ mats[row.key] ? row.present : row.absent }}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </ng-container>
+        <ng-template #productsEmpty>
+          <p class="font-body text-sm text-[#45565b]">Products for this shipment will appear here.</p>
+        </ng-template>
+      </div>
     </ng-container>
 
     <!-- NOTES TAB -->
@@ -510,5 +611,39 @@
       </div>
     </ng-container>
 
+    <!-- SHIPMENT LOG TAB -->
+    <ng-container *ngIf="activeTab() === 'Shipment Log'">
+      <div class="p-5" data-testid="tab-content-shipment-log">
+        <ng-container *ngIf="(shipment.log?.length ?? 0) > 0; else logEmpty">
+          <ol class="flex flex-col">
+            <li *ngFor="let entry of shipment.log; let i = index; let last = last"
+              [attr.data-testid]="'log-entry-' + i"
+              class="flex gap-3">
+              <div class="flex flex-col items-center">
+                <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#008572]"></span>
+                <span *ngIf="!last" class="my-1 w-px flex-1 bg-[#e4eaed]"></span>
+              </div>
+              <div class="flex flex-1 flex-col gap-0.5 pb-4">
+                <p class="font-body text-sm font-medium text-[#0b1516]">{{ entry.label }}</p>
+                <p class="font-body text-xs text-[#45565b]">{{ entry.at }}</p>
+              </div>
+            </li>
+          </ol>
+        </ng-container>
+        <ng-template #logEmpty>
+          <p class="font-body text-sm text-[#45565b]">No log entries for this shipment yet.</p>
+        </ng-template>
+      </div>
+    </ng-container>
+
   </div>
 </div>
+
+<!-- Split Shipment modal -->
+<app-split-shipment-modal
+  *ngIf="splitModalOpen()"
+  [products]="shipment.products ?? []"
+  [shipmentId]="shipment.shipmentId"
+  (cancel)="closeSplitModal()"
+  (confirm)="confirmSplit()"
+/>

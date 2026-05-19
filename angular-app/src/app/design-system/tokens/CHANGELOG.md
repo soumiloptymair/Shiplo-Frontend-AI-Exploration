@@ -1,5 +1,17 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Split Shipment surfacing (Figma node `23008-101023` / file `unEpC0FcuWKbB5yO1m7OyX`)
+
+### Added (components, no new tokens)
+- `pages/shipments/split-recommendation-banner` — peach `#FDE2D4` banner that appears at the top of the detail panel when a shipment has a `splitRecommendation`. Title/body copy switches on `reason` (`low-inventory` / `faster-delivery` / `lower-cost`). Emits `split` and `dismiss`; dismissal is session-scoped per shipment id.
+- `pages/shipments/split-shipment-modal` — self-designed two-column (Shipment A / B) split modal. Chevron buttons move whole items between columns; Confirm is disabled until both sides have ≥1 item; Confirm fires the global toast `Shipment split into 2`.
+- `shipment-detail-panel` — adds a header quick-icon (between kebab and close-X) with hover tooltip "Split Shipment"; adds a `Shipment Log` tab (timeline of `ShipmentLogEntry`); replaces the Products tab placeholder with the spec table (Item / Qty / Value / Total + total row), an inline `only N left ●` red badge for low-inventory SKUs, and a Materials section (5 handling flags, red present / green absent dots).
+- `core/models/shipment.model.ts` — new types `ShipmentProduct`, `MaterialFlags`, `SplitRecommendation` (discriminated union), `ShipmentLogEntry`. Seeded s-4 (low-inventory @ `ABC12345SBL`, `KS Fulfillment center`), s-5 (faster-delivery), s-6 (lower-cost, $4.50 savings) with shared default products / materials / log.
+
+### Tokens
+- No new tokens introduced. Banner background `#FDE2D4` already exists as the `chip.red` token; used as an arbitrary hex inline because it is consumed in a single component-local context.
+- Reused `action.primary` (`#008572`) for the modal Confirm button.
+
 ## 2026-05-19 — Global Toast component (Figma node `25949-1336122`)
 
 ### Added (component, no new tokens)
