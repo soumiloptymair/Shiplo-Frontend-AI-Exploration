@@ -148,30 +148,42 @@
                   [attr.aria-label]="'Select shipment ' + s.shipmentId" />
               </td>
 
-              <!-- Alert / Split icon (24px column between checkbox and Shipment ID) -->
+              <!-- Alert / Split / Merge icon (24px column between checkbox and Shipment ID).
+                   Mutually exclusive in priority order: Split > Merged > Needs-attention > Merge-opportunity. -->
               <td class="h-8 w-[24px] p-0 text-center">
-                <span *ngIf="(s.needsAttention || hasMergeOpportunity(s.id)) && !s.isSplit && !s.isMerged" class="inline-flex"
-                  [title]="hasMergeOpportunity(s.id) && !s.needsAttention ? 'Merge opportunity' : 'Needs attention'"
-                  [attr.aria-label]="hasMergeOpportunity(s.id) && !s.needsAttention ? 'Merge opportunity' : 'Needs attention'"
-                  [attr.data-testid]="hasMergeOpportunity(s.id) && !s.needsAttention ? 'icon-merge-opportunity-' + s.id : 'icon-attention-' + s.id">
-                  <svg class="h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                  </svg>
-                </span>
-                <span *ngIf="s.isSplit" class="inline-flex text-[#45565b]" title="Split shipment" aria-label="Split shipment" [attr.data-testid]="'icon-split-' + s.id">
-                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 11.5 10.3889" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3.52778 9.0833H1.86111C1.30556 9.0833 0.75 8.52774 0.75 7.97219V2.41663C0.75 1.86108 1.30556 1.30552 1.86111 1.30552H3.52778"/>
-                    <path d="M7.97222 1.30552H9.63889C10.1944 1.30552 10.75 1.86108 10.75 2.41663V7.97219C10.75 8.52774 10.1944 9.0833 9.63889 9.0833H7.97222"/>
-                    <path d="M5.75 0.75V9.63889"/>
-                  </svg>
-                </span>
-                <span *ngIf="s.isMerged" class="inline-flex text-[#45565b]" title="Merged shipment" aria-label="Merged shipment" [attr.data-testid]="'icon-merge-' + s.id">
-                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 3v6a6 6 0 006 6 6 6 0 006-6V3"/>
-                    <path d="M12 15v6"/>
-                    <path d="M9 18l3 3 3-3"/>
-                  </svg>
-                </span>
+                <ng-container *ngIf="s.isSplit; else mergeOrAttention">
+                  <span class="inline-flex text-[#45565b]" title="Split shipment" aria-label="Split shipment" [attr.data-testid]="'icon-split-' + s.id">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 11.5 10.3889" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3.52778 9.0833H1.86111C1.30556 9.0833 0.75 8.52774 0.75 7.97219V2.41663C0.75 1.86108 1.30556 1.30552 1.86111 1.30552H3.52778"/>
+                      <path d="M7.97222 1.30552H9.63889C10.1944 1.30552 10.75 1.86108 10.75 2.41663V7.97219C10.75 8.52774 10.1944 9.0833 9.63889 9.0833H7.97222"/>
+                      <path d="M5.75 0.75V9.63889"/>
+                    </svg>
+                  </span>
+                </ng-container>
+                <ng-template #mergeOrAttention>
+                  <ng-container *ngIf="s.isMerged; else attentionOrOpp">
+                    <span class="inline-flex text-[#45565b]" title="Merged shipment" aria-label="Merged shipment" [attr.data-testid]="'icon-merge-' + s.id">
+                      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 3v6a6 6 0 006 6 6 6 0 006-6V3"/>
+                        <path d="M12 15v6"/>
+                        <path d="M9 18l3 3 3-3"/>
+                      </svg>
+                    </span>
+                  </ng-container>
+                  <ng-template #attentionOrOpp>
+                    <span *ngIf="s.needsAttention" class="inline-flex" title="Needs attention" aria-label="Needs attention" [attr.data-testid]="'icon-attention-' + s.id">
+                      <svg class="h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                      </svg>
+                    </span>
+                    <span *ngIf="!s.needsAttention && hasMergeOpportunity(s.id)" class="inline-flex" title="Merge opportunity" aria-label="Merge opportunity" [attr.data-testid]="'icon-merge-opportunity-' + s.id">
+                      <!-- Orange recommendation color matches the peach merge banner accent (#E07B00). -->
+                      <svg class="h-4 w-4 text-[#E07B00]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                      </svg>
+                    </span>
+                  </ng-template>
+                </ng-template>
               </td>
 
               <!-- Shipment ID -->
