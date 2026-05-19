@@ -47,10 +47,14 @@ export class NavSidebarComponent {
 
   readonly resourceNavItems: NavItem[] = [
     { label: 'Inventory',  matchPaths: ['/inventory'],  route: '/inventory' },
-    { label: 'Marketplace',matchPaths: ['/marketplace'],route: '/marketplace' },
+  ];
+
+  readonly settingsNavItems: NavItem[] = [
+    { label: 'Marketplace', matchPaths: ['/marketplace'], route: '/marketplace' },
   ];
 
   resourcesExpanded = true;
+  settingsExpanded = true;
 
   isActive(item: NavItem): boolean {
     const url = this.router.url;

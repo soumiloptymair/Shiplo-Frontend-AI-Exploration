@@ -147,10 +147,24 @@
             </div>
           </section>
           <section class="flex flex-col gap-1">
-            <button type="button" class="h-auto inline-flex justify-start gap-2 self-start p-0 text-neutral-900 bg-transparent border-none cursor-pointer">
-              <img class="h-4 w-4" alt="" src="figmaAssets/chevron-right-1.svg" />
+            <button type="button"
+              class="h-auto inline-flex justify-start gap-2 self-start p-0 text-neutral-900 bg-transparent border-none cursor-pointer"
+              (click)="settingsExpanded = !settingsExpanded">
+              <img class="h-4 w-4 transition-transform" [class.rotate-90]="settingsExpanded" alt="" src="figmaAssets/chevron-right-1.svg" />
               <span class="font-body text-sm font-normal">SETTINGS</span>
             </button>
+            <div *ngIf="settingsExpanded" class="flex flex-col gap-1 px-2">
+              <a *ngFor="let item of settingsNavItems"
+                [routerLink]="item.route"
+                [attr.data-testid]="testId(item.label)"
+                class="flex h-8 w-full items-center gap-2 rounded px-2 py-1 no-underline font-body text-sm transition-colors"
+                [ngClass]="isActive(item) ? 'bg-brand-secondary text-white' : 'bg-transparent text-neutral-900 hover:bg-neutral-100'">
+                <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l1.5-5h15L21 9M3 9v10a1 1 0 001 1h16a1 1 0 001-1V9M3 9h18M8 9V6m4 3V6m4 3V6"/>
+                </svg>
+                <span>{{ item.label }}</span>
+              </a>
+            </div>
           </section>
         </ng-container>
       </div>
