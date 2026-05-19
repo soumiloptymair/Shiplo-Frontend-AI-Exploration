@@ -197,16 +197,15 @@ export class ShipmentService {
       originalIds: sources.map((s) => s.id),
     };
 
-    // Insert the merged row in place of the first-occurring source row (in grid order),
-    // and drop every other source row.
+    // Insert the merged row at the position of `sourceIds[0]` (the user-selected primary), and
+    // drop every other source row — regardless of grid ordering between primary and its peers.
     const removeIds = new Set(sources.map((s) => s.id));
     const next: Shipment[] = [];
-    let inserted = false;
-    for (const s of all) {
-      if (removeIds.has(s.id)) {
-        if (!inserted) { next.push(newRow); inserted = true; }
-      } else {
-        next.push(s);
+    for (let i = 0; i < all.length; i++) {
+      if (i === firstIdx) {
+        next.push(newRow);
+      } else if (!removeIds.has(all[i].id)) {
+        next.push(all[i]);
       }
     }
     this.allShipments.set(next);

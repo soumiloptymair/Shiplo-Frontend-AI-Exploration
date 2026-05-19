@@ -100,10 +100,6 @@ export class MergeShipmentModalComponent implements OnChanges {
 
   setWarehouse(w: string) { this.keptWarehouse.set(w); }
 
-  productsTotal(s: Shipment): number {
-    return (s.products ?? []).reduce((sum, p) => sum + p.qty * p.unitValue, 0);
-  }
-
   productsQty(s: Shipment): number {
     return (s.products ?? []).reduce((sum, p) => sum + p.qty, 0);
   }
