@@ -7,7 +7,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="merge-shipment-modal-title"
-    class="flex h-[680px] max-h-[95vh] w-[1024px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg bg-white"
+    class="flex h-[812px] max-h-[95vh] w-[1324px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg bg-white"
     style="box-shadow: 0 1px 16px 0 rgba(0,0,0,0.25);"
     (click)="$event.stopPropagation()"
   >
@@ -17,10 +17,11 @@
         <p id="merge-shipment-modal-title"
           class="font-body text-[18px] font-bold leading-tight text-[#0b1516]"
           data-testid="text-merge-modal-title">
-          Merge Shipments
+          Merge Shipments — {{ primary.shipmentId }}
         </p>
         <p class="font-body text-xs text-[#45565b]" data-testid="text-merge-modal-subtitle">
           {{ selectedShipments().length }} of {{ allShipments().length }} orders going to ZIP {{ destinationZip() }}
+          · Projected savings ${{ projectedSavings().toFixed(2) }}
         </p>
       </div>
       <button type="button" aria-label="Close merge modal" data-testid="button-close-merge-modal"
@@ -32,14 +33,19 @@
       </button>
     </header>
 
-    <!-- Body: left summary + right source cards -->
+    <!-- Body: left summary + right source cards (with merged preview as final right-pane card) -->
     <section class="flex min-h-0 flex-1 overflow-hidden">
 
-      <!-- LEFT: summary + warehouse picker + merged preview -->
+      <!-- LEFT: summary + warehouse picker -->
       <aside class="flex w-[380px] shrink-0 flex-col overflow-y-auto border-r border-[#b8c6cc] bg-[#f6f9fb] px-5 py-5">
         <p class="font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Destination</p>
         <p class="mt-1 font-body text-sm text-[#0b1516]" data-testid="text-merge-summary-destination">
           {{ primary.customer }} &middot; ZIP {{ destinationZip() }}
+        </p>
+
+        <p class="mt-5 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Projected savings</p>
+        <p class="mt-1 font-body text-sm font-bold text-[#008572]" data-testid="text-merge-summary-savings">
+          ${{ projectedSavings().toFixed(2) }}
         </p>
 
         <!-- Warehouse radio picker -->
@@ -57,48 +63,21 @@
           </label>
         </div>
 
-        <!-- Merged preview card -->
-        <div class="mt-6 rounded border border-[#008572] bg-white p-4" data-testid="card-merge-preview">
-          <p class="font-body text-xs font-medium uppercase tracking-wide text-[#008572]">Merged preview</p>
-          <p class="mt-1 font-body text-sm font-bold text-[#0b1516]" data-testid="text-merge-preview-title">
-            1 combined shipment &middot; {{ totalQty() }} items
-          </p>
-          <p class="mt-0.5 font-body text-sm text-[#0b1516]" data-testid="text-merge-preview-total">
-            Total value: ${{ totalValue().toFixed(2) }}
-          </p>
-          <p class="mt-0.5 font-body text-xs text-[#45565b]">
-            Warehouse: {{ keptWarehouse() || '—' }}
-          </p>
-
-          <div *ngIf="mergedProducts().length > 0" class="mt-3 border-t border-[#e4eaed] pt-3">
-            <p class="font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Combined products</p>
-            <ul class="mt-2 flex flex-col gap-1" data-testid="list-merge-preview-products">
-              <li *ngFor="let p of mergedProducts()"
-                [attr.data-testid]="'preview-product-' + p.sku"
-                class="flex items-center justify-between font-body text-sm text-[#0b1516]">
-                <span class="truncate pr-2">{{ p.sku }}</span>
-                <span class="shrink-0 text-[#45565b]">×{{ p.qty }} · ${{ (p.qty * p.unitValue).toFixed(2) }}</span>
-              </li>
-            </ul>
-          </div>
-          <p *ngIf="mergedProducts().length === 0"
-            class="mt-3 font-body text-xs italic text-[#5b6b72]">
-            Select at least one peer to preview combined products.
-          </p>
-        </div>
+        <p class="mt-6 font-body text-xs text-[#5b6b72]">
+          Selected sources are combined into one shipment. Uncheck a source card on the right to exclude it (minimum 2).
+        </p>
       </aside>
 
-      <!-- RIGHT: source cards with checkboxes -->
+      <!-- RIGHT: source cards followed by Merged Shipment preview card -->
       <div class="flex min-w-0 flex-1 flex-col overflow-y-auto bg-white px-5 py-5"
         data-testid="list-merge-source-cards">
         <p class="font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Source shipments</p>
-        <p class="mt-1 font-body text-xs text-[#5b6b72]">Uncheck to exclude from the merge (minimum 2).</p>
 
         <div class="mt-3 flex flex-col gap-3">
           <article *ngFor="let s of allShipments(); let i = index"
             [attr.data-testid]="'card-merge-source-' + s.id"
             class="rounded border bg-white px-4 py-3 transition-colors"
-            [ngClass]="isSelected(s.id) ? 'border-[#008572]' : 'border-[#e4eaed] opacity-60'">
+            [ngClass]="isSelected(s.id) ? 'border-[#e4eaed]' : 'border-[#e4eaed] opacity-60'">
             <label class="flex cursor-pointer items-start gap-3"
               [class.cursor-not-allowed]="isPrimary(s.id)">
               <input type="checkbox"
@@ -110,7 +89,7 @@
               <div class="flex flex-1 flex-col gap-1">
                 <div class="flex items-center justify-between gap-2">
                   <p class="font-body text-sm font-bold text-[#0b1516]">
-                    {{ s.shipmentId }}
+                    Order {{ i + 1 }}: {{ s.shipmentId }}
                     <span *ngIf="isPrimary(s.id)" class="ml-1 font-body text-xs font-normal text-[#008572]">(primary)</span>
                   </p>
                   <span class="font-body text-sm font-medium text-[#0b1516]">{{ s.value }}</span>
@@ -127,6 +106,44 @@
               </div>
             </label>
           </article>
+
+          <!-- Merged Shipment preview card (right-pane, final card per spec) -->
+          <article class="rounded border-2 border-[#008572] bg-[#f0faf7] px-4 py-3"
+            data-testid="card-merge-preview">
+            <div class="flex items-center justify-between gap-2">
+              <p class="font-body text-sm font-bold text-[#008572]" data-testid="text-merge-preview-title">
+                Merged Shipment Preview
+              </p>
+              <span class="font-body text-sm font-bold text-[#0b1516]" data-testid="text-merge-preview-total">
+                ${{ totalValue().toFixed(2) }}
+              </span>
+            </div>
+            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-xs text-[#45565b]">
+              <span>1 combined shipment</span>
+              <span>·</span>
+              <span>{{ totalQty() }} items</span>
+              <span>·</span>
+              <span>{{ keptWarehouse() || '—' }}</span>
+              <span>·</span>
+              <span>Saves ${{ projectedSavings().toFixed(2) }}</span>
+            </div>
+
+            <div *ngIf="mergedProducts().length > 0" class="mt-3 border-t border-[#cce7e0] pt-3">
+              <p class="font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Combined products</p>
+              <ul class="mt-2 flex flex-col gap-1" data-testid="list-merge-preview-products">
+                <li *ngFor="let p of mergedProducts()"
+                  [attr.data-testid]="'preview-product-' + p.sku"
+                  class="flex items-center justify-between font-body text-sm text-[#0b1516]">
+                  <span class="truncate pr-2">{{ p.sku }} — {{ p.name }}</span>
+                  <span class="shrink-0 text-[#45565b]">×{{ p.qty }} · ${{ (p.qty * p.unitValue).toFixed(2) }}</span>
+                </li>
+              </ul>
+            </div>
+            <p *ngIf="mergedProducts().length === 0"
+              class="mt-3 font-body text-xs italic text-[#5b6b72]">
+              Select at least one peer to preview combined products.
+            </p>
+          </article>
         </div>
       </div>
     </section>
@@ -134,7 +151,7 @@
     <!-- Footer -->
     <footer class="flex shrink-0 items-center justify-between gap-4 border-t border-[#b8c6cc] bg-white px-6 py-4">
       <p class="font-body text-xs text-[#45565b]" data-testid="text-merge-footer-summary">
-        Merging {{ selectedShipments().length }} shipments into 1
+        Merging {{ selectedShipments().length }} shipments into 1 · Saves ${{ projectedSavings().toFixed(2) }}
       </p>
       <div class="flex items-center gap-3">
         <button type="button" data-testid="button-cancel-merge"

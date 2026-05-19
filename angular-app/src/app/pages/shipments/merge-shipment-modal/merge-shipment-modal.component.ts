@@ -60,6 +60,14 @@ export class MergeShipmentModalComponent implements OnChanges {
   readonly canConfirm = computed(() => this.selectedShipments().length >= 2 && !!this.keptWarehouse());
   readonly destinationZip = computed(() => this.primary.destinationZip ?? '');
 
+  /** Projected savings for the merge. Prefers the seeded recommendation; falls back to a per-peer estimate. */
+  readonly projectedSavings = computed(() => {
+    const seeded = this.primary.mergeRecommendation?.savings;
+    if (seeded != null) return seeded;
+    const extraPeers = Math.max(0, this.selectedShipments().length - 1);
+    return extraPeers * 3.20;
+  });
+
   ngOnChanges() {
     const next = new Set<string>([this.primary.id, ...this.candidates.map((c) => c.id)]);
     this.selectedIds.set(next);
