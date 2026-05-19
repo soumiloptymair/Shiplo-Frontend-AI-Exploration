@@ -644,6 +644,7 @@
   *ngIf="splitModalOpen()"
   [products]="shipment.products ?? []"
   [shipmentId]="shipment.shipmentId"
+  [warehouse]="shipment.warehouse"
   (cancel)="closeSplitModal()"
   (confirm)="confirmSplit()"
 />

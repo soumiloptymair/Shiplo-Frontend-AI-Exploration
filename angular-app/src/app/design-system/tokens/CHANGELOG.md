@@ -1,5 +1,10 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Split Shipment modal (Figma node `23008-101209` / file `unEpC0FcuWKbB5yO1m7OyX`)
+
+### Changed (no new tokens)
+- `pages/shipments/split-shipment-modal` — fully rewritten to match the Figma "Dialog template" pixel-for-pixel. Now a 1324×812 dialog: 320 px left column with 3 recommendation presets (Rec 1 selected by default with `#e0f5f0` background and 2 px `#008572` border) + Manual split, divided by a `#b8c6cc` hairline; 964 px right area on `#f6f9fb` with the "You can edit this recommendation…" copy and a Reset button, then two 472 px Shipment cards (warehouse dropdown defaulting to `KS Fulfillment Center`, Product/Qty table with row checkboxes, per-card "0 products selected" / "Move to Shipment N" action menu), plus an "Add Shipment" pill button. Selecting a recommendation rehydrates the buckets; checking rows enables "Move to Shipment N"; Reset re-applies the active recommendation; Add Shipment appends an extra bucket (warehouse-picker + remove control). Footer Cancel + teal "Split Shipment" still fires the global `Shipment split into 2` toast — UI-only, no grid mutation. All colors are the design tokens called out in the Figma context (`#0b1516`, `#5b6b72`, `#b8c6cc`, `#008572`, `#e0f5f0`, `#e4eaed`, `#f6f9fb`); no new design tokens added.
+
 ## 2026-05-19 — Split Shipment surfacing (Figma node `23008-101023` / file `unEpC0FcuWKbB5yO1m7OyX`)
 
 ### Added (components, no new tokens)

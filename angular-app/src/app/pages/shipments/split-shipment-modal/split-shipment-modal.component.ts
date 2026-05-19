@@ -1,159 +1,266 @@
-import { Component, Input, Output, EventEmitter, signal, computed, OnChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, OnChanges, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ShipmentProduct } from '../../../core/models/shipment.model';
 
-type Side = 'A' | 'B';
-interface AssignedProduct extends ShipmentProduct { side: Side; key: number; }
+interface BucketItem {
+  /** Stable per-source-row id so rows can move between buckets without losing identity. */
+  rowKey: string;
+  sku: string;
+  name: string;
+  qty: number;
+}
+
+interface ShipmentBucket {
+  id: string;
+  warehouse: string;
+  items: BucketItem[];
+}
+
+type DistributionFn = (products: ShipmentProduct[]) => ShipmentBucket[];
+
+interface Recommendation {
+  id: string;
+  title: string;
+  parts: number;
+  shippingCost: number;
+  /** Returns a fresh set of buckets for this recommendation. */
+  distribute: DistributionFn;
+}
+
+const BASE_WAREHOUSES: readonly string[] = ['KS Fulfillment Center', 'TX Fulfillment Center', 'CA Fulfillment Center'];
+const DEFAULT_WAREHOUSE = BASE_WAREHOUSES[0];
+
+function makeItem(p: ShipmentProduct, idx: number, qty: number): BucketItem {
+  return { rowKey: `r${idx}`, sku: p.sku, name: p.name, qty };
+}
+
+/** Two-shipment split: each product line split roughly in half (favoring shipment 1). */
+const splitHalves: DistributionFn = (products) => [
+  {
+    id: 's1', warehouse: DEFAULT_WAREHOUSE,
+    items: products.map((p, i) => makeItem(p, i, Math.ceil(p.qty / 2))),
+  },
+  {
+    id: 's2', warehouse: DEFAULT_WAREHOUSE,
+    items: products.map((p, i) => makeItem(p, i, Math.floor(p.qty / 2))).filter(it => it.qty > 0),
+  },
+];
+
+/** Two-shipment split: first line in shipment 1, the rest in shipment 2. */
+const splitFirstVsRest: DistributionFn = (products) => [
+  {
+    id: 's1', warehouse: DEFAULT_WAREHOUSE,
+    items: products.slice(0, 1).map((p, i) => makeItem(p, i, p.qty)),
+  },
+  {
+    id: 's2', warehouse: DEFAULT_WAREHOUSE,
+    items: products.slice(1).map((p, i) => makeItem(p, i + 1, p.qty)),
+  },
+];
+
+/** Three-shipment split: one line item per shipment. */
+const splitEachLine: DistributionFn = (products) => {
+  const n = Math.max(products.length, 1);
+  return Array.from({ length: Math.min(n, 3) }).map((_, sIdx) => ({
+    id: `s${sIdx + 1}`,
+    warehouse: DEFAULT_WAREHOUSE,
+    items: products.filter((_p, i) => i % 3 === sIdx).map((p, _i) => {
+      const origIdx = products.indexOf(p);
+      return makeItem(p, origIdx, p.qty);
+    }),
+  }));
+};
+
+/** Manual: everything starts in shipment 1, shipment 2 empty. */
+const splitManual: DistributionFn = (products) => [
+  {
+    id: 's1', warehouse: DEFAULT_WAREHOUSE,
+    items: products.map((p, i) => makeItem(p, i, p.qty)),
+  },
+  { id: 's2', warehouse: DEFAULT_WAREHOUSE, items: [] },
+];
 
 @Component({
   selector: 'app-split-shipment-modal',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      data-testid="modal-split-shipment"
-      (click)="cancel.emit()"
-    >
-      <div
-        class="flex max-h-[90vh] w-full max-w-[760px] flex-col overflow-hidden rounded-lg bg-white shadow-xl"
-        (click)="$event.stopPropagation()"
-      >
-        <!-- Header -->
-        <header class="flex items-center justify-between border-b border-[#e4eaed] px-5 py-4">
-          <div class="flex flex-col gap-0.5">
-            <h2 class="font-heading text-lg font-semibold text-[#0b1516]" data-testid="text-split-modal-title">
-              Split Shipment
-            </h2>
-            <p class="font-body text-xs text-[#45565b]">
-              Move items between <span class="font-medium text-[#0b1516]">{{ idA }}</span> and
-              <span class="font-medium text-[#0b1516]">{{ idB }}</span>. Items move as whole quantities.
-            </p>
-          </div>
-          <button type="button" aria-label="Close split modal" data-testid="button-close-split-modal"
-            (click)="cancel.emit()"
-            class="flex h-7 w-7 items-center justify-center rounded text-[#45565b] hover:bg-neutral-100">
-            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </header>
-
-        <!-- Two columns -->
-        <div class="grid flex-1 grid-cols-2 gap-4 overflow-y-auto px-5 py-5">
-          <ng-container *ngFor="let side of SIDES">
-            <section
-              class="flex flex-col rounded-lg border border-[#e4eaed] bg-[#f6f9fb]"
-              [attr.data-testid]="'column-shipment-' + side.toLowerCase()"
-            >
-              <header class="border-b border-[#e4eaed] px-3 py-2">
-                <p class="font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">
-                  Shipment {{ side }}
-                </p>
-                <p class="font-body text-sm font-medium text-[#0b1516]">{{ side === 'A' ? idA : idB }}</p>
-              </header>
-
-              <ul class="flex flex-1 flex-col">
-                <li
-                  *ngFor="let p of bySide(side); let i = index"
-                  [attr.data-testid]="'row-split-product-' + p.key"
-                  class="flex items-center gap-2 border-b border-[#e4eaed] bg-white px-3 py-2 last:border-0"
-                >
-                  <button
-                    *ngIf="side === 'B'"
-                    type="button"
-                    [attr.data-testid]="'button-move-left-' + p.key"
-                    (click)="move(p, 'A')"
-                    aria-label="Move to Shipment A"
-                    class="flex h-6 w-6 items-center justify-center rounded text-[#45565b] hover:bg-neutral-100"
-                  >
-                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                  </button>
-
-                  <div class="flex min-w-0 flex-1 flex-col">
-                    <p class="font-body text-sm font-medium text-[#2da1cb] truncate">{{ p.sku }}</p>
-                    <p class="font-body text-xs text-[#45565b] truncate">{{ p.name }}</p>
-                  </div>
-
-                  <span class="font-body text-xs text-[#45565b] whitespace-nowrap">
-                    qty {{ p.qty }} · \${{ (p.qty * p.unitValue).toFixed(2) }}
-                  </span>
-
-                  <button
-                    *ngIf="side === 'A'"
-                    type="button"
-                    [attr.data-testid]="'button-move-right-' + p.key"
-                    (click)="move(p, 'B')"
-                    aria-label="Move to Shipment B"
-                    class="flex h-6 w-6 items-center justify-center rounded text-[#45565b] hover:bg-neutral-100"
-                  >
-                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                    </svg>
-                  </button>
-                </li>
-                <li
-                  *ngIf="bySide(side).length === 0"
-                  class="flex flex-1 items-center justify-center px-3 py-8 text-center"
-                  [attr.data-testid]="'empty-column-' + side.toLowerCase()"
-                >
-                  <p class="font-body text-xs italic text-[#7e97a0]">No items assigned yet</p>
-                </li>
-              </ul>
-            </section>
-          </ng-container>
-        </div>
-
-        <!-- Footer -->
-        <footer class="flex items-center justify-end gap-2 border-t border-[#e4eaed] bg-white px-5 py-3">
-          <button type="button" data-testid="button-cancel-split"
-            (click)="cancel.emit()"
-            class="h-9 rounded px-4 font-body text-sm font-medium text-[#45565b] hover:bg-neutral-100">
-            Cancel
-          </button>
-          <button type="button" data-testid="button-confirm-split"
-            (click)="onConfirm()"
-            [disabled]="!canConfirm()"
-            class="h-9 rounded bg-[#008572] px-4 font-body text-sm font-medium text-white transition-colors hover:bg-[#006A5A] disabled:cursor-not-allowed disabled:bg-[#b8c6cc]">
-            Confirm Split
-          </button>
-        </footer>
-      </div>
-    </div>
-  `,
+  templateUrl: './split-shipment-modal.component.html',
 })
 export class SplitShipmentModalComponent implements OnChanges {
   @Input({ required: true }) products: ShipmentProduct[] = [];
   @Input({ required: true }) shipmentId = '';
+  @Input() warehouse = DEFAULT_WAREHOUSE;
   @Output() cancel = new EventEmitter<void>();
   @Output() confirm = new EventEmitter<void>();
 
-  readonly SIDES: Side[] = ['A', 'B'];
-  assigned = signal<AssignedProduct[]>([]);
+  /** Per-instance, immutable list including the shipment's current warehouse if it isn't already in the base list. */
+  warehouseOptions: readonly string[] = BASE_WAREHOUSES;
 
-  readonly canConfirm = computed(() => {
-    const items = this.assigned();
-    return items.some(p => p.side === 'A') && items.some(p => p.side === 'B');
-  });
+  recommendations: Recommendation[] = [];
+  selectedRecId = signal<string>('rec-1');
+  shipments = signal<ShipmentBucket[]>([]);
+  /** Keys of checked rows, stored as `${shipmentIdx}|${rowKey}`. */
+  selectedKeys = signal<Set<string>>(new Set());
+  /** Tracks which warehouse dropdown is currently open (-1 = none). */
+  openWarehouseIdx = signal<number>(-1);
+  private nextShipmentNum = 3;
 
-  get idA(): string { return `${this.shipmentId} - 1`; }
-  get idB(): string { return `${this.shipmentId} - 2`; }
+  readonly selectedCountTotal = computed(() => this.selectedKeys().size);
+  readonly canConfirm = computed(() => this.shipments().every(s => s.items.length > 0) && this.shipments().length >= 2);
 
   ngOnChanges() {
-    this.assigned.set(this.products.map((p, i) => ({ ...p, side: 'A' as Side, key: i })));
+    const normWarehouse = this.normalizeWarehouseName(this.warehouse);
+    this.warehouseOptions = BASE_WAREHOUSES.includes(normWarehouse)
+      ? BASE_WAREHOUSES
+      : [normWarehouse, ...BASE_WAREHOUSES];
+    this.recommendations = [
+      { id: 'rec-1', title: 'Recommendation 1', parts: 2, shippingCost: 13.50, distribute: splitHalves },
+      { id: 'rec-2', title: 'Recommendation 2', parts: 2, shippingCost: 15.50, distribute: splitFirstVsRest },
+      { id: 'rec-3', title: 'Recommendation 3', parts: 3, shippingCost: 15.50, distribute: splitEachLine },
+      { id: 'rec-manual', title: 'Manual split',  parts: 0, shippingCost: 0,    distribute: splitManual },
+    ];
+    this.applyRecommendation(this.selectedRecId());
   }
 
-  bySide(side: Side): AssignedProduct[] {
-    return this.assigned().filter(p => p.side === side);
+  /** "KS Fulfilment center" → "KS Fulfillment Center" so the dropdown label matches Figma. */
+  private normalizeWarehouseName(w: string): string {
+    if (!w) return DEFAULT_WAREHOUSE;
+    return w
+      .replace(/Fulfilment/i, 'Fulfillment')
+      .replace(/\bcenter\b/i, 'Center');
   }
 
-  move(p: AssignedProduct, to: Side): void {
-    this.assigned.update(prev => prev.map(x => x.key === p.key ? { ...x, side: to } : x));
+  selectRecommendation(id: string) {
+    if (this.selectedRecId() === id) return;
+    this.selectedRecId.set(id);
+    this.applyRecommendation(id);
   }
 
-  onConfirm(): void {
-    if (this.canConfirm()) this.confirm.emit();
+  applyRecommendation(id: string) {
+    const rec = this.recommendations.find(r => r.id === id);
+    if (!rec) return;
+    const fresh = rec.distribute(this.products).map((b, i) => ({
+      ...b,
+      id: `s${i + 1}`,
+      warehouse: this.normalizeWarehouseName(this.warehouse) || DEFAULT_WAREHOUSE,
+    }));
+    while (fresh.length < 2) fresh.push({ id: `s${fresh.length + 1}`, warehouse: DEFAULT_WAREHOUSE, items: [] });
+    this.shipments.set(fresh);
+    this.selectedKeys.set(new Set());
+    this.nextShipmentNum = fresh.length + 1;
   }
+
+  resetCurrent() { this.applyRecommendation(this.selectedRecId()); }
+
+  // ---- Selection ----
+  rowKey(sIdx: number, rowKey: string): string { return `${sIdx}|${rowKey}`; }
+  isRowSelected(sIdx: number, rowKey: string): boolean { return this.selectedKeys().has(this.rowKey(sIdx, rowKey)); }
+  toggleRow(sIdx: number, rowKey: string) {
+    const k = this.rowKey(sIdx, rowKey);
+    this.selectedKeys.update(prev => {
+      const next = new Set(prev);
+      if (next.has(k)) next.delete(k); else next.add(k);
+      return next;
+    });
+  }
+  selectedCountFor(sIdx: number): number {
+    let n = 0;
+    for (const k of this.selectedKeys()) if (k.startsWith(`${sIdx}|`)) n++;
+    return n;
+  }
+  isAllSelected(sIdx: number): boolean {
+    const items = this.shipments()[sIdx]?.items ?? [];
+    if (items.length === 0) return false;
+    return items.every(it => this.isRowSelected(sIdx, it.rowKey));
+  }
+  toggleAll(sIdx: number) {
+    const items = this.shipments()[sIdx]?.items ?? [];
+    const all = this.isAllSelected(sIdx);
+    this.selectedKeys.update(prev => {
+      const next = new Set(prev);
+      for (const it of items) {
+        const k = this.rowKey(sIdx, it.rowKey);
+        if (all) next.delete(k); else next.add(k);
+      }
+      return next;
+    });
+  }
+
+  // ---- Move ----
+  /** Returns the index of the "other" shipment for the Move button (2-shipment case). */
+  otherShipmentIdx(sIdx: number): number {
+    const all = this.shipments();
+    if (all.length === 2) return sIdx === 0 ? 1 : 0;
+    // For 3+ shipments, default to the next one wrapping around.
+    return (sIdx + 1) % all.length;
+  }
+  moveButtonLabel(sIdx: number): string {
+    const target = this.otherShipmentIdx(sIdx);
+    return `Move to Shipment ${target + 1}`;
+  }
+  moveSelected(fromIdx: number) {
+    const toIdx = this.otherShipmentIdx(fromIdx);
+    if (this.selectedCountFor(fromIdx) === 0) return;
+    this.shipments.update(prev => {
+      const next = prev.map(b => ({ ...b, items: [...b.items] }));
+      const fromItems = next[fromIdx].items;
+      const toItems = next[toIdx].items;
+      const stay: BucketItem[] = [];
+      for (const it of fromItems) {
+        if (this.isRowSelected(fromIdx, it.rowKey)) {
+          // Merge with an existing matching row in the destination, else push.
+          const existing = toItems.find(t => t.rowKey === it.rowKey);
+          if (existing) existing.qty += it.qty; else toItems.push({ ...it });
+        } else {
+          stay.push(it);
+        }
+      }
+      next[fromIdx].items = stay;
+      return next;
+    });
+    // Clear selection for the source shipment only.
+    this.selectedKeys.update(prev => {
+      const next = new Set<string>();
+      for (const k of prev) if (!k.startsWith(`${fromIdx}|`)) next.add(k);
+      return next;
+    });
+  }
+
+  addShipment() {
+    this.shipments.update(prev => [
+      ...prev,
+      { id: `s${this.nextShipmentNum}`, warehouse: DEFAULT_WAREHOUSE, items: [] },
+    ]);
+    this.nextShipmentNum++;
+  }
+
+  removeShipment(sIdx: number) {
+    if (this.shipments().length <= 2) return;
+    this.shipments.update(prev => {
+      const next = prev.map(b => ({ ...b, items: [...b.items] }));
+      // Re-home items to a sibling bucket (the first bucket that isn't being removed).
+      const rehomeIdx = sIdx === 0 ? 1 : 0;
+      next[rehomeIdx].items.push(...next[sIdx].items);
+      next.splice(sIdx, 1);
+      return next;
+    });
+    this.selectedKeys.set(new Set());
+  }
+
+  // ---- Warehouse picker ----
+  toggleWarehouseMenu(sIdx: number, evt: Event) {
+    evt.stopPropagation();
+    this.openWarehouseIdx.update(curr => curr === sIdx ? -1 : sIdx);
+  }
+  pickWarehouse(sIdx: number, w: string, evt: Event) {
+    evt.stopPropagation();
+    this.shipments.update(prev => prev.map((b, i) => i === sIdx ? { ...b, warehouse: w } : b));
+    this.openWarehouseIdx.set(-1);
+  }
+  closeWarehouseMenus() { this.openWarehouseIdx.set(-1); }
+
+  onConfirm() { if (this.canConfirm()) this.confirm.emit(); }
+
+  @HostListener('document:keydown.escape')
+  onEscape() { this.cancel.emit(); }
 }
