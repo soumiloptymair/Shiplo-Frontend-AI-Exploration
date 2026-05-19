@@ -37,9 +37,9 @@
       <span
         class="inline-flex h-5 items-center gap-1 rounded-[14px] px-2 py-1 text-[14px] leading-[1.43] text-[#0b1516]"
         [class.bg-[#daeec4]]="row.status === 'Connected'"
-        [class.bg-orange-100]="row.status === 'Disconnected'"
+        [class.bg-[#fde2d4]]="row.status === 'Disconnected'"
         data-testid="panel-status">
-        {{ row.status }}
+        {{ statusLabel }}
       </span>
     </div>
 
@@ -50,15 +50,30 @@
        class="text-[12px] leading-[1.43] text-[#2da1cb] underline hover:no-underline"
        data-testid="panel-store-url">{{ storeUrl }}</a>
 
-    <p class="text-[12px] leading-[1.43] text-[#45565b]" data-testid="panel-installed-by">
-      Installed by: <span class="text-[#0b1516]">{{ row.installedBy }}</span>
-    </p>
-    <p class="text-[12px] leading-[1.43] text-[#45565b]" data-testid="panel-installed-on">
-      Installed on: <span class="text-[#0b1516]">{{ row.installedDate }}</span>
-    </p>
-    <p class="text-[12px] leading-[1.43] text-[#45565b]" data-testid="panel-last-synced">
-      Last synced: <span class="text-[#0b1516]">{{ lastSynced }}</span>
-    </p>
+    @if (row.status === 'Connected') {
+      <p class="text-[12px] leading-[1.43] text-[#45565b]" data-testid="panel-installed-by">
+        Installed by: <span class="text-[#0b1516]">{{ row.installedBy }}</span>
+      </p>
+      <p class="text-[12px] leading-[1.43] text-[#45565b]" data-testid="panel-installed-on">
+        Installed on: <span class="text-[#0b1516]">{{ row.installedDate }}</span>
+      </p>
+      <p class="text-[12px] leading-[1.43] text-[#45565b]" data-testid="panel-last-synced">
+        Last synced: <span class="text-[#0b1516]">{{ lastSynced }}</span>
+      </p>
+    } @else {
+      <div class="mt-2 grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-[12px] leading-[1.5] text-[#45565b]">Installs</p>
+          <p class="text-[14px] leading-[1.43] text-[#0b1516]" data-testid="panel-installs">{{ row.installs }}</p>
+        </div>
+        <div>
+          <p class="text-[12px] leading-[1.5] text-[#45565b]">Rating</p>
+          <p class="text-[14px] leading-[1.43] text-[#0b1516]" data-testid="panel-rating">
+            {{ row.rating.score }} <span class="text-[#f5b400]">★</span> ({{ row.rating.count }})
+          </p>
+        </div>
+      </div>
+    }
   </div>
 
   <div class="h-px shrink-0 bg-[#e4eaed]"></div>
@@ -73,15 +88,16 @@
   <div class="shrink-0 px-5 pb-5">
     <button type="button"
             [disabled]="row.status === 'Connected'"
+            (click)="connect.emit()"
             data-testid="button-connect"
-            class="flex h-10 w-full items-center justify-center rounded-[4px] px-6 py-2 text-[16px] font-medium leading-[1.43]"
+            class="flex h-10 w-full items-center justify-center rounded-[4px] px-6 py-2 text-[16px] font-medium leading-[1.43] transition-colors"
             [class.bg-[#008572]]="row.status !== 'Connected'"
             [class.text-white]="row.status !== 'Connected'"
             [class.hover:bg-[#006a5a]]="row.status !== 'Connected'"
             [class.bg-[rgba(69,86,91,0.12)]]="row.status === 'Connected'"
             [class.text-[rgba(69,86,91,0.38)]]="row.status === 'Connected'"
             [class.cursor-not-allowed]="row.status === 'Connected'">
-      {{ row.status === 'Connected' ? 'Connect' : 'Connect' }}
+      Connect
     </button>
   </div>
 </aside>

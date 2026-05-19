@@ -11,6 +11,7 @@ import type { ConnectorRow } from '../marketplace.component';
 export class MarketplaceDetailPanelComponent {
   @Input({ required: true }) row!: ConnectorRow;
   @Output() close = new EventEmitter<void>();
+  @Output() connect = new EventEmitter<void>();
 
   get storeUrl(): string {
     const slug = this.row.brand.toLowerCase().replace(/\s+/g, '');
@@ -22,4 +23,6 @@ export class MarketplaceDetailPanelComponent {
   }
 
   get lastSynced(): string { return '20 Feb 2026, 11:32 CST'; }
+
+  get statusLabel(): string { return this.row.status === 'Connected' ? 'Connected' : 'Not Connected'; }
 }
