@@ -126,12 +126,12 @@
           </div>
         </div>
 
-        <!-- Shipment cards -->
-        <div class="flex min-h-0 flex-1 flex-wrap content-start items-start gap-5 overflow-y-auto pb-5 pt-3"
+        <!-- Shipment cards: strict 2-column grid, left→right then top→bottom (no gaps) -->
+        <div class="grid min-h-0 flex-1 grid-cols-2 content-start items-start gap-5 overflow-y-auto pb-5 pt-3"
           data-testid="row-shipment-cards">
           <article *ngFor="let bucket of shipments(); let sIdx = index"
             [attr.data-testid]="'card-shipment-' + (sIdx + 1)"
-            class="flex w-[472px] shrink-0 flex-col rounded border border-[#b8c6cc] bg-white">
+            class="flex w-full flex-col rounded border border-[#b8c6cc] bg-white">
 
             <!-- Card Header -->
             <header class="flex items-center gap-2 px-5 py-3">
