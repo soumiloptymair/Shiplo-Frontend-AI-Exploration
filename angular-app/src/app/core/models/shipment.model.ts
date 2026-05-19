@@ -65,6 +65,8 @@ export interface Shipment {
   products?: ShipmentProduct[];
   materials?: MaterialFlags;
   splitRecommendation?: SplitRecommendation;
+  /** Set on rows created by `ShipmentService.splitShipment(...)` so the grid can render a Split badge. */
+  isSplit?: boolean;
   log?: ShipmentLogEntry[];
 }
 

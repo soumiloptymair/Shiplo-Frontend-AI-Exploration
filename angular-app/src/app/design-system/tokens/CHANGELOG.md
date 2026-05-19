@@ -1,5 +1,11 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Split badge on split rows (Figma node `24091-104124`)
+
+### Added (model field + icon, no new tokens)
+- `core/models/shipment.model.ts` — new optional `isSplit?: boolean` flag on `Shipment`. Set by `ShipmentService.splitShipment(...)` on every new child row.
+- `pages/shipments/shipments.component.html` — render a small "split" git-branch icon (`text-[#5b6b72]`, `h-4 w-4`) in the existing 24px alert column between the checkbox and the Shipment ID whenever `s.isSplit`. Icon carries `title`/`aria-label="Split shipment"` and `data-testid="icon-split-{id}"`. Per Figma, the split badge replaces the orange `needsAttention` triangle on a split row (`*ngIf="s.needsAttention && !s.isSplit"`).
+
 ## 2026-05-19 — Split Shipment modal refinements (Task #16)
 
 ### Changed (behavior + layout, no new tokens)

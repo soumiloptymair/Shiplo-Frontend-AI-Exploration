@@ -102,6 +102,7 @@ export class ShipmentService {
         splitRecommendation: undefined,
         needsAttention: false,
         tags: [],
+        isSplit: true,
       };
     });
 
