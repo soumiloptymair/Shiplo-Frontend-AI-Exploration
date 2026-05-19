@@ -32,6 +32,11 @@ export const routes: Routes = [
       import('./pages/marketplace/marketplace.component').then((m) => m.MarketplaceComponent),
   },
   {
+    path: 'settings/automations',
+    loadComponent: () =>
+      import('./pages/automations/automations.component').then((m) => m.AutomationsComponent),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./pages/not-found/not-found.component').then((m) => m.NotFoundComponent),

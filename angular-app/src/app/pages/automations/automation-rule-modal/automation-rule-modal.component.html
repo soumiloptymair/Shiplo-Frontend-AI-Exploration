@@ -1,0 +1,468 @@
+<!-- Backdrop + modal. Click backdrop to cancel; stop propagation inside. -->
+<div
+  class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-8"
+  (click)="onCancel()"
+  data-testid="modal-automation-backdrop">
+  <div
+    class="my-auto w-[820px] max-w-[95vw] rounded-md bg-surface shadow-2xl"
+    (click)="$event.stopPropagation(); closePicker()"
+    role="dialog"
+    aria-modal="true"
+    data-testid="modal-automation-rule">
+
+    <!-- ============ Header ============ -->
+    <header class="flex items-center justify-between px-5 pt-5 pb-3">
+      <h2 class="font-heading text-[18px] font-semibold text-fg-primary" data-testid="text-modal-title">
+        {{ isEdit() ? 'Edit Automation Rule' : 'Add Automation Rule' }}
+      </h2>
+      <button
+        type="button"
+        (click)="onCancel()"
+        aria-label="Close"
+        data-testid="button-close-modal"
+        class="flex h-7 w-7 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
+        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- ============ Match All / Match Any segmented toggle ============ -->
+    <div class="flex items-center justify-center gap-4 pb-2">
+      <button
+        type="button"
+        (click)="conditionMatch.set('all')"
+        [attr.aria-pressed]="conditionMatch() === 'all'"
+        data-testid="toggle-match-all"
+        class="relative pb-1 font-body text-[13px] font-medium transition-colors"
+        [ngClass]="conditionMatch() === 'all' ? 'text-action-primary' : 'text-fg-secondary'">
+        Match All
+        <span *ngIf="conditionMatch() === 'all'" class="absolute -bottom-px left-0 right-0 h-px bg-action-primary"></span>
+      </button>
+      <button
+        type="button"
+        (click)="conditionMatch.set('any')"
+        [attr.aria-pressed]="conditionMatch() === 'any'"
+        data-testid="toggle-match-any"
+        class="relative pb-1 font-body text-[13px] font-medium transition-colors"
+        [ngClass]="conditionMatch() === 'any' ? 'text-action-primary' : 'text-fg-secondary'">
+        Match Any
+        <span *ngIf="conditionMatch() === 'any'" class="absolute -bottom-px left-0 right-0 h-px bg-action-primary"></span>
+      </button>
+    </div>
+
+    <!-- ============ Two-column body ============ -->
+    <div class="relative grid grid-cols-2 gap-0 px-6 pb-6">
+      <!-- Center → arrow circle (absolute) -->
+      <div class="absolute left-1/2 top-[88px] z-10 -translate-x-1/2 -translate-y-1/2">
+        <div class="flex h-8 w-8 items-center justify-center rounded-full border border-divider bg-surface text-fg-secondary">
+          <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7-7 7M21 12H3"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- ===== Left column: IF conditions ===== -->
+      <section class="pr-7" data-testid="section-conditions">
+        <h3 class="mb-3 flex items-center justify-center gap-2 font-heading text-[15px] font-semibold text-fg-primary">
+          <svg class="h-4 w-4 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="9"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4M12 16h.01"/>
+          </svg>
+          If this is true
+        </h3>
+
+        <div class="flex flex-col gap-3">
+          <div
+            *ngFor="let cond of conditions(); let i = index; trackBy: trackById"
+            class="relative flex flex-col gap-2"
+            [attr.data-testid]="'condition-row-' + i">
+
+            <!-- Top row: Parameter + Condition (operator) -->
+            <div class="flex items-stretch gap-2">
+              <!-- Parameter -->
+              <div class="relative flex-1">
+                <button type="button"
+                  (click)="togglePicker('c' + i + ':field', $event)"
+                  [attr.data-testid]="'button-condition-field-' + i"
+                  class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                  <span [ngClass]="conditionField(cond.fieldKey)?.label ? 'text-fg-primary' : 'text-fg-tertiary'">
+                    {{ conditionField(cond.fieldKey)?.label || 'Parameter' }}
+                  </span>
+                  <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'c' + i + ':field'"
+                  class="absolute left-0 top-10 z-20 w-full rounded-token border border-divider bg-surface p-2 shadow-lg"
+                  (click)="$event.stopPropagation()"
+                  data-testid="dropdown-condition-field">
+                  <div class="mb-2 flex items-center gap-2 rounded-token border border-divider px-2">
+                    <svg class="h-3.5 w-3.5 text-fg-tertiary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      [value]="pickerSearch()"
+                      (input)="pickerSearch.set($any($event.target).value)"
+                      class="h-8 w-full bg-transparent text-[13px] text-fg-primary outline-none"/>
+                  </div>
+                  <ul class="max-h-64 overflow-y-auto">
+                    <li *ngFor="let f of filteredFields(CONDITION_FIELDS)">
+                      <button type="button"
+                        (click)="setConditionField(i, f.key)"
+                        class="flex w-full items-center px-2 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                        {{ f.label }}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Operator -->
+              <div class="relative flex-1">
+                <button type="button"
+                  [disabled]="!cond.fieldKey"
+                  (click)="togglePicker('c' + i + ':op', $event)"
+                  [attr.data-testid]="'button-condition-op-' + i"
+                  class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
+                  [ngClass]="cond.fieldKey ? 'text-fg-primary hover:bg-surface-light-primary' : 'text-fg-tertiary'">
+                  <span [ngClass]="cond.fieldKey ? 'text-fg-primary' : 'text-fg-tertiary'">
+                    {{ cond.fieldKey ? OPERATORS[cond.operator].label : 'Condition' }}
+                  </span>
+                  <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'c' + i + ':op' && cond.fieldKey"
+                  class="absolute left-0 top-10 z-20 w-full rounded-token border border-divider bg-surface py-1 shadow-lg"
+                  (click)="$event.stopPropagation()">
+                  <button *ngFor="let opKey of conditionField(cond.fieldKey)?.operators"
+                    type="button"
+                    (click)="setConditionOperator(i, opKey)"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                    {{ OPERATORS[opKey].label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Value row -->
+            <div class="relative flex items-center gap-2">
+              <div class="relative flex-1">
+                <!-- Number input -->
+                <ng-container *ngIf="conditionField(cond.fieldKey)?.valueKind === 'number'">
+                  <div class="flex h-9 items-center rounded-token border border-divider bg-surface px-3">
+                    <input
+                      type="number"
+                      [value]="cond.value ?? ''"
+                      (input)="onNumberInput(i, $any($event.target).value)"
+                      placeholder="Value"
+                      class="h-full w-full bg-transparent text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary"
+                      [attr.data-testid]="'input-condition-value-' + i"/>
+                    <span *ngIf="conditionField(cond.fieldKey)?.unit" class="ml-2 text-[13px] text-fg-tertiary">{{ conditionField(cond.fieldKey)?.unit }}</span>
+                  </div>
+                </ng-container>
+
+                <!-- Text input -->
+                <ng-container *ngIf="conditionField(cond.fieldKey)?.valueKind === 'text'">
+                  <input
+                    type="text"
+                    [value]="cond.value ?? ''"
+                    (input)="setConditionValue(i, $any($event.target).value)"
+                    placeholder="Value"
+                    class="h-9 w-full rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary"
+                    [attr.data-testid]="'input-condition-value-' + i"/>
+                </ng-container>
+
+                <!-- Boolean toggle -->
+                <ng-container *ngIf="conditionField(cond.fieldKey)?.valueKind === 'boolean'">
+                  <div class="flex h-9 items-center gap-3 rounded-token border border-divider bg-surface px-3">
+                    <label class="flex items-center gap-2 text-[13px] text-fg-primary">
+                      <input type="radio" [name]="'b'+i" [checked]="cond.value === true" (change)="setConditionValue(i, true)"/> True
+                    </label>
+                    <label class="flex items-center gap-2 text-[13px] text-fg-primary">
+                      <input type="radio" [name]="'b'+i" [checked]="cond.value === false" (change)="setConditionValue(i, false)"/> False
+                    </label>
+                  </div>
+                </ng-container>
+
+                <!-- Select / Region (single value picker) -->
+                <ng-container *ngIf="conditionField(cond.fieldKey)?.valueKind === 'select' || conditionField(cond.fieldKey)?.valueKind === 'region'">
+                  <button type="button"
+                    (click)="togglePicker('c' + i + ':val', $event)"
+                    [attr.data-testid]="'button-condition-value-' + i"
+                    class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                    <span class="inline-flex items-center gap-1.5" [ngClass]="cond.value ? 'text-fg-primary' : 'text-fg-tertiary'">
+                      <span *ngIf="conditionField(cond.fieldKey)?.valueKind === 'region' && cond.value" class="text-base leading-none">🇺🇸</span>
+                      {{ valueDisplay(cond.value) }}
+                    </span>
+                    <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </button>
+                  <div *ngIf="openPicker() === 'c' + i + ':val'"
+                    class="absolute left-0 top-10 z-20 w-full rounded-token border border-divider bg-surface py-1 shadow-lg"
+                    (click)="$event.stopPropagation()">
+                    <button *ngFor="let opt of conditionField(cond.fieldKey)?.options"
+                      type="button"
+                      (click)="pickConditionValue(i, opt)"
+                      class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                      {{ opt }}
+                    </button>
+                  </div>
+                </ng-container>
+
+                <!-- Multi-select (chips) -->
+                <ng-container *ngIf="conditionField(cond.fieldKey)?.valueKind === 'multi'">
+                  <button type="button"
+                    (click)="togglePicker('c' + i + ':val', $event)"
+                    [attr.data-testid]="'button-condition-value-' + i"
+                    class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] hover:bg-surface-light-primary"
+                    [ngClass]="(cond.value && $any(cond.value).length) ? 'text-fg-primary' : 'text-fg-tertiary'">
+                    <span>{{ valueDisplay(cond.value) }}</span>
+                    <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </button>
+                  <div *ngIf="openPicker() === 'c' + i + ':val'"
+                    class="absolute left-0 top-10 z-20 w-full rounded-token border border-divider bg-surface py-1 shadow-lg"
+                    (click)="$event.stopPropagation()">
+                    <label *ngFor="let opt of conditionField(cond.fieldKey)?.options"
+                      class="flex w-full items-center gap-2 px-3 py-1.5 text-[13px] text-fg-primary hover:bg-surface-light-primary cursor-pointer">
+                      <input type="checkbox"
+                        [checked]="$any(cond.value)?.includes(opt)"
+                        (change)="toggleConditionMulti(i, opt)"/>
+                      {{ opt }}
+                    </label>
+                  </div>
+                </ng-container>
+
+                <!-- No field selected → disabled stub -->
+                <ng-container *ngIf="!cond.fieldKey">
+                  <div class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-tertiary">
+                    Value
+                    <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </ng-container>
+              </div>
+
+              <!-- Remove condition button -->
+              <button *ngIf="conditions().length > 1"
+                type="button"
+                (click)="removeCondition(i)"
+                [attr.data-testid]="'button-remove-condition-' + i"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-token text-fg-tertiary hover:bg-surface-light-primary hover:text-fg-secondary"
+                aria-label="Remove condition">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Add condition + -->
+          <button type="button"
+            (click)="addCondition()"
+            data-testid="button-add-condition"
+            class="mx-auto mt-2 flex h-7 w-7 items-center justify-center rounded-token border border-action-primary text-action-primary hover:bg-action-primary/10"
+            aria-label="Add condition">
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== Right column: THEN actions ===== -->
+      <section class="pl-7" data-testid="section-actions">
+        <h3 class="mb-3 flex items-center justify-center gap-2 font-heading text-[15px] font-semibold text-fg-primary">
+          <svg class="h-4 w-4 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h7v8l9-12h-7V2z"/>
+          </svg>
+          Then take these actions
+        </h3>
+
+        <div class="flex flex-col gap-3">
+          <div *ngFor="let act of actions(); let i = index; trackBy: trackById"
+            class="relative flex flex-col gap-2"
+            [attr.data-testid]="'action-row-' + i">
+
+            <!-- Top row: Parameter + (frozen) Condition -->
+            <div class="flex items-stretch gap-2">
+              <div class="relative flex-1">
+                <button type="button"
+                  (click)="togglePicker('a' + i + ':field', $event)"
+                  [attr.data-testid]="'button-action-field-' + i"
+                  class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] hover:bg-surface-light-primary">
+                  <span [ngClass]="actionField(act.fieldKey)?.label ? 'text-fg-primary' : 'text-fg-tertiary'">
+                    {{ actionField(act.fieldKey)?.label || 'Parameter' }}
+                  </span>
+                  <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'a' + i + ':field'"
+                  class="absolute left-0 top-10 z-20 w-full rounded-token border border-divider bg-surface py-1 shadow-lg"
+                  (click)="$event.stopPropagation()">
+                  <button *ngFor="let f of ACTION_FIELDS"
+                    type="button"
+                    (click)="setActionField(i, f.key)"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                    {{ f.label }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Condition (operator) dropdown — action operators are always "Is", but we still
+                   render a real picker so the THEN side has IF parity. -->
+              <div class="relative flex-1">
+                <button type="button"
+                  [disabled]="!act.fieldKey"
+                  (click)="togglePicker('a' + i + ':op', $event)"
+                  [attr.data-testid]="'button-action-op-' + i"
+                  class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
+                  [ngClass]="act.fieldKey ? 'text-fg-primary hover:bg-surface-light-primary' : 'text-fg-tertiary'">
+                  <span [ngClass]="act.fieldKey ? 'text-fg-primary' : 'text-fg-tertiary'">
+                    {{ act.fieldKey ? OPERATORS[act.operator].label : 'Condition' }}
+                  </span>
+                  <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'a' + i + ':op' && act.fieldKey"
+                  class="absolute left-0 top-10 z-20 w-full rounded-token border border-divider bg-surface py-1 shadow-lg"
+                  (click)="$event.stopPropagation()">
+                  <button *ngFor="let opKey of actionField(act.fieldKey)?.operators"
+                    type="button"
+                    (click)="setActionOperator(i, opKey)"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                    {{ OPERATORS[opKey].label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Value -->
+            <div class="relative flex items-center gap-2">
+              <div class="relative flex-1">
+                <ng-container *ngIf="actionField(act.fieldKey)?.valueKind === 'select'; else actStub">
+                  <button type="button"
+                    (click)="togglePicker('a' + i + ':val', $event)"
+                    [attr.data-testid]="'button-action-value-' + i"
+                    class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] hover:bg-surface-light-primary"
+                    [ngClass]="act.value ? 'text-fg-primary' : 'text-fg-tertiary'">
+                    <span>{{ valueDisplay(act.value) }}</span>
+                    <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </button>
+                  <div *ngIf="openPicker() === 'a' + i + ':val'"
+                    class="absolute left-0 top-10 z-20 w-full rounded-token border border-divider bg-surface py-1 shadow-lg"
+                    (click)="$event.stopPropagation()">
+                    <button *ngFor="let opt of actionField(act.fieldKey)?.options"
+                      type="button"
+                      (click)="pickActionValue(i, opt)"
+                      class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                      {{ opt }}
+                    </button>
+                  </div>
+                </ng-container>
+                <ng-template #actStub>
+                  <div class="flex h-9 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-tertiary">
+                    Value
+                    <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </ng-template>
+              </div>
+
+              <button *ngIf="actions().length > 1"
+                type="button"
+                (click)="removeAction(i)"
+                [attr.data-testid]="'button-remove-action-' + i"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-token text-fg-tertiary hover:bg-surface-light-primary hover:text-fg-secondary"
+                aria-label="Remove action">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="button"
+            (click)="addAction()"
+            data-testid="button-add-action"
+            class="mx-auto mt-2 flex h-7 w-7 items-center justify-center rounded-token border border-action-primary text-action-primary hover:bg-action-primary/10"
+            aria-label="Add action">
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ Test panel ============ -->
+    <div *ngIf="testOpen()"
+      class="border-t border-divider bg-surface-light-primary px-6 py-4"
+      data-testid="panel-test-rule">
+      <div class="mb-3 flex items-center gap-3">
+        <span class="font-body text-[13px] font-medium text-fg-primary">Test against sample shipment:</span>
+        <select
+          [value]="testShipmentId()"
+          (change)="testShipmentId.set($any($event.target).value); runTest()"
+          class="h-8 rounded-token border border-divider bg-surface px-2 text-[13px] text-fg-primary"
+          data-testid="select-test-shipment">
+          <option *ngFor="let s of SAMPLES" [value]="s.id">{{ s.label }}</option>
+        </select>
+      </div>
+      <div *ngIf="testResult()" class="rounded-token border border-divider bg-surface p-3 text-[13px]">
+        <p *ngIf="testResult()?.matchedRuleId" class="text-fg-positive">
+          ✓ Rule matched. Applied actions: <span class="font-medium">
+            {{ getActionSummary() }}
+          </span>
+        </p>
+        <p *ngIf="testResult()?.usedFallback" class="text-fg-secondary">
+          No rule matched — falling back to default: <span class="font-medium">{{ testResult()?.fallback?.carrier }} / {{ testResult()?.fallback?.service }}</span>
+        </p>
+        <ul class="mt-2 space-y-1 text-[12px] text-fg-secondary">
+          <li *ngFor="let t of testResult()?.trace">
+            <span [ngClass]="t.matched ? 'text-fg-positive' : 'text-fg-tertiary'">{{ t.matched ? '✓' : '·' }}</span>
+            {{ t.ruleName }} — {{ t.reason }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ============ Footer ============ -->
+    <footer class="flex items-center justify-between border-t border-divider px-5 py-3">
+      <button type="button"
+        (click)="toggleTest()"
+        data-testid="button-test-rule"
+        class="inline-flex h-9 items-center gap-1.5 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary hover:bg-surface-light-primary">
+        <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h7v8l9-12h-7V2z"/>
+        </svg>
+        {{ testOpen() ? 'Hide test' : 'Test rule' }}
+      </button>
+      <div class="flex items-center gap-2">
+        <button type="button"
+          (click)="onCancel()"
+          data-testid="button-cancel"
+          class="h-9 rounded-token bg-transparent px-4 text-[13px] font-medium text-fg-primary hover:bg-surface-light-primary">
+          Cancel
+        </button>
+        <button type="button"
+          (click)="onSave()"
+          [disabled]="!canSave()"
+          data-testid="button-save"
+          class="h-9 rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action transition-colors hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50">
+          {{ isEdit() ? 'Save changes' : 'Add Automation rule' }}
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>

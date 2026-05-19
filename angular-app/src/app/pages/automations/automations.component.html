@@ -1,0 +1,281 @@
+<app-shell>
+  <section class="relative flex h-full min-w-0 flex-col font-body" data-testid="page-automations">
+
+    <!-- Single white panel — header + table together (mirrors Wallet/Inventory patterns). -->
+    <div class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg bg-surface" data-testid="automations-content-panel">
+
+      <!-- ============ Title bar (68px) ============ -->
+      <header class="flex h-[68px] shrink-0 items-center gap-3 border-b border-divider px-5" data-testid="automations-header">
+        <svg class="h-7 w-7 text-action-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h11M4 12h7M4 18h13M17 4v4M17 4l-2 2M17 4l2 2M14 14v4M14 18l-2-2M14 18l2-2M21 10v4M21 14l-2-2M21 14l2-2"/>
+        </svg>
+        <h1 class="font-heading text-[20px] font-semibold leading-[1.4] tracking-[0.15px] text-fg-primary">
+          Automation Rules
+        </h1>
+
+        <!-- Right-aligned controls -->
+        <div class="ml-auto flex items-center gap-2">
+          <div class="flex h-9 w-[240px] items-center gap-2 rounded-token border border-divider bg-surface px-3">
+            <svg class="h-3.5 w-3.5 text-fg-tertiary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search..."
+              [value]="search()"
+              (input)="search.set($any($event.target).value)"
+              class="h-full w-full bg-transparent text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary"
+              data-testid="input-search-rules"/>
+          </div>
+
+          <button type="button"
+            data-testid="button-filters"
+            class="inline-flex h-9 items-center gap-2 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary hover:bg-surface-light-primary">
+            <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 12h12M10 20h4"/>
+            </svg>
+            Filters
+          </button>
+
+          <button type="button"
+            (click)="openCreate()"
+            data-testid="button-add-rule"
+            class="inline-flex h-9 items-center gap-1.5 rounded-token bg-action-primary px-3 text-[13px] font-medium text-fg-on-action transition-colors hover:bg-action-primary-hover">
+            <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Rule
+          </button>
+        </div>
+      </header>
+
+      <!-- ============ Table ============ -->
+      <div class="min-h-0 flex-1 overflow-auto" data-testid="automations-table">
+
+        <!-- Two-row header -->
+        <div class="sticky top-0 z-10 bg-surface-light-primary">
+          <!-- Row 1: outer column titles -->
+          <div class="grid items-center border-b border-divider px-5 py-2 text-[12px] font-medium text-fg-secondary"
+            style="grid-template-columns: 24px 1fr 160px 130px 32px;">
+            <span></span>
+            <span data-testid="header-rule">Rule</span>
+            <span data-testid="header-created-by">Created by</span>
+            <span data-testid="header-created-on">Created on</span>
+            <span></span>
+          </div>
+          <!-- Row 2: IF / THEN split -->
+          <div class="grid items-center border-b border-divider px-5 py-2 text-[12px] text-fg-secondary"
+            style="grid-template-columns: 24px 1fr 1fr 160px 130px 32px;">
+            <span></span>
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4M12 16h.01"/>
+              </svg>
+              If this is true
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h7v8l9-12h-7V2z"/>
+              </svg>
+              Then take these actions
+            </span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <!-- Rule rows -->
+        <ul *ngIf="filtered().length > 0; else emptyState">
+          <li *ngFor="let rule of filtered(); trackBy: trackById"
+            class="group grid items-start border-b border-divider px-5 py-3 hover:bg-surface-light-primary"
+            [attr.data-testid]="'row-rule-' + rule.id"
+            [class.opacity-60]="!rule.enabled"
+            style="grid-template-columns: 24px 1fr 1fr 160px 130px 32px;">
+
+            <!-- Drag handle -->
+            <button type="button"
+              class="mt-1 flex h-5 w-5 cursor-grab items-center justify-center text-fg-tertiary opacity-0 group-hover:opacity-100"
+              aria-label="Reorder"
+              [attr.data-testid]="'drag-handle-' + rule.id">
+              <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 6 10">
+                <circle cx="1" cy="1" r="1"/><circle cx="5" cy="1" r="1"/>
+                <circle cx="1" cy="5" r="1"/><circle cx="5" cy="5" r="1"/>
+                <circle cx="1" cy="9" r="1"/><circle cx="5" cy="9" r="1"/>
+              </svg>
+            </button>
+
+            <!-- IF column: Match All + condition chips -->
+            <div class="flex flex-wrap items-center gap-1.5 pr-4" [attr.data-testid]="'cell-if-' + rule.id">
+              <span class="inline-flex h-[26px] items-center rounded-token border border-divider bg-surface px-2 text-[12px] font-medium text-fg-primary"
+                data-testid="chip-match">
+                {{ rule.conditionMatch === 'all' ? 'Match All' : 'Match Any' }}
+              </span>
+              <span *ngFor="let c of visibleChips(rule.conditions)"
+                class="inline-flex h-[26px] items-stretch overflow-hidden rounded-token border border-divider bg-surface text-[12px]"
+                data-testid="chip-condition">
+                <span class="flex items-center px-2 text-fg-primary">{{ fieldLabel(c) }}</span>
+                <span class="flex items-center border-l border-divider px-2 text-fg-secondary">{{ OPERATORS[c.operator].chipLabel }}</span>
+                <span class="flex items-center border-l border-divider px-2 text-fg-primary">{{ formatValue(c) }}</span>
+              </span>
+              <button *ngIf="hiddenChipCount(rule.conditions) > 0"
+                type="button"
+                class="text-[12px] text-fg-link hover:underline"
+                [attr.data-testid]="'link-more-conditions-' + rule.id">
+                {{ hiddenChipCount(rule.conditions) }} more...
+              </button>
+            </div>
+
+            <!-- THEN column: action chips -->
+            <div class="flex flex-wrap items-center gap-1.5 pr-4" [attr.data-testid]="'cell-then-' + rule.id">
+              <span *ngFor="let a of visibleChips(rule.actions)"
+                class="inline-flex h-[26px] items-stretch overflow-hidden rounded-token border border-divider bg-surface text-[12px]"
+                data-testid="chip-action">
+                <span class="flex items-center px-2 text-fg-primary">{{ fieldLabel(a) }}</span>
+                <span class="flex items-center border-l border-divider px-2 text-fg-secondary">{{ OPERATORS[a.operator].chipLabel }}</span>
+                <span class="flex items-center gap-1 border-l border-divider px-2 text-fg-primary">
+                  <span *ngIf="carrierGlyph(a)" class="text-[11px]">{{ carrierGlyph(a) }}</span>
+                  {{ formatValue(a) }}
+                </span>
+              </span>
+              <button *ngIf="hiddenChipCount(rule.actions) > 0"
+                type="button"
+                class="text-[12px] text-fg-link hover:underline"
+                [attr.data-testid]="'link-more-actions-' + rule.id">
+                {{ hiddenChipCount(rule.actions) }} more...
+              </button>
+            </div>
+
+            <!-- Created by -->
+            <div class="flex items-center gap-2 text-[13px] text-fg-primary" [attr.data-testid]="'cell-created-by-' + rule.id">
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-chip-blue text-[10px] font-medium text-fg-primary">
+                {{ initials(rule.createdBy) }}
+              </span>
+              {{ rule.createdBy }}
+            </div>
+
+            <!-- Created on -->
+            <div class="text-[13px] text-fg-primary" [attr.data-testid]="'cell-created-on-' + rule.id">{{ rule.createdOn }}</div>
+
+            <!-- Row menu -->
+            <div class="relative flex justify-end">
+              <button type="button"
+                (click)="toggleMenu(rule.id, $event)"
+                aria-label="Row actions"
+                [attr.data-testid]="'button-row-menu-' + rule.id"
+                class="flex h-7 w-7 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>
+                </svg>
+              </button>
+              <div *ngIf="openMenuId() === rule.id"
+                class="absolute right-0 top-8 z-30 w-44 rounded-token border border-divider bg-surface py-1 shadow-lg"
+                (click)="$event.stopPropagation()"
+                [attr.data-testid]="'menu-row-' + rule.id">
+                <button type="button" (click)="openEdit(rule, $event)"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary"
+                  [attr.data-testid]="'menu-edit-' + rule.id">Edit</button>
+                <button type="button" (click)="duplicate(rule.id, $event)"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary"
+                  [attr.data-testid]="'menu-duplicate-' + rule.id">Duplicate</button>
+                <button type="button" (click)="moveUp(rule.id, $event)"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">Move up</button>
+                <button type="button" (click)="moveDown(rule.id, $event)"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">Move down</button>
+                <button type="button" (click)="toggleEnabled(rule.id, $event)"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary"
+                  [attr.data-testid]="'menu-toggle-' + rule.id">
+                  {{ rule.enabled ? 'Disable' : 'Enable' }}
+                </button>
+                <div class="my-1 border-t border-divider"></div>
+                <button type="button" (click)="remove(rule.id, $event)"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-negative hover:bg-surface-light-primary"
+                  [attr.data-testid]="'menu-delete-' + rule.id">Delete</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <ng-template #emptyState>
+          <div class="flex h-48 flex-col items-center justify-center gap-2 text-fg-secondary"
+            data-testid="empty-state">
+            <p class="text-[14px]">No automation rules yet.</p>
+            <button type="button" (click)="openCreate()"
+              class="inline-flex h-8 items-center gap-1.5 rounded-token bg-action-primary px-3 text-[13px] font-medium text-fg-on-action hover:bg-action-primary-hover">
+              + Add your first rule
+            </button>
+          </div>
+        </ng-template>
+
+        <!-- ============ Default Fallback card ============ -->
+        <div class="m-5 rounded-token border border-divider bg-surface-light-primary p-4"
+          data-testid="card-default-fallback">
+          <div class="mb-2 flex items-center justify-between">
+            <h2 class="font-heading text-[14px] font-semibold text-fg-primary">Default Fallback</h2>
+            <button *ngIf="!fallbackEditing()" type="button"
+              (click)="startEditFallback()"
+              data-testid="button-edit-fallback"
+              class="inline-flex h-7 items-center gap-1 rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-primary hover:bg-surface">
+              Edit
+            </button>
+          </div>
+          <p class="mb-3 text-[12px] text-fg-secondary">
+            Applied when no enabled rule matches a shipment (US-AUT-04).
+          </p>
+
+          <ng-container *ngIf="!fallbackEditing(); else fallbackForm">
+            <div class="flex flex-wrap items-center gap-2 text-[13px] text-fg-primary"
+              data-testid="text-fallback-summary">
+              <span class="inline-flex h-[26px] items-stretch overflow-hidden rounded-token border border-divider bg-surface">
+                <span class="flex items-center px-2">Carrier</span>
+                <span class="flex items-center border-l border-divider px-2 text-fg-secondary">is</span>
+                <span class="flex items-center border-l border-divider px-2">{{ svc.defaultFallback().carrier }}</span>
+              </span>
+              <span class="inline-flex h-[26px] items-stretch overflow-hidden rounded-token border border-divider bg-surface">
+                <span class="flex items-center px-2">Service</span>
+                <span class="flex items-center border-l border-divider px-2 text-fg-secondary">is</span>
+                <span class="flex items-center border-l border-divider px-2">{{ svc.defaultFallback().service }}</span>
+              </span>
+            </div>
+          </ng-container>
+          <ng-template #fallbackForm>
+            <div class="flex flex-wrap items-end gap-3">
+              <label class="flex flex-col gap-1 text-[12px] text-fg-secondary">
+                Carrier
+                <select [value]="fallbackDraft().carrier"
+                  (change)="setFallbackCarrier($any($event.target).value)"
+                  class="h-9 rounded-token border border-divider bg-surface px-2 text-[13px] text-fg-primary"
+                  data-testid="select-fallback-carrier">
+                  <option *ngFor="let c of ['UPS','FedEx','USPS','DHL','XPO','Old Dominion','Saia']" [value]="c">{{ c }}</option>
+                </select>
+              </label>
+              <label class="flex flex-col gap-1 text-[12px] text-fg-secondary">
+                Service
+                <select [value]="fallbackDraft().service"
+                  (change)="setFallbackService($any($event.target).value)"
+                  class="h-9 rounded-token border border-divider bg-surface px-2 text-[13px] text-fg-primary"
+                  data-testid="select-fallback-service">
+                  <option *ngFor="let s of ['Ground','Priority','Standard','Express 2 day','Next Day Air','Standard LTL']" [value]="s">{{ s }}</option>
+                </select>
+              </label>
+              <div class="flex items-center gap-2">
+                <button type="button" (click)="cancelFallback()"
+                  class="h-9 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary hover:bg-surface"
+                  data-testid="button-cancel-fallback">Cancel</button>
+                <button type="button" (click)="saveFallback()"
+                  class="h-9 rounded-token bg-action-primary px-3 text-[13px] font-medium text-fg-on-action hover:bg-action-primary-hover"
+                  data-testid="button-save-fallback">Save</button>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Builder modal -->
+  <app-automation-rule-modal *ngIf="modalOpen()"
+    [initialRule]="editing()"
+    (save)="onSave($event)"
+    (cancel)="closeModal()" />
+</app-shell>

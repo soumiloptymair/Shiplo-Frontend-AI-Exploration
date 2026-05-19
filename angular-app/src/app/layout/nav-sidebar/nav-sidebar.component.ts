@@ -50,7 +50,8 @@ export class NavSidebarComponent {
   ];
 
   readonly settingsNavItems: NavItem[] = [
-    { label: 'Marketplace', matchPaths: ['/marketplace'], route: '/marketplace' },
+    { label: 'Automations', matchPaths: ['/settings/automations'], route: '/settings/automations' },
+    { label: 'Marketplace', matchPaths: ['/marketplace'],          route: '/marketplace' },
   ];
 
   resourcesExpanded = true;
