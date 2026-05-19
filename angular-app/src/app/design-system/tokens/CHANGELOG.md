@@ -1,5 +1,18 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Merge Shipments capability (Figma file `unEpC0FcuWKbB5yO1m7OyX` / section `23011:103329`)
+
+### Added (model + components + service method, no new tokens)
+- `core/models/shipment.model.ts` — new `MergeRecommendation` interface (`peerCount`, `destination`, `savings`) and new `Shipment` fields: `mergeRecommendation?`, `isMerged?`, `originalIds?`. Seed: `s-15` carries a `mergeRecommendation` so the side-panel merge banner appears on that row.
+- `core/services/shipment.service.ts` — `mergeCandidatesFor(id)`: returns other shipments sharing customer + warehouse with compatible statuses (excludes Cancelled/Delivered/Delayed + already split/merged rows). `mergeShipments(sourceIds)`: replaces the first source row in place with one combined row (`shipmentId` suffixed `(merged)`, `orderRefKind: 'combined'`, `combinedCount`, status reset to `Pending`, products de-duped by SKU summing qty, value recomputed), removes the other sources, adds the new id to `selectedIds`, closes the side panel, and returns `{ newId, originalLabels }`.
+- `pages/shipments/merge-recommendation-banner` — peach `#FDE2D4` banner mirroring the split banner: orange `#E07B00` dot, "Merge opportunity" title, "Found N shipments going to {destination}. Merging could save you $X.XX." body, "Merge Shipments" pill action, dismiss X. Dismissal is session-scoped per shipment id (`dismissedMergeBanners`).
+- `pages/shipments/merge-shipment-modal` — 1324×812 dialog mirroring the split modal's frame: header "Merge Shipments (N orders)", body is a strict 2-column scrolling card grid (one card per source shipment with Order N: #ID title, Details/Products/Notes/Shipment Log tabs, identity/dimensions/customer fields per Figma), footer Cancel + teal "Merge Shipments". Cards past the minimum show an X to remove them from the merge (primary is non-removable; minimum 2 selected). Confirm is disabled when <2 sources remain.
+- `pages/shipments/shipment-detail-panel` — kebab menu gains "Merge Shipments" (above Edit Shipment). The merge banner is rendered alongside the existing split banner; opening the modal is also reachable from the banner action. Confirming fires the global toast `Shipments merged into {newId}`.
+- `pages/shipments/shipments.component.html` — new 16px merge badge in the 24px alert column for `isMerged` rows (`data-testid="icon-merge-{id}"`, `title="Merged shipment"`). Mutually exclusive with the orange needs-attention triangle and the split badge.
+
+### Tokens
+- No new design tokens introduced. Banner reuses the existing peach `#FDE2D4` (chip.red) currently inline at the call site, matching the split banner. Confirm button reuses `action.primary` (`#008572`).
+
 ## 2026-05-19 — Status pill-select in detail panel (Figma node `27437-68533`)
 
 ### Changed (component pattern, reuses existing `--status-*` tokens)

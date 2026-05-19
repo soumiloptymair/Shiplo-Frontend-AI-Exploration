@@ -4,6 +4,8 @@ import { Shipment, ShipmentStatus, STATUS_PILL_CLASS, SHIPMENT_STATUSES, Materia
 import { NotesTabComponent } from '../../../shared/notes-tab/notes-tab.component';
 import { SplitRecommendationBannerComponent } from '../split-recommendation-banner/split-recommendation-banner.component';
 import { SplitShipmentModalComponent, SplitConfirmPayload } from '../split-shipment-modal/split-shipment-modal.component';
+import { MergeRecommendationBannerComponent } from '../merge-recommendation-banner/merge-recommendation-banner.component';
+import { MergeShipmentModalComponent } from '../merge-shipment-modal/merge-shipment-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
 import { ShipmentService } from '../../../core/services/shipment.service';
 
@@ -21,6 +23,8 @@ interface MaterialRow { key: keyof MaterialFlags; present: string; absent: strin
     NotesTabComponent,
     SplitRecommendationBannerComponent,
     SplitShipmentModalComponent,
+    MergeRecommendationBannerComponent,
+    MergeShipmentModalComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
 })
@@ -52,6 +56,9 @@ export class ShipmentDetailPanelComponent implements OnChanges {
   /** Per-session set of shipment ids whose banner the user dismissed. */
   dismissedBanners = signal<Set<string>>(new Set());
   splitModalOpen = signal(false);
+  mergeModalOpen = signal(false);
+  /** Per-session set of shipment ids whose merge banner was dismissed. */
+  dismissedMergeBanners = signal<Set<string>>(new Set());
 
   private nextDocId = 1;
   private nextPodId = 1;
@@ -71,6 +78,7 @@ export class ShipmentDetailPanelComponent implements OnChanges {
 
   readonly MENU_ITEMS = [
     { label: 'Split Shipment', testid: 'menu-item-split-shipment', action: 'split' as const },
+    { label: 'Merge Shipments', testid: 'menu-item-merge-shipments', action: 'merge' as const },
     { label: 'Edit Shipment',  testid: 'menu-item-edit-shipment',  action: 'noop'  as const },
     { label: 'View Receipt',   testid: 'menu-item-view-receipt',   action: 'noop'  as const },
     { label: 'View Label',     testid: 'menu-item-view-label',     action: 'noop'  as const },
@@ -80,6 +88,27 @@ export class ShipmentDetailPanelComponent implements OnChanges {
     const s = this.shipment;
     return !!s?.splitRecommendation && !this.dismissedBanners().has(s.id);
   });
+
+  /**
+   * Live list of merge-eligible peers. Implemented as a plain getter (not a `computed`) because
+   * `this.shipment` is a non-signal `@Input` — a `computed` would not re-run when the parent swaps
+   * the selected shipment without re-creating the panel. Getters re-evaluate every change-detection
+   * cycle, which Angular triggers on input changes, so the result always tracks the current input.
+   */
+  get mergeCandidates(): Shipment[] {
+    const s = this.shipment;
+    if (!s) return [];
+    // Read the service signal so changes from merge/split mutations are visible during CD.
+    void this.shipmentSvc.allShipments();
+    return this.shipmentSvc.mergeCandidatesFor(s.id);
+  }
+
+  get showMergeBanner(): boolean {
+    const s = this.shipment;
+    if (!s) return false;
+    if (this.dismissedMergeBanners().has(s.id)) return false;
+    return !!s.mergeRecommendation && this.mergeCandidates.length > 0;
+  }
 
   readonly productsTotal = computed(() => {
     const items = this.shipment?.products ?? [];
@@ -116,10 +145,11 @@ export class ShipmentDetailPanelComponent implements OnChanges {
     this.statusDropdownOpen.set(false);
   }
 
-  onMenuItem(action: 'split' | 'noop', event: Event) {
+  onMenuItem(action: 'split' | 'merge' | 'noop', event: Event) {
     event.stopPropagation();
     this.menuOpen.set(false);
     if (action === 'split') this.openSplitModal();
+    if (action === 'merge') this.openMergeModal();
   }
 
   openSplitModal() {
@@ -140,8 +170,34 @@ export class ShipmentDetailPanelComponent implements OnChanges {
     }
   }
 
+  openMergeModal() {
+    if (this.mergeCandidates.length === 0) {
+      this.toast.show('No merge candidates found for this shipment.');
+      return;
+    }
+    this.mergeModalOpen.set(true);
+  }
+
+  closeMergeModal() { this.mergeModalOpen.set(false); }
+
+  confirmMerge(payload: { sourceIds: string[] }) {
+    const result = this.shipmentSvc.mergeShipments(payload.sourceIds);
+    this.mergeModalOpen.set(false);
+    if (result) {
+      this.toast.show(`Shipments merged into ${result.newId}`);
+    }
+  }
+
   dismissBanner() {
     this.dismissedBanners.update(prev => {
+      const next = new Set(prev);
+      next.add(this.shipment.id);
+      return next;
+    });
+  }
+
+  dismissMergeBanner() {
+    this.dismissedMergeBanners.update(prev => {
       const next = new Set(prev);
       next.add(this.shipment.id);
       return next;

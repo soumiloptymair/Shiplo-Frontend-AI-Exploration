@@ -53,6 +53,24 @@
     class="block pt-3"
   />
 
+  <!-- Merge recommendation banner (Figma file unEpC0FcuWKbB5yO1m7OyX / section 23011:103329) -->
+  <app-merge-recommendation-banner
+    *ngIf="showMergeBanner && shipment.mergeRecommendation"
+    [recommendation]="shipment.mergeRecommendation"
+    (merge)="openMergeModal()"
+    (dismiss)="dismissMergeBanner()"
+    class="block pt-3"
+  />
+
+  <!-- Merge Shipments modal -->
+  <app-merge-shipment-modal
+    *ngIf="mergeModalOpen()"
+    [primary]="shipment"
+    [candidates]="mergeCandidates"
+    (cancel)="closeMergeModal()"
+    (confirm)="confirmMerge($event)"
+  />
+
   <!-- Shipment Header -->
   <div class="shrink-0 bg-white px-4 py-4">
     <div class="flex items-start justify-between gap-2">
