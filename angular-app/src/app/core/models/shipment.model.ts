@@ -149,4 +149,20 @@ export const SAMPLE_SHIPMENTS: Shipment[] = [
   { id: 's-19', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Pending',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'TX Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  destinationZip: '30303', tags: ['Tag'],
     products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG },
   { id: 's-20', shipmentId: '#20230101180003', freightType: 'Parcel',     orderRefId: '#20230101180003', orderRefKind: 'order',    status: 'Shipped',       createdOn: '12/02/2024', value: '$41.99', source: 'Walmart Marketplace', warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Carter, Mike',  tags: ['Tag'] },
+
+  // Merge-opportunity sample shipments at the bottom of the table for testing the merge flow.
+  // Pair A: Dawson, Diana → ZIP 60601 (same warehouse).
+  { id: 's-21', shipmentId: '#20240501290001', freightType: 'Parcel',     orderRefId: '#20240501290001', orderRefKind: 'order',    status: 'Pending',       createdOn: '05/12/2025', value: '$58.20', source: 'Shopify',             warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Dawson, Diana', destinationZip: '60601', tags: ['Tag'],
+    products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG,
+    mergeRecommendation: { peerCount: 1, destination: 'Chicago, IL 60601', savings: 4.80 } },
+  { id: 's-22', shipmentId: '#20240501290002', freightType: 'Parcel',     orderRefId: '#20240501290002', orderRefKind: 'order',    status: 'Pending',       createdOn: '05/12/2025', value: '$32.75', source: 'Shopify',             warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Dawson, Diana', destinationZip: '60601', tags: ['Tag'],
+    products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG },
+
+  // Pair B: Edwards, Ellen → ZIP 94110 (three shipments, mixed warehouses to exercise the warehouse picker).
+  { id: 's-23', shipmentId: '#20240501290003', freightType: 'Parcel',     orderRefId: '#20240501290003', orderRefKind: 'order',    status: 'Pending',       createdOn: '05/14/2025', value: '$24.10', source: 'Amazon',              warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Edwards, Ellen', destinationZip: '94110', tags: ['Tag'],
+    products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG },
+  { id: 's-24', shipmentId: '#20240501290004', freightType: 'Parcel',     orderRefId: '#20240501290004', orderRefKind: 'order',    status: 'Pending',       createdOn: '05/14/2025', value: '$19.50', source: 'Amazon',              warehouse: 'TX Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Edwards, Ellen', destinationZip: '94110', tags: ['Tag'],
+    products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG },
+  { id: 's-25', shipmentId: '#20240501290005', freightType: 'Parcel',     orderRefId: '#20240501290005', orderRefKind: 'order',    status: 'Label Created', createdOn: '05/15/2025', value: '$27.40', source: 'Amazon',              warehouse: 'KS Fulfilment center', shipping: 'UPS',             method: 'Standard', customer: 'Edwards, Ellen', destinationZip: '94110', tags: ['Tag'],
+    products: DEFAULT_PRODUCTS, materials: DEFAULT_MATERIALS, log: DEFAULT_LOG },
 ];
