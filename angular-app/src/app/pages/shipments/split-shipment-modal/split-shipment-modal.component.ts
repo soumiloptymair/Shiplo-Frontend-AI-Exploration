@@ -117,6 +117,8 @@ export class SplitShipmentModalComponent implements OnChanges {
   openMoveIdx = signal<number>(-1);
   /** Tracks which shipment's delete-confirmation popover is open (-1 = none). */
   openDeleteConfirmIdx = signal<number>(-1);
+  /** Flips to true once the user mutates the current recommendation; resets on applyRecommendation. */
+  dirty = signal<boolean>(false);
   private nextShipmentNum = 3;
 
   readonly selectedRec = computed<Recommendation | undefined>(() =>
@@ -183,7 +185,20 @@ export class SplitShipmentModalComponent implements OnChanges {
     this.openMoveIdx.set(-1);
     this.openDeleteConfirmIdx.set(-1);
     this.nextShipmentNum = fresh.length + 1;
+    this.dirty.set(false);
   }
+
+  /** Subtractive list: omit warehouses chosen by other cards, keep the card's own selection. */
+  warehouseOptionsFor(sIdx: number): readonly string[] {
+    const all = this.shipments();
+    const used = new Set<string>();
+    all.forEach((b, i) => { if (i !== sIdx) used.add(b.warehouse); });
+    const own = all[sIdx]?.warehouse;
+    return this.warehouseOptions.filter(w => !used.has(w) || w === own);
+  }
+
+  /** True when there's room to remove a shipment without falling below 2 cards. */
+  get canRemoveShipment(): boolean { return this.shipments().length > 2; }
 
   resetCurrent() { this.applyRecommendation(this.selectedRecId()); }
 
@@ -234,6 +249,7 @@ export class SplitShipmentModalComponent implements OnChanges {
   // ---- Qty editing (only meaningful when the row is checked) ----
   setItemQty(sIdx: number, rowKey: string, value: number | string) {
     const raw = typeof value === 'string' ? parseInt(value, 10) : value;
+    let changed = false;
     this.shipments.update(prev => prev.map((b, i) => {
       if (i !== sIdx) return b;
       return {
@@ -241,10 +257,12 @@ export class SplitShipmentModalComponent implements OnChanges {
         items: b.items.map(it => {
           if (it.rowKey !== rowKey) return it;
           const clamped = Math.max(1, Math.min(it.maxQty, isNaN(raw) ? 1 : raw));
+          if (clamped !== it.qty) changed = true;
           return { ...it, qty: clamped };
         }),
       };
     }));
+    if (changed) this.dirty.set(true);
   }
   bumpItemQty(sIdx: number, rowKey: string, delta: number) {
     const item = this.shipments()[sIdx]?.items.find(it => it.rowKey === rowKey);
@@ -311,6 +329,7 @@ export class SplitShipmentModalComponent implements OnChanges {
       return next;
     });
     this.openMoveIdx.set(-1);
+    this.dirty.set(true);
   }
   pickMoveTarget(fromIdx: number, toIdx: number, evt: Event) {
     evt.stopPropagation();
@@ -319,15 +338,19 @@ export class SplitShipmentModalComponent implements OnChanges {
 
   // ---- Add / remove shipment ----
   addShipment() {
+    // Pick the first warehouse not already in use, so the new card lands on a unique option.
+    const used = new Set(this.shipments().map(b => b.warehouse));
+    const freshWh = this.warehouseOptions.find(w => !used.has(w)) ?? this.originalWarehouse;
     this.shipments.update(prev => [
       ...prev,
-      { id: `s${this.nextShipmentNum}`, warehouse: this.originalWarehouse, items: [] },
+      { id: `s${this.nextShipmentNum}`, warehouse: freshWh, items: [] },
     ]);
     this.nextShipmentNum++;
+    this.dirty.set(true);
   }
   requestRemoveShipment(sIdx: number, evt: Event) {
     evt.stopPropagation();
-    if (this.shipments().length <= 2) return;
+    if (!this.canRemoveShipment) return;
     this.openDeleteConfirmIdx.set(sIdx);
   }
   cancelRemoveShipment(evt: Event) { evt.stopPropagation(); this.openDeleteConfirmIdx.set(-1); }
@@ -344,6 +367,7 @@ export class SplitShipmentModalComponent implements OnChanges {
     });
     this.selectedKeys.set(new Set());
     this.openDeleteConfirmIdx.set(-1);
+    this.dirty.set(true);
   }
 
   // ---- Warehouse picker ----
@@ -353,8 +377,10 @@ export class SplitShipmentModalComponent implements OnChanges {
   }
   pickWarehouse(sIdx: number, w: string, evt: Event) {
     evt.stopPropagation();
+    const current = this.shipments()[sIdx]?.warehouse;
     this.shipments.update(prev => prev.map((b, i) => i === sIdx ? { ...b, warehouse: w } : b));
     this.openWarehouseIdx.set(-1);
+    if (current !== w) this.dirty.set(true);
   }
   closeAllMenus() {
     this.openWarehouseIdx.set(-1);

@@ -7,7 +7,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="split-shipment-modal-title"
-    class="flex max-h-[95vh] w-full max-w-[1324px] flex-col overflow-hidden rounded-lg bg-white"
+    class="flex h-[812px] max-h-[95vh] w-[1324px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg bg-white"
     style="box-shadow: 0 1px 16px 0 rgba(0,0,0,0.25);"
     (click)="$event.stopPropagation(); closeAllMenus()"
   >
@@ -101,21 +101,33 @@
           </div>
         </div>
 
-        <!-- Subheader: copy + Reset -->
-        <div class="flex shrink-0 items-center justify-between pt-3">
+        <!-- Subheader: copy + Add Shipment + Reset -->
+        <div class="flex shrink-0 items-center justify-between gap-3 pt-3">
           <p class="font-body text-sm text-[#5b6b72]" data-testid="text-edit-recommendation-copy">
             You can edit this recommendation by moving items across shipments
           </p>
-          <button type="button"
-            data-testid="button-reset-split"
-            (click)="resetCurrent()"
-            class="flex items-center gap-1 rounded border border-[#b8c6cc] bg-white px-2 py-1 font-body text-xs font-bold text-[#0b1516] hover:bg-neutral-50">
-            Reset
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button"
+              data-testid="button-add-shipment"
+              (click)="addShipment()"
+              class="flex items-center gap-1 rounded border border-[#b8c6cc] bg-white px-2 py-1 font-body text-xs font-bold text-[#0b1516] hover:bg-neutral-50">
+              <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Shipment
+            </button>
+            <button type="button"
+              data-testid="button-reset-split"
+              (click)="resetCurrent()"
+              [disabled]="!dirty()"
+              class="flex items-center gap-1 rounded border border-[#b8c6cc] bg-white px-2 py-1 font-body text-xs font-bold text-[#0b1516] hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50">
+              Reset
+            </button>
+          </div>
         </div>
 
         <!-- Shipment cards -->
-        <div class="flex flex-1 flex-wrap content-start items-start gap-5 overflow-y-auto pb-5 pt-3"
+        <div class="flex min-h-0 flex-1 flex-wrap content-start items-start gap-5 overflow-y-auto pb-5 pt-3"
           data-testid="row-shipment-cards">
           <article *ngFor="let bucket of shipments(); let sIdx = index"
             [attr.data-testid]="'card-shipment-' + (sIdx + 1)"
@@ -141,7 +153,7 @@
                   [attr.data-testid]="'menu-warehouse-' + (sIdx + 1)"
                   class="absolute right-0 top-full z-20 mt-1 w-[180px] overflow-hidden rounded border border-[#b8c6cc] bg-white shadow-lg"
                   (click)="$event.stopPropagation()">
-                  <li *ngFor="let w of warehouseOptions">
+                  <li *ngFor="let w of warehouseOptionsFor(sIdx)">
                     <button type="button"
                       [attr.data-testid]="'menu-warehouse-' + (sIdx + 1) + '-' + w"
                       (click)="pickWarehouse(sIdx, w, $event)"
@@ -152,18 +164,20 @@
                   </li>
                 </ul>
               </div>
-              <!-- Remove shipment (only when >2) with confirmation popover -->
-              <div *ngIf="shipments().length > 2" class="relative">
+              <!-- Remove shipment: trash icon always shown, disabled when <=2 shipments -->
+              <div class="relative">
                 <button type="button"
                   [attr.data-testid]="'button-remove-shipment-' + (sIdx + 1)"
-                  aria-label="Remove shipment"
+                  [attr.aria-label]="canRemoveShipment ? 'Remove shipment' : 'Remove shipment (disabled — at least 2 shipments are required)'"
+                  [attr.title]="canRemoveShipment ? null : 'At least 2 shipments are required'"
+                  [disabled]="!canRemoveShipment"
                   (click)="requestRemoveShipment(sIdx, $event)"
-                  class="flex h-8 w-8 items-center justify-center rounded border border-[#b8c6cc] text-[#5b6b72] hover:bg-neutral-50">
+                  class="flex h-8 w-8 items-center justify-center rounded border border-[#b8c6cc] text-[#5b6b72] hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent">
                   <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
                   </svg>
                 </button>
-                <div *ngIf="openDeleteConfirmIdx() === sIdx"
+                <div *ngIf="openDeleteConfirmIdx() === sIdx && canRemoveShipment"
                   [attr.data-testid]="'popover-delete-shipment-' + (sIdx + 1)"
                   class="absolute right-0 top-full z-30 mt-1 flex items-center gap-3 rounded-md bg-[#0b1516] px-3 py-2 shadow-lg"
                   (click)="$event.stopPropagation()">
@@ -177,14 +191,6 @@
                     (click)="confirmRemoveShipment(sIdx, $event)"
                     class="rounded-md bg-[#cc2c2c] px-3 py-1 font-body text-sm font-bold text-white hover:bg-[#a02020]">Delete</button>
                 </div>
-              </div>
-              <!-- Decorative icon mirroring Figma slot (non-interactive) -->
-              <div *ngIf="shipments().length <= 2" aria-hidden="true"
-                [attr.data-testid]="'icon-shipment-info-' + (sIdx + 1)"
-                class="flex h-8 w-8 items-center justify-center rounded border border-[#b8c6cc] text-[#5b6b72]">
-                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
               </div>
             </header>
 
@@ -237,7 +243,7 @@
 
               <!-- Qty column (104w to fit stepper) -->
               <div class="flex w-[104px] shrink-0 flex-col">
-                <div class="flex items-center border-y border-[#b8c6cc] p-2">
+                <div class="flex items-center justify-end border-y border-[#b8c6cc] p-2">
                   <p class="font-body text-sm font-bold text-[#0b1516]">Qty</p>
                 </div>
                 <div *ngFor="let item of bucket.items"
@@ -294,17 +300,6 @@
               </div>
             </div>
           </article>
-
-          <!-- Add Shipment -->
-          <button type="button"
-            data-testid="button-add-shipment"
-            (click)="addShipment()"
-            class="flex h-10 shrink-0 items-center gap-1 self-start rounded-md border border-[#b8c6cc] bg-white px-3 py-2 font-body text-sm font-bold text-[#0b1516] hover:bg-neutral-50">
-            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Add Shipment
-          </button>
         </div>
       </section>
     </div>

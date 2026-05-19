@@ -1,5 +1,18 @@
 # Design Tokens Changelog
 
+## 2026-05-19 — Split Shipment modal refinements (Task #16)
+
+### Changed (behavior + layout, no new tokens)
+- `pages/shipments/split-shipment-modal` — dialog frame is now fixed at 1324×812 (`h-[812px] w-[1324px]`, capped by `max-h-[95vh]` / `max-w-[calc(100vw-2rem)]`). Opening warehouse / move dropdowns, adding shipments, or showing the impact-preview banner no longer resizes the dialog; the right-hand cards area is the scroll container.
+- `pages/shipments/split-shipment-modal` — shipment cards wrap to a second row at N≥3 (`flex-wrap` + `content-start`) and the cards area scrolls vertically while the header, subheader, and footer stay pinned.
+- `pages/shipments/split-shipment-modal` — `Add Shipment` moved out of the cards container into the subheader, sitting immediately left of `Reset`. Both buttons share the same compact pill style (`px-2 py-1`, `text-xs font-bold`).
+- `pages/shipments/split-shipment-modal` — added a `dirty` signal that flips to true on any user mutation (move, qty change, warehouse pick, add/remove shipment) and resets in `applyRecommendation`. `Reset` is `[disabled]="!dirty()"` (`disabled:cursor-not-allowed disabled:opacity-50`).
+- `pages/shipments/split-shipment-modal` — added `warehouseOptionsFor(sIdx)`: subtractive list of warehouses excluding those chosen by other cards, while always keeping the card's own current selection so its label still renders.
+- `pages/shipments/split-shipment-modal` — `addShipment()` now picks the first unused warehouse so new cards land on a unique option; falls back to `originalWarehouse` once `BASE_WAREHOUSES` is exhausted.
+- `pages/shipments/split-shipment-modal` — replaced the decorative info-circle (rendered when `shipments().length <= 2`) with the same trash-can button used at N≥3. The button is always present; when `!canRemoveShipment` it's `disabled` (opacity 40, `cursor-not-allowed`) with `title="At least 2 shipments are required"`. The delete-confirm popover only opens when `canRemoveShipment`.
+- `pages/shipments/split-shipment-modal` — Qty column header gained `justify-end` so the "Qty" label sits above its numeric values in both stepper and read-only row modes.
+- No new design tokens introduced.
+
 ## 2026-05-19 — Split Shipment workflow behavior (Figma workflow `27432-68529` / file `unEpC0FcuWKbB5yO1m7OyX`)
 
 ### Changed (behavior + supporting UI states, no new tokens)
