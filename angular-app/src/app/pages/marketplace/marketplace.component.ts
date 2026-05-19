@@ -180,6 +180,7 @@ export class MarketplaceComponent {
   readonly selectedRowId = signal<string | null>(null);
   readonly connectModalOpen = signal(false);
   readonly toast = signal<string | null>(null);
+  readonly openRowMenuId = signal<string | null>(null);
 
   readonly rows = signal<ConnectorRow[]>(generateRows());
 
@@ -258,4 +259,25 @@ export class MarketplaceComponent {
   }
 
   dismissToast() { this.toast.set(null); }
+
+  toggleRowMenu(id: string, ev?: Event) {
+    ev?.stopPropagation();
+    this.openRowMenuId.update(curr => curr === id ? null : id);
+  }
+
+  closeRowMenu() { this.openRowMenuId.set(null); }
+
+  disconnect(id: string) {
+    const target = this.rows().find(r => r.id === id);
+    if (!target) return;
+    const name = target.accountName;
+    this.rows.update(list => list.map(r =>
+      r.id === id
+        ? { ...r, status: 'Disconnected' as ConnectorStatus, availableBucket: 'connect' as AvailableBucket }
+        : r));
+    this.openRowMenuId.set(null);
+    if (this.selectedRowId() === id) this.selectedRowId.set(null);
+    this.toast.set(`Disconnected “${name}”`);
+    setTimeout(() => this.toast.set(null), 4000);
+  }
 }

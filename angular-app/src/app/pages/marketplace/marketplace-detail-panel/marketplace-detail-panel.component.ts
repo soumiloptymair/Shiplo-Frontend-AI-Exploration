@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { ConnectorRow } from '../marketplace.component';
 
@@ -12,6 +12,22 @@ export class MarketplaceDetailPanelComponent {
   @Input({ required: true }) row!: ConnectorRow;
   @Output() close = new EventEmitter<void>();
   @Output() connect = new EventEmitter<void>();
+  @Output() disconnect = new EventEmitter<void>();
+
+  readonly menuOpen = signal(false);
+
+  toggleMenu(ev: Event) {
+    ev.stopPropagation();
+    this.menuOpen.update(v => !v);
+  }
+
+  @HostListener('document:click')
+  closeMenuOnOutsideClick() { this.menuOpen.set(false); }
+
+  onDisconnect() {
+    this.menuOpen.set(false);
+    this.disconnect.emit();
+  }
 
   get storeUrl(): string {
     const slug = this.row.brand.toLowerCase().replace(/\s+/g, '');

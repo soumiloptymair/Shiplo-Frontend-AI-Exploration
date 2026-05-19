@@ -1,5 +1,6 @@
 <app-shell>
-  <section class="relative flex h-full min-w-0 gap-3">
+  <section class="relative flex h-full min-w-0 gap-3"
+           (click)="closeRowMenu()">
 
     <!-- LEFT RAIL: categories -->
     <aside class="flex h-full w-[220px] shrink-0 flex-col rounded-lg bg-neutral-0 p-3"
@@ -155,15 +156,32 @@
                     </span>
                   </td>
                   <td class="px-2 align-middle">
-                    <button type="button"
-                            [attr.aria-label]="'Actions for ' + r.accountName"
-                            [attr.data-testid]="'button-row-menu-' + r.id"
-                            (click)="$event.stopPropagation()"
-                            class="inline-flex h-6 w-6 items-center justify-center rounded text-neutral-700 hover:bg-neutral-100">
-                      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>
-                      </svg>
-                    </button>
+                    <div class="relative inline-block">
+                      <button type="button"
+                              [attr.aria-label]="'Actions for ' + r.accountName"
+                              [attr.aria-expanded]="openRowMenuId() === r.id"
+                              aria-haspopup="menu"
+                              [attr.data-testid]="'button-row-menu-' + r.id"
+                              (click)="toggleRowMenu(r.id, $event)"
+                              class="inline-flex h-6 w-6 items-center justify-center rounded text-neutral-700 hover:bg-neutral-100">
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>
+                        </svg>
+                      </button>
+                      @if (openRowMenuId() === r.id) {
+                        <div role="menu"
+                             [attr.data-testid]="'menu-row-' + r.id"
+                             (click)="$event.stopPropagation()"
+                             class="absolute right-0 top-7 z-20 w-[200px] rounded-md border border-[#e4eaed] bg-white py-1 shadow-lg">
+                          <button type="button" role="menuitem"
+                                  (click)="disconnect(r.id)"
+                                  [attr.data-testid]="'menuitem-disconnect-' + r.id"
+                                  class="flex w-full items-center px-3 py-2 text-left text-[14px] leading-[1.43] text-[#0b1516] hover:bg-neutral-100">
+                            Disconnect Integration
+                          </button>
+                        </div>
+                      }
+                    </div>
                   </td>
                 </tr>
               } @empty {
@@ -236,7 +254,8 @@
     @if (selectedRow(); as row) {
       <app-marketplace-detail-panel [row]="row"
                                     (close)="closePanel()"
-                                    (connect)="openConnectModal()" />
+                                    (connect)="openConnectModal()"
+                                    (disconnect)="disconnect(row.id)" />
     }
 
     <!-- CONNECT MODAL -->
