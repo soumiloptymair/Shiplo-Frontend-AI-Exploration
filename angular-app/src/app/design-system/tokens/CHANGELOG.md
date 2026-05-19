@@ -23,7 +23,7 @@ Tailwind utilities** (e.g. `text-fg-primary`, `bg-surface-subtle`,
 
 #### Surface / background
 - `surface.DEFAULT`        `#FFFFFF`
-- `surface.subtle`         `#F0F4F7` — Auto-topup body panel
+- `surface.subtle`         `#F0F4F7` — reserved for tinted inset panels (currently unused on the Wallet page; Auto-topup body is plain white per Figma node `24950:231111`)
 - `surface.light-primary`  `#F6F9FB` — Table header / inset rows
 
 #### Border

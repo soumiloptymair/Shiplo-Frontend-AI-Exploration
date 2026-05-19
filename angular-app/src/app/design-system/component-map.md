@@ -6,7 +6,7 @@ Living document mapping Figma components / instances to Angular components.
 |---------------------------------------|----------------------------------------------------------------------|-------|
 | Title Bar                             | `app-shell` page-header slot                                         | 68 px tall, 20 px gutter, title at y=17 |
 | KPI Cards / Current Balance           | `pages/wallet` inline `<article data-testid="card-current-balance">` | Reuses `text-heading-5-md` + Montserrat 56 px for value |
-| KPI Cards / Auto-topup                | `pages/wallet` inline `<article data-testid="card-auto-topup">`      | Edit button 69×26, Toggle 48×28, body in `bg-surface-subtle` |
+| KPI Cards / Auto-topup                | `pages/wallet` inline `<article data-testid="card-auto-topup">`      | Edit button 69×26, Toggle 48×28; body on plain `bg-surface` per Figma node `24950:231111` (no tint); Funding method row uses a 131×40 bordered Select-style field |
 | KPI Cards / Funding Methods           | `pages/wallet` inline `<article data-testid="card-funding-methods">` | 3 rows × 40 px in `bg-surface-light-primary` |
 | Wallet Chips (status pill)            | `shared/components/status-pill`                                       | Single component, `tone` prop maps to `chip.*` tokens |
 | Toggle (on/off)                       | inline (Wallet card only — keep until a 2nd consumer exists)         | 48×28 track, 24 px knob |
