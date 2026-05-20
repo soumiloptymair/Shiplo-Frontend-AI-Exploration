@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, effect, signal } from '@angular/core';
 import {
   ACTION_FIELDS,
   Action,
@@ -22,12 +22,31 @@ import {
  * Evaluation: pure `evaluate(shipment)` — first-match-wins with a configurable
  * default fallback (US-AUT-04).
  */
+const STORAGE_KEY = 'shiplo.automation.v1';
+
+interface PersistedState {
+  rules: AutomationRule[];
+  defaultFallback: DefaultFallback;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AutomationService {
-  readonly rules = signal<AutomationRule[]>(seedRules());
-  readonly defaultFallback = signal<DefaultFallback>({ carrier: 'UPS', service: 'Ground' });
+  readonly rules = signal<AutomationRule[]>(loadPersisted()?.rules ?? seedRules());
+  readonly defaultFallback = signal<DefaultFallback>(
+    loadPersisted()?.defaultFallback ?? { carrier: 'UPS', service: 'Ground' },
+  );
 
   readonly enabledRules = computed(() => this.rules().filter((r) => r.enabled));
+
+  constructor() {
+    effect(() => {
+      const state: PersistedState = {
+        rules: this.rules(),
+        defaultFallback: this.defaultFallback(),
+      };
+      savePersisted(state);
+    });
+  }
 
   // ---- Lookups ---------------------------------------------------------
   conditionField(key: string): FieldDef | undefined {
@@ -202,6 +221,28 @@ function formatDateMDY(d: Date): string {
 
 function cryptoRandom(): string {
   return Math.random().toString(36).slice(2, 10);
+}
+
+function loadPersisted(): PersistedState | null {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<PersistedState>;
+    if (!parsed || !Array.isArray(parsed.rules) || !parsed.defaultFallback) return null;
+    return { rules: parsed.rules, defaultFallback: parsed.defaultFallback };
+  } catch {
+    return null;
+  }
+}
+
+function savePersisted(state: PersistedState): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // quota exceeded or storage unavailable — silently ignore
+  }
 }
 
 function newCondition(fieldKey: string, operator: OperatorKey, value: Condition['value']): Condition {
