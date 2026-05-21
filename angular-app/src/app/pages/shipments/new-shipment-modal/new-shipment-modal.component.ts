@@ -87,6 +87,13 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   readonly CARRIER_ADDONS = CARRIER_ADDONS;
   readonly LABEL_FORMATS = LABEL_FORMAT_OPTIONS;
   readonly PICKUP_WINDOWS = PICKUP_WINDOW_OPTIONS;
+  /** US state two-letter codes for the Receiver State select (Figma 27004-11049). */
+  readonly US_STATES = [
+    'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
+    'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+    'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT',
+    'VA','WA','WV','WI','WY',
+  ] as const;
 
   /** Draft form state held entirely in-memory for the foundation task. */
   draft = signal<NewShipmentDraft>(blankDraft());
@@ -454,13 +461,22 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     if (this.currentStep() !== 2) return true;
     const c = this.draft().customer;
     const required: (keyof NewShipmentCustomer)[] = [
-      'name', 'email', 'phone',
+      'firstName', 'lastName',
       'street1', 'city', 'state', 'postalCode', 'country',
     ];
-    if (!required.every((k) => c[k].trim().length > 0)) return false;
-    // Minimal email shape check so obvious typos can't slip past.
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email);
+    if (!required.every((k) => String(c[k] ?? '').trim().length > 0)) return false;
+    // Email/phone optional per Figma — but if present, email must look valid.
+    if (c.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) return false;
+    return true;
   });
+
+  /** Toggle the "This is a residential address" checkbox. */
+  toggleResidential() {
+    this.draft.update((d) => ({
+      ...d,
+      customer: { ...d.customer, residential: !d.customer.residential },
+    }));
+  }
 
   requestClose() {
     this.openPicker.set(null);

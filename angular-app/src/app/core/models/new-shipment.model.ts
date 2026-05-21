@@ -89,15 +89,15 @@ export interface NewShipmentDetails {
 }
 
 /**
- * Step-2 form state — recipient address + contact for the shipment.
+ * Step-2 form state — Receiver address + contact for the shipment.
  *
- * Required fields (gate the wizard's Continue button): `name`, `email`,
- * `phone`, `street1`, `city`, `state`, `postalCode`, `country`. `company`
- * and `street2` are optional.
+ * Required fields (gate the wizard's Continue button): `firstName`,
+ * `lastName`, `street1`, `city`, `state`, `postalCode`, `country`.
+ * `email`, `phone`, `street2` are optional per Figma 27004-11021.
  */
 export interface NewShipmentCustomer {
-  name: string;
-  company: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   street1: string;
@@ -106,6 +106,7 @@ export interface NewShipmentCustomer {
   state: string;
   postalCode: string;
   country: string;
+  residential: boolean;
 }
 
 // ============================================================
@@ -205,8 +206,8 @@ export interface NewShipmentDraft {
 
 export function blankCustomer(): NewShipmentCustomer {
   return {
-    name: '',
-    company: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     street1: '',
@@ -215,6 +216,7 @@ export function blankCustomer(): NewShipmentCustomer {
     state: '',
     postalCode: '',
     country: 'United States',
+    residential: false,
   };
 }
 
