@@ -400,23 +400,43 @@
               <div class="flex w-full items-start gap-5">
                 <div class="flex min-w-0 flex-1 flex-col gap-1">
                   <label for="customer-first-name" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
-                    First Name
+                    First Name <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                   </label>
-                  <input id="customer-first-name" type="text" autocomplete="given-name"
+                  <input id="customer-first-name" type="text" autocomplete="given-name" required
                     [value]="draft().customer.firstName"
                     (input)="onCustomerInput('firstName', $event)"
+                    (blur)="markCustomerTouched('firstName')"
+                    [attr.aria-invalid]="hasError('firstName') || null"
+                    [attr.aria-describedby]="hasError('firstName') ? 'err-first-name' : null"
                     data-testid="input-customer-first-name"
-                    class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"/>
+                    class="h-10 w-full rounded-[4px] border bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"
+                    [class.border-\[\#e4eaed\]]="!hasError('firstName')"
+                    [class.border-\[\#cb2b2b\]]="hasError('firstName')"/>
+                  <p *ngIf="hasError('firstName')" id="err-first-name"
+                    class="font-body text-[12px] leading-[1.4] text-[#cb2b2b]"
+                    data-testid="error-customer-first-name">
+                    {{ customerErrors().firstName }}
+                  </p>
                 </div>
                 <div class="flex min-w-0 flex-1 flex-col gap-1">
                   <label for="customer-last-name" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
-                    Last Name
+                    Last Name <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                   </label>
-                  <input id="customer-last-name" type="text" autocomplete="family-name"
+                  <input id="customer-last-name" type="text" autocomplete="family-name" required
                     [value]="draft().customer.lastName"
                     (input)="onCustomerInput('lastName', $event)"
+                    (blur)="markCustomerTouched('lastName')"
+                    [attr.aria-invalid]="hasError('lastName') || null"
+                    [attr.aria-describedby]="hasError('lastName') ? 'err-last-name' : null"
                     data-testid="input-customer-last-name"
-                    class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"/>
+                    class="h-10 w-full rounded-[4px] border bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"
+                    [class.border-\[\#e4eaed\]]="!hasError('lastName')"
+                    [class.border-\[\#cb2b2b\]]="hasError('lastName')"/>
+                  <p *ngIf="hasError('lastName')" id="err-last-name"
+                    class="font-body text-[12px] leading-[1.4] text-[#cb2b2b]"
+                    data-testid="error-customer-last-name">
+                    {{ customerErrors().lastName }}
+                  </p>
                 </div>
               </div>
 
@@ -432,12 +452,14 @@
                   class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"/>
               </div>
 
-              <!-- Phone (optional) with +1 / flag prefix -->
+              <!-- Phone (required) with +1 / flag prefix -->
               <div class="flex w-full flex-col gap-1">
                 <label for="customer-phone" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
-                  Phone (optional)
+                  Phone <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                 </label>
-                <div class="flex h-10 w-full items-center gap-3 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 focus-within:border-[#008572]">
+                <div class="flex h-10 w-full items-center gap-3 rounded-[4px] border bg-white pl-3 pr-2 focus-within:border-[#008572]"
+                  [class.border-\[\#e4eaed\]]="!hasError('phone')"
+                  [class.border-\[\#cb2b2b\]]="hasError('phone')">
                   <div class="flex shrink-0 items-center gap-2 self-stretch" data-testid="customer-phone-prefix">
                     <span class="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full" aria-hidden="true">
                       <span class="flex h-6 w-6 items-center justify-center text-[14px] leading-none">🇺🇸</span>
@@ -448,12 +470,20 @@
                     </svg>
                     <span class="ml-1 h-full w-px self-stretch bg-[#e5e5e5]"></span>
                   </div>
-                  <input id="customer-phone" type="tel" autocomplete="tel"
+                  <input id="customer-phone" type="tel" autocomplete="tel" required
                     [value]="draft().customer.phone"
                     (input)="onCustomerInput('phone', $event)"
+                    (blur)="markCustomerTouched('phone')"
+                    [attr.aria-invalid]="hasError('phone') || null"
+                    [attr.aria-describedby]="hasError('phone') ? 'err-phone' : null"
                     data-testid="input-customer-phone"
                     class="h-full min-w-0 flex-1 border-0 bg-transparent text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none"/>
                 </div>
+                <p *ngIf="hasError('phone')" id="err-phone"
+                  class="font-body text-[12px] leading-[1.4] text-[#cb2b2b]"
+                  data-testid="error-customer-phone">
+                  {{ customerErrors().phone }}
+                </p>
               </div>
 
               <!-- Divider between contact and address sections -->
@@ -464,13 +494,23 @@
                 <!-- Address Line 1 -->
                 <div class="flex w-full flex-col gap-1">
                   <label for="customer-street1" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
-                    Address Line 1
+                    Address Line 1 <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                   </label>
-                  <input id="customer-street1" type="text" autocomplete="address-line1"
+                  <input id="customer-street1" type="text" autocomplete="address-line1" required
                     [value]="draft().customer.street1"
                     (input)="onCustomerInput('street1', $event)"
+                    (blur)="markCustomerTouched('street1')"
+                    [attr.aria-invalid]="hasError('street1') || null"
+                    [attr.aria-describedby]="hasError('street1') ? 'err-street1' : null"
                     data-testid="input-customer-street1"
-                    class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"/>
+                    class="h-10 w-full rounded-[4px] border bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"
+                    [class.border-\[\#e4eaed\]]="!hasError('street1')"
+                    [class.border-\[\#cb2b2b\]]="hasError('street1')"/>
+                  <p *ngIf="hasError('street1')" id="err-street1"
+                    class="font-body text-[12px] leading-[1.4] text-[#cb2b2b]"
+                    data-testid="error-customer-street1">
+                    {{ customerErrors().street1 }}
+                  </p>
                 </div>
 
                 <!-- Address Line 2 | Country -->
@@ -487,14 +527,19 @@
                   </div>
                   <div class="flex w-[164px] shrink-0 flex-col gap-1">
                     <label for="customer-country" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
-                      Country
+                      Country <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                     </label>
                     <div class="relative">
-                      <select id="customer-country" autocomplete="country-name"
+                      <select id="customer-country" autocomplete="country-name" required
                         [value]="draft().customer.country"
                         (change)="onCustomerInput('country', $event)"
+                        (blur)="markCustomerTouched('country')"
+                        [attr.aria-invalid]="hasError('country') || null"
+                        [attr.aria-describedby]="hasError('country') ? 'err-country' : null"
                         data-testid="select-customer-country"
-                        class="h-10 w-full appearance-none rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-8 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]">
+                        class="h-10 w-full appearance-none rounded-[4px] border bg-white pl-3 pr-8 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"
+                        [class.border-\[\#e4eaed\]]="!hasError('country')"
+                        [class.border-\[\#cb2b2b\]]="hasError('country')">
                         <option value="United States">United States</option>
                         <option value="Canada">Canada</option>
                         <option value="Mexico">Mexico</option>
@@ -504,6 +549,11 @@
                         <path d="M4 6l4 4 4-4" stroke="#45565b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     </div>
+                    <p *ngIf="hasError('country')" id="err-country"
+                      class="font-body text-[12px] leading-[1.4] text-[#cb2b2b]"
+                      data-testid="error-customer-country">
+                      {{ customerErrors().country }}
+                    </p>
                   </div>
                 </div>
 
@@ -511,24 +561,39 @@
                 <div class="flex w-full items-start gap-4">
                   <div class="flex min-w-0 flex-1 flex-col gap-1">
                     <label for="customer-city" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
-                      City
+                      City <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                     </label>
-                    <input id="customer-city" type="text" autocomplete="address-level2"
+                    <input id="customer-city" type="text" autocomplete="address-level2" required
                       [value]="draft().customer.city"
                       (input)="onCustomerInput('city', $event)"
+                      (blur)="markCustomerTouched('city')"
+                      [attr.aria-invalid]="hasError('city') || null"
+                      [attr.aria-describedby]="hasError('city') ? 'err-city' : null"
                       data-testid="input-customer-city"
-                      class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"/>
+                      class="h-10 w-full rounded-[4px] border bg-white pl-3 pr-2 text-[14px] text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"
+                      [class.border-\[\#e4eaed\]]="!hasError('city')"
+                      [class.border-\[\#cb2b2b\]]="hasError('city')"/>
+                    <p *ngIf="hasError('city')" id="err-city"
+                      class="font-body text-[12px] leading-[1.4] text-[#cb2b2b]"
+                      data-testid="error-customer-city">
+                      {{ customerErrors().city }}
+                    </p>
                   </div>
                   <div class="flex min-w-0 flex-1 flex-col gap-1">
                     <label for="customer-state" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
-                      State
+                      State <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                     </label>
                     <div class="relative">
-                      <select id="customer-state" autocomplete="address-level1"
+                      <select id="customer-state" autocomplete="address-level1" required
                         [value]="draft().customer.state"
                         (change)="onCustomerInput('state', $event)"
+                        (blur)="markCustomerTouched('state')"
+                        [attr.aria-invalid]="hasError('state') || null"
+                        [attr.aria-describedby]="hasError('state') ? 'err-state' : null"
                         data-testid="select-customer-state"
-                        class="h-10 w-full appearance-none rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-8 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]">
+                        class="h-10 w-full appearance-none rounded-[4px] border bg-white pl-3 pr-8 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"
+                        [class.border-\[\#e4eaed\]]="!hasError('state')"
+                        [class.border-\[\#cb2b2b\]]="hasError('state')">
                         <option value=""></option>
                         <option *ngFor="let s of US_STATES" [value]="s">{{ s }}</option>
                       </select>
@@ -536,16 +601,79 @@
                         <path d="M4 6l4 4 4-4" stroke="#45565b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     </div>
+                    <p *ngIf="hasError('state')" id="err-state"
+                      class="font-body text-[12px] leading-[1.4] text-[#cb2b2b]"
+                      data-testid="error-customer-state">
+                      {{ customerErrors().state }}
+                    </p>
                   </div>
                   <div class="flex w-[116px] shrink-0 flex-col gap-1">
                     <label for="customer-postal" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
-                      Zip Code
+                      Zip Code <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                     </label>
-                    <input id="customer-postal" type="text" autocomplete="postal-code"
+                    <input id="customer-postal" type="text" autocomplete="postal-code" inputmode="numeric" maxlength="10" required
                       [value]="draft().customer.postalCode"
                       (input)="onCustomerInput('postalCode', $event)"
+                      (blur)="markCustomerTouched('postalCode')"
+                      [attr.aria-invalid]="hasError('postalCode') || null"
+                      [attr.aria-describedby]="hasError('postalCode') ? 'err-postal' : null"
                       data-testid="input-customer-postal"
-                      class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-[14px] font-medium text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"/>
+                      class="h-10 w-full rounded-[4px] border bg-white pl-3 pr-2 text-[14px] font-medium text-[#0b1516] placeholder:text-[#7f9199] outline-none focus:border-[#008572]"
+                      [class.border-\[\#e4eaed\]]="!hasError('postalCode')"
+                      [class.border-\[\#cb2b2b\]]="hasError('postalCode')"/>
+                    <p *ngIf="hasError('postalCode')" id="err-postal"
+                      class="font-body text-[12px] leading-[1.4] text-[#cb2b2b]"
+                      data-testid="error-customer-postal">
+                      {{ customerErrors().postalCode }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- USPS verify CTA + result banner -->
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center justify-between gap-3">
+                    <p class="font-body text-[12px] text-[#7f9199]">
+                      Tip: enter a 5-digit zip code to auto-fill City and State from USPS.
+                    </p>
+                    <button type="button"
+                      (click)="verifyAddress()"
+                      [disabled]="addressVerifyState() === 'verifying'"
+                      data-testid="button-verify-address"
+                      class="inline-flex h-8 items-center gap-1 rounded-[4px] border border-[#328ac9] px-3 text-[12px] font-medium text-[#328ac9] hover:bg-[#eef5fb] disabled:cursor-wait disabled:opacity-60">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z" stroke="currentColor" stroke-width="1.6"/>
+                        <circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+                      </svg>
+                      {{ addressVerifyState() === 'verifying' ? 'Verifying…' : 'Verify with USPS' }}
+                    </button>
+                  </div>
+
+                  <div *ngIf="addressVerifyState() !== 'idle' && addressVerifyState() !== 'verifying'"
+                    class="flex flex-col gap-2 rounded-[4px] border px-3 py-2 text-[12px]"
+                    [ngClass]="{
+                      'border-[#a7e0c3] bg-[#eef9f3] text-[#0b6b3b]': addressVerifyState() === 'matches',
+                      'border-[#f4d28a] bg-[#fdf6e6] text-[#7a5a00]': addressVerifyState() === 'suggested',
+                      'border-[#f1b3b3] bg-[#fdecec] text-[#9a1f1f]':
+                        addressVerifyState() === 'invalid' || addressVerifyState() === 'error',
+                      'border-[#e4eaed] bg-[#f6f9fb] text-[#45565b]': addressVerifyState() === 'unconfigured'
+                    }"
+                    role="status"
+                    data-testid="banner-address-verify">
+                    <p class="font-medium">{{ addressVerifyMessage() }}</p>
+                    <ng-container *ngIf="addressVerifyState() === 'suggested' && addressSuggestion() as s">
+                      <p class="text-[#0b1516]">
+                        {{ s.street1 }}<ng-container *ngIf="s.street2">, {{ s.street2 }}</ng-container>,
+                        {{ s.city }}, {{ s.state }} {{ s.zip }}<ng-container *ngIf="s.zipPlus4">-{{ s.zipPlus4 }}</ng-container>
+                      </p>
+                      <div>
+                        <button type="button"
+                          (click)="applyAddressSuggestion()"
+                          data-testid="button-apply-address-suggestion"
+                          class="inline-flex h-7 items-center rounded-[4px] bg-[#008572] px-3 text-[12px] font-medium text-white hover:bg-[#006e5e]">
+                          Use suggested address
+                        </button>
+                      </div>
+                    </ng-container>
                   </div>
                 </div>
 

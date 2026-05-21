@@ -43,6 +43,31 @@ import {
 } from '../../../core/models/new-shipment.model';
 import { ShipmentService } from '../../../core/services/shipment.service';
 import { Shipment } from '../../../core/models/shipment.model';
+import {
+  UspsService,
+  UspsValidatedAddress,
+} from '../../../core/services/usps.service';
+
+/** Field keys that gate Step 2 — used for touched/error tracking. */
+export type CustomerFieldKey =
+  | 'firstName'
+  | 'lastName'
+  | 'phone'
+  | 'street1'
+  | 'country'
+  | 'city'
+  | 'state'
+  | 'postalCode';
+
+/** Status of the inline USPS address verification banner. */
+export type AddressVerifyState =
+  | 'idle'
+  | 'verifying'
+  | 'matches'
+  | 'suggested'
+  | 'invalid'
+  | 'unconfigured'
+  | 'error';
 
 /**
  * "Create New Shipment" modal — foundation for User Story ES-R8.
@@ -74,6 +99,20 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
 
   private readonly shipmentService = inject(ShipmentService);
+  private readonly uspsService = inject(UspsService);
+
+  /** Set of Step-2 fields the user has interacted with (blurred). */
+  readonly touchedFields = signal<ReadonlySet<CustomerFieldKey>>(new Set());
+  /** True once the user has attempted to leave Step 2 — forces all errors visible. */
+  readonly submitAttempted = signal<boolean>(false);
+
+  /** Pending USPS suggestion to accept; null if nothing to suggest. */
+  readonly addressSuggestion = signal<UspsValidatedAddress | null>(null);
+  readonly addressVerifyState = signal<AddressVerifyState>('idle');
+  readonly addressVerifyMessage = signal<string>('');
+
+  private zipLookupTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastZipLookup = '';
 
   /** Element that held focus before the modal opened; restored on close. */
   private previouslyFocused: HTMLElement | null = null;
@@ -218,12 +257,167 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
       ...d,
       customer: { ...d.customer, [key]: value },
     }));
+    // Any edit invalidates a stale USPS suggestion / banner.
+    if (key === 'street1' || key === 'street2' || key === 'city' ||
+        key === 'state' || key === 'postalCode') {
+      if (this.addressVerifyState() !== 'idle') {
+        this.addressVerifyState.set('idle');
+        this.addressVerifyMessage.set('');
+        this.addressSuggestion.set(null);
+      }
+    }
+    // ZIP → City/State autofill (debounced).
+    if (key === 'postalCode' && typeof value === 'string') {
+      this.scheduleZipAutofill(value);
+    }
   }
 
   /** Inputs feed raw `string` values; this trampoline keeps the template terse. */
   onCustomerInput(key: keyof NewShipmentCustomer, evt: Event) {
-    const value = (evt.target as HTMLInputElement).value;
-    this.setCustomerField(key, value);
+    const target = evt.target as HTMLInputElement | HTMLSelectElement;
+    this.setCustomerField(key, target.value as never);
+  }
+
+  /** Track which fields the user has interacted with (blur). */
+  markCustomerTouched(key: CustomerFieldKey) {
+    if (this.touchedFields().has(key)) return;
+    const next = new Set(this.touchedFields());
+    next.add(key);
+    this.touchedFields.set(next);
+  }
+
+  /**
+   * Map of customer field → human-readable error, recomputed on every
+   * draft change. Empty string means the field is valid.
+   */
+  readonly customerErrors = computed<Record<CustomerFieldKey, string>>(() => {
+    const c = this.draft().customer;
+    const e: Record<CustomerFieldKey, string> = {
+      firstName: '', lastName: '', phone: '',
+      street1: '', country: '', city: '', state: '', postalCode: '',
+    };
+    if (!c.firstName.trim()) e.firstName = 'First name is required.';
+    if (!c.lastName.trim())  e.lastName  = 'Last name is required.';
+    const digits = c.phone.replace(/\D/g, '');
+    if (!c.phone.trim())       e.phone = 'Phone number is required.';
+    else if (digits.length < 7) e.phone = 'Enter a valid phone number.';
+    if (!c.street1.trim()) e.street1 = 'Address line 1 is required.';
+    if (!c.country.trim()) e.country = 'Country is required.';
+    if (!c.city.trim())    e.city    = 'City is required.';
+    if (!c.state.trim())   e.state   = 'State is required.';
+    const zipDigits = c.postalCode.replace(/\D/g, '');
+    if (!c.postalCode.trim()) e.postalCode = 'Zip code is required.';
+    else if (zipDigits.length !== 5) e.postalCode = 'Enter a 5-digit zip code.';
+    return e;
+  });
+
+  /** Should the error message for `field` be visible right now? */
+  shouldShowError(field: CustomerFieldKey): boolean {
+    if (!this.customerErrors()[field]) return false;
+    return this.submitAttempted() || this.touchedFields().has(field);
+  }
+
+  /** Helper for the template — true if the field is in an error state. */
+  hasError(field: CustomerFieldKey): boolean {
+    return this.shouldShowError(field);
+  }
+
+  // ------------------------------------------------------------
+  // USPS address autofill + validation
+  // ------------------------------------------------------------
+
+  /** Debounce ZIP → city/state autofill. Fires once ZIP is 5 digits. */
+  private scheduleZipAutofill(rawZip: string) {
+    if (this.zipLookupTimer) clearTimeout(this.zipLookupTimer);
+    const zip = rawZip.replace(/\D/g, '').slice(0, 5);
+    if (zip.length !== 5 || zip === this.lastZipLookup) return;
+    this.zipLookupTimer = setTimeout(() => this.lookupZip(zip), 350);
+  }
+
+  private lookupZip(zip: string) {
+    this.lastZipLookup = zip;
+    this.uspsService.safeCityState(zip).subscribe((res) => {
+      if (!res) return;
+      this.draft.update((d) => ({
+        ...d,
+        customer: {
+          ...d.customer,
+          // Only fill blank fields so we don't overwrite the user's edits.
+          city:  d.customer.city.trim()  ? d.customer.city  : (res.city  ?? ''),
+          state: d.customer.state.trim() ? d.customer.state : (res.state ?? ''),
+        },
+      }));
+    });
+  }
+
+  /** Click handler for the "Verify with USPS" button. */
+  verifyAddress() {
+    const c = this.draft().customer;
+    if (!c.street1.trim() || (!c.postalCode.trim() && (!c.city.trim() || !c.state.trim()))) {
+      this.addressVerifyState.set('invalid');
+      this.addressVerifyMessage.set('Enter an address before verifying.');
+      return;
+    }
+    this.addressVerifyState.set('verifying');
+    this.addressVerifyMessage.set('Checking with USPS…');
+    this.uspsService
+      .validate({
+        street1: c.street1.trim(),
+        street2: c.street2.trim() || undefined,
+        city: c.city.trim(),
+        state: c.state.trim(),
+        zip: c.postalCode.replace(/\D/g, '').slice(0, 5),
+      })
+      .subscribe({
+        next: (res) => {
+          const same =
+            res.street1.toUpperCase() === c.street1.trim().toUpperCase() &&
+            res.city.toUpperCase()    === c.city.trim().toUpperCase() &&
+            res.state.toUpperCase()   === c.state.trim().toUpperCase() &&
+            res.zip                   === c.postalCode.replace(/\D/g, '').slice(0, 5);
+          this.addressSuggestion.set(res);
+          if (same) {
+            this.addressVerifyState.set('matches');
+            this.addressVerifyMessage.set('Address verified with USPS.');
+          } else {
+            this.addressVerifyState.set('suggested');
+            this.addressVerifyMessage.set('USPS suggests a standardized address.');
+          }
+        },
+        error: (err) => {
+          const status = err?.status ?? 500;
+          if (status === 503) {
+            this.addressVerifyState.set('unconfigured');
+            this.addressVerifyMessage.set('USPS credentials not configured on the server.');
+          } else if (status === 400) {
+            this.addressVerifyState.set('invalid');
+            this.addressVerifyMessage.set('USPS could not match this address.');
+          } else {
+            this.addressVerifyState.set('error');
+            this.addressVerifyMessage.set('Address verification is unavailable right now.');
+          }
+        },
+      });
+  }
+
+  /** Apply the standardized USPS suggestion into the form. */
+  applyAddressSuggestion() {
+    const s = this.addressSuggestion();
+    if (!s) return;
+    this.draft.update((d) => ({
+      ...d,
+      customer: {
+        ...d.customer,
+        street1: s.street1 || d.customer.street1,
+        street2: s.street2 || d.customer.street2,
+        city:    s.city    || d.customer.city,
+        state:   s.state   || d.customer.state,
+        postalCode: s.zip  || d.customer.postalCode,
+      },
+    }));
+    this.addressVerifyState.set('matches');
+    this.addressVerifyMessage.set('Standardized USPS address applied.');
+    this.addressSuggestion.set(null);
   }
 
   toggleMaterial(key: keyof NewShipmentDraft['details']['materials']) {
@@ -385,9 +579,16 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   }
 
   continueOrSubmit() {
+    // On Step 2 a click with errors should reveal all of them at once.
+    if (this.currentStep() === 2 && !this.canContinue()) {
+      this.submitAttempted.set(true);
+      return;
+    }
     if (!this.canContinue()) return;
     const n = this.currentStep();
     if (n < 4) {
+      // Reset the just-completed step's "submit attempted" state.
+      if (n === 2) this.submitAttempted.set(false);
       this.currentStep.set((n + 1) as WizardStepNum);
     } else {
       this.submit();
@@ -459,14 +660,11 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
    */
   readonly canContinue = computed(() => {
     if (this.currentStep() !== 2) return true;
-    const c = this.draft().customer;
-    const required: (keyof NewShipmentCustomer)[] = [
-      'firstName', 'lastName',
-      'street1', 'city', 'state', 'postalCode', 'country',
-    ];
-    if (!required.every((k) => String(c[k] ?? '').trim().length > 0)) return false;
-    // Email/phone optional per Figma — but if present, email must look valid.
-    if (c.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) return false;
+    const errors = this.customerErrors();
+    if (Object.values(errors).some((m) => m)) return false;
+    const email = this.draft().customer.email.trim();
+    // Email stays optional per Figma; if present, must look like an email.
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
     return true;
   });
 
