@@ -19,7 +19,9 @@ import {
   BOX_SIZE_OPTIONS,
   CARRIER_ACCOUNT_OPTIONS,
   CARRIER_ADDONS,
+  CARRIER_OPTIONS,
   CarrierAddOn,
+  CarrierName,
   CarrierRateOption,
   FREIGHT_TYPE_OPTIONS,
   FreightTypeOption,
@@ -35,7 +37,11 @@ import {
   PickupWindow,
   SAMPLE_CARRIER_RATES,
   SAMPLE_PRODUCT_OPTIONS,
+  SERVICE_TYPE_OPTIONS,
+  ServiceType,
   ShipmentTypeChoice,
+  WAREHOUSE_OPTIONS,
+  WarehouseName,
   WIZARD_STEPS,
   WizardStepNum,
   blankDraft,
@@ -136,6 +142,14 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   readonly PRODUCT_OPTIONS = SAMPLE_PRODUCT_OPTIONS;
   readonly CARRIER_RATES = SAMPLE_CARRIER_RATES;
   readonly CARRIER_ADDONS = CARRIER_ADDONS;
+  readonly WAREHOUSES = WAREHOUSE_OPTIONS;
+  readonly CARRIERS = CARRIER_OPTIONS;
+  readonly SERVICE_TYPES = SERVICE_TYPE_OPTIONS;
+
+  // ---- Step 3 rate-shop filter / sort state -----------------------------
+  readonly carrierFilter = signal<CarrierName | 'All'>('All');
+  readonly serviceFilter = signal<ServiceType | 'All'>('All');
+  readonly rateSort      = signal<'lowest' | 'fastest'>('lowest');
   readonly LABEL_FORMATS = LABEL_FORMAT_OPTIONS;
   readonly PICKUP_WINDOWS = PICKUP_WINDOW_OPTIONS;
   /** US state two-letter codes for the Receiver State select (Figma 27004-11049). */
@@ -703,6 +717,63 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     this.openPicker.set(null);
   }
 
+  setWarehouse(warehouse: WarehouseName) {
+    this.draft.update((d) => ({ ...d, carrier: { ...d.carrier, warehouse } }));
+    this.openPicker.set(null);
+  }
+
+  setCarrierFilter(c: CarrierName | 'All') {
+    this.carrierFilter.set(c);
+    this.openPicker.set(null);
+    this.clearHiddenRateSelection();
+  }
+
+  setServiceFilter(s: ServiceType | 'All') {
+    this.serviceFilter.set(s);
+    this.openPicker.set(null);
+    this.clearHiddenRateSelection();
+  }
+
+  /**
+   * If the currently selected rate is filtered out, drop it so the user
+   * doesn't end up paying for a service they can no longer see on screen.
+   */
+  private clearHiddenRateSelection() {
+    const id = this.draft().carrier.rateId;
+    if (!id) return;
+    const stillVisible = this.filteredRates().some((r) => r.id === id);
+    if (!stillVisible) {
+      this.draft.update((d) => ({ ...d, carrier: { ...d.carrier, rateId: '', account: '' } }));
+    }
+  }
+
+  setRateSort(s: 'lowest' | 'fastest') {
+    this.rateSort.set(s);
+    this.openPicker.set(null);
+  }
+
+  /** Rates after Carrier + Est Delivery filters and current sort. */
+  readonly filteredRates = computed<CarrierRateOption[]>(() => {
+    const c = this.carrierFilter();
+    const s = this.serviceFilter();
+    let list = this.CARRIER_RATES.filter(
+      (r) => (c === 'All' || r.carrier === c) && (s === 'All' || r.serviceType === s),
+    );
+    // "Lowest" = ascending price; "Fastest" pushes Next Day → 2 Day → 3 Day → Ground → Economy.
+    if (this.rateSort() === 'lowest') {
+      list = [...list].sort((a, b) => a.price - b.price);
+    } else {
+      const rank: Record<ServiceType, number> = {
+        'Next Day': 0, '2 Day': 1, '3 Day': 2, 'Ground': 3, 'Economy': 4,
+      };
+      list = [...list].sort((a, b) => rank[a.serviceType] - rank[b.serviceType] || a.price - b.price);
+    }
+    return list;
+  });
+
+  /** Receiver postal code echoed in the "Shipping to" read-only field. */
+  readonly shippingToZip = computed(() => this.draft().customer.postalCode || '—');
+
   toggleAddOn(key: CarrierAddOn['key']) {
     this.draft.update((d) => ({
       ...d,
@@ -723,13 +794,14 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     return rate ? CARRIER_ACCOUNT_OPTIONS[rate.carrier] ?? [] : [];
   });
 
-  addOnTotal = computed<number>(() => {
-    const flags = this.draft().carrier.addOns;
-    return this.CARRIER_ADDONS.reduce(
-      (sum, a) => (flags[a.key] ? sum + a.cost : sum),
-      0,
-    );
-  });
+  /**
+   * Add-on cost. The Add-Ons UI was removed from Step 3 (Figma 27004-12245),
+   * so users can no longer see or edit these flags. Zero out the cost here to
+   * avoid invisible charges from a restored saved-quote draft that still has
+   * legacy add-on flags set. The flags themselves stay in the draft for
+   * back-compat with quote round-tripping.
+   */
+  addOnTotal = computed<number>(() => 0);
 
   // ============================================================
   // Step 4 — Label & Pickup mutators
@@ -857,7 +929,7 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
       createdOn: this.formatToday(),
       value: this.fmt(s.total),
       source: 'Manual entry',
-      warehouse: 'KS Fulfilment center',
+      warehouse: d.carrier.warehouse || 'KS Fulfilment center',
       shipping: rate ? `${rate.carrier} ${rate.service}` : 'To be assigned',
       method: d.label.schedulePickup ? 'Pickup' : 'Standard',
       customer: 'New Customer',

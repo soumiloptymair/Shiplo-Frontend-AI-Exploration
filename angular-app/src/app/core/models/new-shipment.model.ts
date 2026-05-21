@@ -117,22 +117,48 @@ export interface NewShipmentCustomer {
 export interface CarrierRateOption {
   id: string;
   carrier: string;
+  /** Short marketing description shown under the carrier name. */
   service: string;
-  /** Human-readable ETA, e.g. "2 business days". */
+  /** Human-readable ETA, e.g. "2 business days" — kept for back-compat. */
   eta: string;
+  /** Standardized service-type bucket used by the Est Delivery filter. */
+  serviceType: 'Next Day' | '2 Day' | '3 Day' | 'Ground' | 'Economy';
+  /** Estimated delivery date, e.g. "01/17/2025". */
+  etaDate: string;
+  /** Estimated delivery cutoff time, e.g. "10:00 AM EST". */
+  etaTime: string;
   /** Quoted price in USD. */
   price: number;
 }
 
+/** Carriers represented in the rate-shop list — drives the Carrier filter. */
+export const CARRIER_OPTIONS = ['UPS', 'FedEx', 'USPS', 'DHL'] as const;
+export type CarrierName = (typeof CARRIER_OPTIONS)[number];
+
+/** Service-type buckets — drives the Est Delivery filter. */
+export const SERVICE_TYPE_OPTIONS = ['Next Day', '2 Day', '3 Day', 'Ground', 'Economy'] as const;
+export type ServiceType = (typeof SERVICE_TYPE_OPTIONS)[number];
+
 export const SAMPLE_CARRIER_RATES: CarrierRateOption[] = [
-  { id: 'r-ups-ground',   carrier: 'UPS',   service: 'Ground',              eta: '3-5 business days', price: 12.40 },
-  { id: 'r-ups-3day',     carrier: 'UPS',   service: '3 Day Select',        eta: '3 business days',   price: 18.95 },
-  { id: 'r-ups-2day',     carrier: 'UPS',   service: '2nd Day Air',         eta: '2 business days',   price: 24.50 },
-  { id: 'r-fedex-ground', carrier: 'FedEx', service: 'Ground',              eta: '3-5 business days', price: 11.80 },
-  { id: 'r-fedex-2day',   carrier: 'FedEx', service: '2Day',                eta: '2 business days',   price: 22.95 },
-  { id: 'r-usps-priority',carrier: 'USPS',  service: 'Priority Mail',       eta: '2-3 business days', price: 9.65 },
-  { id: 'r-usps-express', carrier: 'USPS',  service: 'Priority Mail Express', eta: '1-2 business days', price: 28.40 },
+  { id: 'r-ups-early',     carrier: 'UPS',   service: 'Express Early A.M. to U.S.', serviceType: 'Next Day', etaDate: '01/17/2025', etaTime: '10:00 AM EST', eta: '1 business day',   price: 10.50 },
+  { id: 'r-ups-nextday',   carrier: 'UPS',   service: 'Next Day Air',               serviceType: 'Next Day', etaDate: '01/17/2025', etaTime: '3:00 PM EST',  eta: '1 business day',   price: 12.75 },
+  { id: 'r-ups-2day',      carrier: 'UPS',   service: '2nd Day Air',                serviceType: '2 Day',    etaDate: '01/20/2025', etaTime: 'End of day',   eta: '2 business days',  price: 14.20 },
+  { id: 'r-fedex-priority',carrier: 'FedEx', service: 'Priority Overnight',         serviceType: 'Next Day', etaDate: '01/17/2025', etaTime: '10:30 AM EST', eta: '1 business day',   price: 16.40 },
+  { id: 'r-fedex-2day',    carrier: 'FedEx', service: '2Day Air',                   serviceType: '2 Day',    etaDate: '01/20/2025', etaTime: 'End of day',   eta: '2 business days',  price: 13.95 },
+  { id: 'r-fedex-ground',  carrier: 'FedEx', service: 'Home Delivery (Ground)',     serviceType: 'Ground',   etaDate: '01/22/2025', etaTime: 'End of day',   eta: '3-5 business days', price: 9.20 },
+  { id: 'r-usps-express',  carrier: 'USPS',  service: 'Priority Mail Express',      serviceType: 'Next Day', etaDate: '01/17/2025', etaTime: '6:00 PM',      eta: '1-2 business days', price: 11.10 },
+  { id: 'r-usps-priority', carrier: 'USPS',  service: 'Priority Mail',              serviceType: '2 Day',    etaDate: '01/20/2025', etaTime: 'End of day',   eta: '2-3 business days', price: 8.40 },
+  { id: 'r-dhl-express',   carrier: 'DHL',   service: 'Express Worldwide',          serviceType: 'Next Day', etaDate: '01/17/2025', etaTime: '12:00 PM EST', eta: '1-2 business days', price: 19.95 },
 ];
+
+/** Warehouses the shipper can fulfill from — drives the Warehouse select. */
+export const WAREHOUSE_OPTIONS = [
+  'KS Fulfilment center',
+  'CA Distribution hub',
+  'NJ Returns center',
+  'TX South gateway',
+] as const;
+export type WarehouseName = (typeof WAREHOUSE_OPTIONS)[number];
 
 /** Saved carrier accounts the user can bill against. */
 export const CARRIER_ACCOUNT_OPTIONS: Record<string, string[]> = {
@@ -160,6 +186,8 @@ export interface NewShipmentCarrier {
   rateId: string;
   /** Carrier account label selected from `CARRIER_ACCOUNT_OPTIONS`. */
   account: string;
+  /** Origin warehouse for the shipment — selected from `WAREHOUSE_OPTIONS`. */
+  warehouse: WarehouseName | '';
   /** Checked add-on keys. */
   addOns: Record<CarrierAddOn['key'], boolean>;
 }
@@ -294,6 +322,7 @@ export function blankDraft(): NewShipmentDraft {
     carrier: {
       rateId: '',
       account: '',
+      warehouse: '',
       addOns: { signature: false, insurance: false, saturday: false, adultSignature: false },
     },
     label: {

@@ -814,94 +814,232 @@
           </div>
         </ng-container>
 
-        <!-- ----- Step 3: Carrier & Add Ons ----- -->
+        <!-- ----- Step 3: Carrier & Add Ons (Figma 27004-12245) ----- -->
         <ng-container *ngIf="currentStep() === 3">
           <div data-testid="step-3-carrier">
-            <h3 class="font-body text-[14px] font-medium text-[#0b1516]">Carrier &amp; Service</h3>
-            <p class="mt-1 font-body text-[12px] text-[#7f9199]">
-              Choose the carrier service for this shipment. Prices and ETAs come from your saved rate-shop accounts.
-            </p>
 
-            <!-- Rate-shop list -->
-            <div class="mt-4 overflow-hidden rounded-[6px] border border-[#e4eaed]"
+            <!-- ===== WAREHOUSE section ===== -->
+            <h3 class="font-body text-[11px] font-semibold uppercase tracking-[0.06em] text-[#7f9199]">
+              Warehouse
+            </h3>
+            <div class="mt-2 border-t border-[#e4eaed] pt-4">
+              <div class="grid grid-cols-[1fr_140px_140px] gap-6">
+                <!-- Warehouse dropdown -->
+                <div class="relative flex flex-col gap-1">
+                  <label class="font-body text-[12px] font-medium text-[#45565b]">Warehouse</label>
+                  <button type="button"
+                    (click)="togglePicker('warehouse', $event)"
+                    data-testid="button-warehouse"
+                    class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
+                    <span class="flex-1 truncate text-[14px] leading-[1.43]"
+                      [ngClass]="draft().carrier.warehouse ? 'text-[#0b1516]' : 'text-[#7f9199]'">
+                      {{ draft().carrier.warehouse || 'Warehouse Name' }}
+                    </span>
+                    <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                  </button>
+                  <div *ngIf="openPicker() === 'warehouse'"
+                    class="absolute left-0 top-[60px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                    (click)="$event.stopPropagation()"
+                    data-testid="dropdown-warehouse">
+                    <button *ngFor="let w of WAREHOUSES"
+                      type="button"
+                      (click)="setWarehouse(w)"
+                      [attr.data-testid]="'option-warehouse-' + w"
+                      class="flex w-full items-center px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                      {{ w }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Shipping to (read-only) -->
+                <div class="flex flex-col gap-1">
+                  <label class="font-body text-[12px] font-medium text-[#45565b]">Shipping to</label>
+                  <div class="flex h-10 items-center font-body text-[14px] text-[#0b1516]"
+                    data-testid="text-shipping-to">
+                    {{ shippingToZip() }}
+                  </div>
+                </div>
+
+                <!-- Shipment Value (read-only) -->
+                <div class="flex flex-col gap-1">
+                  <label class="font-body text-[12px] font-medium text-[#45565b]">Shipment Value</label>
+                  <div class="flex h-10 items-center font-body text-[14px] text-[#0b1516]"
+                    data-testid="text-shipment-value">
+                    {{ fmt(summary().orderValue) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===== SHIPPING section ===== -->
+            <h3 class="mt-8 font-body text-[11px] font-semibold uppercase tracking-[0.06em] text-[#7f9199]">
+              Shipping
+            </h3>
+
+            <!-- Filters + sort row -->
+            <div class="mt-3 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <!-- Carrier filter -->
+                <div class="relative">
+                  <button type="button"
+                    (click)="togglePicker('carrierFilter', $event)"
+                    data-testid="button-filter-carrier"
+                    class="inline-flex h-9 items-center gap-2 rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    <span class="text-[#7f9199]">Carrier</span>
+                    <span class="font-medium">{{ carrierFilter() }}</span>
+                    <svg class="h-4 w-4 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                  </button>
+                  <div *ngIf="openPicker() === 'carrierFilter'"
+                    class="absolute left-0 top-[40px] z-20 min-w-[140px] rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                    (click)="$event.stopPropagation()"
+                    data-testid="dropdown-filter-carrier">
+                    <button type="button"
+                      (click)="setCarrierFilter('All')"
+                      class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]"
+                      data-testid="option-filter-carrier-All">All</button>
+                    <button *ngFor="let c of CARRIERS"
+                      type="button"
+                      (click)="setCarrierFilter(c)"
+                      [attr.data-testid]="'option-filter-carrier-' + c"
+                      class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                      {{ c }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Est Delivery filter -->
+                <div class="relative">
+                  <button type="button"
+                    (click)="togglePicker('serviceFilter', $event)"
+                    data-testid="button-filter-service"
+                    class="inline-flex h-9 items-center gap-2 rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    <span class="text-[#7f9199]">Est Delivery</span>
+                    <span class="font-medium">{{ serviceFilter() }}</span>
+                    <svg class="h-4 w-4 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                  </button>
+                  <div *ngIf="openPicker() === 'serviceFilter'"
+                    class="absolute left-0 top-[40px] z-20 min-w-[140px] rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                    (click)="$event.stopPropagation()"
+                    data-testid="dropdown-filter-service">
+                    <button type="button"
+                      (click)="setServiceFilter('All')"
+                      class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]"
+                      data-testid="option-filter-service-All">All</button>
+                    <button *ngFor="let s of SERVICE_TYPES"
+                      type="button"
+                      (click)="setServiceFilter(s)"
+                      [attr.data-testid]="'option-filter-service-' + s"
+                      class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                      {{ s }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sort (right aligned) -->
+              <div class="relative">
+                <button type="button"
+                  (click)="togglePicker('rateSort', $event)"
+                  data-testid="button-sort-rate"
+                  class="inline-flex h-9 items-center gap-2 rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                  <svg class="h-4 w-4 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h13M3 12h9M3 17h5M17 4l4 4-4 4M17 20l4-4-4-4"/>
+                  </svg>
+                  <span class="text-[#7f9199]">Shipping Cost</span>
+                  <span class="font-medium">{{ rateSort() === 'lowest' ? 'Lowest' : 'Fastest' }}</span>
+                  <svg class="h-4 w-4 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'rateSort'"
+                  class="absolute right-0 top-[40px] z-20 min-w-[140px] rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  (click)="$event.stopPropagation()"
+                  data-testid="dropdown-sort-rate">
+                  <button type="button" (click)="setRateSort('lowest')"
+                    data-testid="option-sort-lowest"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    Lowest price
+                  </button>
+                  <button type="button" (click)="setRateSort('fastest')"
+                    data-testid="option-sort-fastest"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    Fastest delivery
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rate-shop list (scrollable) -->
+            <div class="mt-3 max-h-[340px] overflow-y-auto rounded-[6px] border border-[#e4eaed]"
               role="radiogroup"
               aria-label="Carrier rates"
               data-testid="list-carrier-rates">
-              <div class="grid grid-cols-[32px_1fr_1fr_140px_100px] items-center gap-3 bg-[#f6f9fb] px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-[#7f9199]">
-                <span></span>
-                <span>Carrier</span>
-                <span>Service</span>
-                <span>ETA</span>
-                <span class="text-right">Price</span>
-              </div>
-              <label *ngFor="let rate of CARRIER_RATES"
+              <label *ngFor="let rate of filteredRates(); let i = index"
                 [attr.data-testid]="'row-rate-' + rate.id"
-                class="grid grid-cols-[32px_1fr_1fr_140px_100px] cursor-pointer items-center gap-3 border-t border-[#e4eaed] px-3 py-3 text-[14px] transition-colors"
-                [ngClass]="draft().carrier.rateId === rate.id ? 'bg-[#e6f4f1]' : 'hover:bg-[#f6f9fb]'">
+                class="grid cursor-pointer items-center gap-3 border-[#e4eaed] px-4 py-3 text-[14px] transition-colors"
+                [class.border-t]="i > 0"
+                [ngClass]="draft().carrier.rateId === rate.id ? 'bg-[#e6f4f1]' : 'hover:bg-[#f6f9fb]'"
+                style="grid-template-columns: 28px 36px 1fr 130px 110px 100px;">
+                <!-- Radio -->
                 <input type="radio"
                   name="carrier-rate"
                   class="h-4 w-4 accent-[#008572]"
                   [attr.data-testid]="'radio-rate-' + rate.id"
                   [checked]="draft().carrier.rateId === rate.id"
                   (change)="setCarrierRate(rate.id)"/>
-                <span class="font-medium text-[#0b1516]">{{ rate.carrier }}</span>
-                <span class="text-[#0b1516]">{{ rate.service }}</span>
-                <span class="text-[#45565b]">{{ rate.eta }}</span>
-                <span class="text-right font-medium text-[#0b1516]"
-                  [attr.data-testid]="'text-rate-price-' + rate.id">
-                  {{ fmt(rate.price) }}
-                </span>
-              </label>
-            </div>
 
-            <!-- Carrier account selector -->
-            <div class="mt-6 grid grid-cols-2 gap-6">
-              <div class="relative flex flex-col gap-1">
-                <label class="font-body text-[12px] font-medium text-[#45565b]">Carrier Account</label>
-                <button type="button"
-                  (click)="togglePicker('carrierAccount', $event)"
-                  [disabled]="!selectedRate()"
-                  data-testid="button-carrier-account"
-                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left disabled:cursor-not-allowed disabled:bg-[#f6f9fb] disabled:text-[#b8c6cc]">
-                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
-                    [ngClass]="draft().carrier.account ? 'text-[#0b1516]' : 'text-[#7f9199]'">
-                    {{ draft().carrier.account || (selectedRate() ? 'Select an account' : 'Pick a carrier first') }}
-                  </span>
-                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7 10l5 5 5-5z"/>
-                  </svg>
-                </button>
-                <div *ngIf="openPicker() === 'carrierAccount' && carrierAccountOptions().length"
-                  class="absolute left-0 top-[60px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
-                  (click)="$event.stopPropagation()"
-                  data-testid="dropdown-carrier-account">
-                  <button *ngFor="let acct of carrierAccountOptions()"
-                    type="button"
-                    (click)="setCarrierAccount(acct)"
-                    class="flex w-full items-center px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
-                    {{ acct }}
-                  </button>
+                <!-- Carrier badge -->
+                <span class="flex h-7 w-9 items-center justify-center rounded-[3px] text-[10px] font-bold uppercase leading-none text-white"
+                  [ngClass]="{
+                    'bg-[#f5a623]': rate.carrier === 'UPS',
+                    'bg-[#4d148c]': rate.carrier === 'FedEx',
+                    'bg-[#004b87]': rate.carrier === 'USPS',
+                    'bg-[#ffcc00] text-[#d40511]': rate.carrier === 'DHL'
+                  }"
+                  [attr.aria-label]="rate.carrier + ' logo'">
+                  {{ rate.carrier }}
+                </span>
+
+                <!-- Carrier name + service description -->
+                <div class="flex flex-col leading-tight">
+                  <span class="font-medium text-[#0b1516]">{{ rate.carrier }}</span>
+                  <span class="text-[12px] text-[#7f9199]">{{ rate.service }}</span>
                 </div>
-              </div>
-            </div>
 
-            <!-- Add-ons -->
-            <h3 class="mt-8 font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
-              Add Ons
-            </h3>
-            <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-[#e4eaed] pt-3">
-              <label *ngFor="let addon of CARRIER_ADDONS"
-                class="flex items-center justify-between gap-3 font-body text-[14px] text-[#0b1516]">
-                <span class="flex items-center gap-2">
-                  <input type="checkbox"
-                    [checked]="draft().carrier.addOns[addon.key]"
-                    (change)="toggleAddOn(addon.key)"
-                    [attr.data-testid]="'checkbox-addon-' + addon.key"
-                    class="h-4 w-4 rounded accent-[#008572]"/>
-                  {{ addon.label }}
-                </span>
-                <span class="text-[12px] text-[#45565b]">+{{ fmt(addon.cost) }}</span>
+                <!-- ETA date + time -->
+                <div class="flex flex-col leading-tight">
+                  <span class="text-[#0b1516]">{{ rate.etaDate }}</span>
+                  <span class="text-[12px] text-[#7f9199]">{{ rate.etaTime }}</span>
+                </div>
+
+                <!-- Service type label -->
+                <div class="flex flex-col leading-tight">
+                  <span class="text-[#0b1516]">{{ rate.serviceType }}</span>
+                  <span class="text-[12px] text-[#7f9199]">Service Type</span>
+                </div>
+
+                <!-- Price + Est. Cost caption (right) -->
+                <div class="flex flex-col items-end leading-tight">
+                  <span class="font-medium text-[#0b1516]"
+                    [attr.data-testid]="'text-rate-price-' + rate.id">
+                    {{ fmt(rate.price) }}
+                  </span>
+                  <span class="text-[12px] text-[#7f9199]">Est. Cost</span>
+                </div>
               </label>
+
+              <!-- Empty state -->
+              <div *ngIf="!filteredRates().length"
+                class="flex items-center justify-center px-4 py-10 text-[13px] text-[#7f9199]"
+                data-testid="text-no-rates">
+                No carrier services match the selected filters.
+              </div>
             </div>
           </div>
         </ng-container>
