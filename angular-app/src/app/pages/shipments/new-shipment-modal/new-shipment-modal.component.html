@@ -77,37 +77,38 @@
         <!-- ----- Step 1: Shipment Details ----- -->
         <ng-container *ngIf="currentStep() === 1">
 
-          <!-- Shipment Type + Freight Type row -->
-          <div class="grid grid-cols-2 gap-6">
-            <div class="flex flex-col gap-2">
-              <label class="font-body text-[12px] font-medium text-[#45565b]">Shipment Type</label>
-              <div class="inline-flex h-10 w-fit items-center rounded-[4px] border border-[#e4eaed] bg-white p-[2px]"
+          <!-- Shipment Type + Freight Type row (Figma: w-[144px] + w-[280px], gap-[20px]) -->
+          <div class="flex items-end gap-5">
+            <div class="flex w-[144px] flex-col gap-2">
+              <label class="font-body text-[12px] font-normal text-[#0b1516]">Shipment Type</label>
+              <!-- Pill toggle: rounded-full outer, rounded-pill active inner -->
+              <div class="inline-flex items-center rounded-full border border-[#b8c6cc] bg-white p-[2px]"
                 data-testid="toggle-shipment-type">
                 <button type="button"
                   (click)="setShipmentType('order')"
                   [attr.aria-pressed]="draft().details.shipmentType === 'order'"
                   data-testid="button-shipment-type-order"
-                  class="flex h-full items-center justify-center rounded-[4px] px-4 text-[14px] leading-none transition-colors"
+                  class="flex items-center justify-center rounded-full px-4 py-[5px] text-[14px] leading-[1.43] transition-colors"
                   [ngClass]="draft().details.shipmentType === 'order'
                     ? 'bg-[#008572] font-medium text-white'
-                    : 'font-normal text-[#45565b] hover:bg-[#f6f9fb]'">
+                    : 'font-normal text-[#5b6b72]'">
                   Order
                 </button>
                 <button type="button"
                   (click)="setShipmentType('return')"
                   [attr.aria-pressed]="draft().details.shipmentType === 'return'"
                   data-testid="button-shipment-type-return"
-                  class="flex h-full items-center justify-center rounded-[4px] px-4 text-[14px] leading-none transition-colors"
+                  class="flex items-center justify-center rounded-full px-4 py-[5px] text-[14px] leading-[1.43] transition-colors"
                   [ngClass]="draft().details.shipmentType === 'return'
                     ? 'bg-[#008572] font-medium text-white'
-                    : 'font-normal text-[#45565b] hover:bg-[#f6f9fb]'">
+                    : 'font-normal text-[#5b6b72]'">
                   Return
                 </button>
               </div>
             </div>
 
-            <div class="flex flex-col gap-2">
-              <label class="font-body text-[12px] font-medium text-[#45565b]">Freight Type</label>
+            <div class="flex w-[280px] flex-col gap-1">
+              <label class="font-body text-[12px] font-normal text-[#0b1516]">Freight Type</label>
               <div class="relative">
                 <button type="button"
                   (click)="togglePicker('freight', $event)"
@@ -137,21 +138,21 @@
             </div>
           </div>
 
-          <!-- Items section -->
-          <div class="mt-6">
-            <h3 class="font-body text-[14px] font-medium text-[#0b1516]">Items</h3>
+          <!-- Items section (Figma column widths: 1fr / 68px / 133px / 57px, gap-[16px]) -->
+          <div class="mt-5">
+            <h3 class="font-body text-[12px] font-medium text-[#0b1516]">Items</h3>
 
             <!-- Column headers -->
-            <div class="mt-3 grid grid-cols-[1fr_120px_120px_80px] items-end gap-4 border-b border-[#e4eaed] pb-2">
-              <span class="font-body text-[12px] font-medium text-[#45565b]">Product Name</span>
-              <span class="font-body text-[12px] font-medium text-[#45565b]">Quantity</span>
-              <span class="font-body text-[12px] font-medium text-[#45565b]">SKU</span>
-              <span class="font-body text-[12px] font-medium text-[#45565b]">Value</span>
+            <div class="mt-2 grid grid-cols-[1fr_68px_133px_57px] items-end gap-4">
+              <span class="font-body text-[12px] font-normal text-[#0b1516]">Product Name</span>
+              <span class="font-body text-[12px] font-normal text-[#0b1516]">Quantity</span>
+              <span class="font-body text-[12px] font-normal text-[#0b1516]">SKU</span>
+              <span class="font-body text-[12px] font-normal text-[#0b1516]">Value</span>
             </div>
 
             <!-- Item rows -->
             <div *ngFor="let item of draft().details.items; let i = index; trackBy: trackById"
-              class="grid grid-cols-[1fr_120px_120px_80px] items-center gap-4 py-3"
+              class="grid grid-cols-[1fr_68px_133px_57px] items-center gap-4 py-2"
               [attr.data-testid]="'row-item-' + i">
               <!-- Product Name select -->
               <div class="relative">
@@ -208,53 +209,59 @@
               </div>
 
               <!-- SKU readout -->
-              <span class="font-body text-[14px] text-[#0b1516]"
+              <span class="font-body text-[14px] font-medium text-[#0b1516]"
                 [attr.data-testid]="'text-item-sku-' + i">
                 {{ productFor(item.productSku)?.sku || '-' }}
               </span>
 
               <!-- Value readout -->
-              <span class="font-body text-[14px] text-[#0b1516]"
+              <span class="font-body text-[14px] font-medium text-[#0b1516]"
                 [attr.data-testid]="'text-item-value-' + i">
                 {{ fmt(itemValue(item.quantity, item.productSku)) }}
               </span>
             </div>
 
-            <!-- + Add Item -->
+            <!-- + Add Item (Figma: blue #328ac9, Roboto Bold 12) -->
             <button type="button"
               (click)="addItem()"
               data-testid="button-add-item"
-              class="mt-2 inline-flex items-center gap-1 font-body text-[14px] font-medium text-[#008572] hover:text-[#006a5a]">
-              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25">
+              class="mt-1 inline-flex items-center gap-1 rounded-[4px] py-1 pr-2 font-body text-[12px] font-bold leading-[16px] text-[#328ac9] hover:text-[#256a9e]">
+              <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
               </svg>
               Add Item
             </button>
           </div>
 
-          <!-- PACKAGING section -->
-          <div class="mt-8">
-            <h3 class="font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
-              Packaging
-            </h3>
-            <div class="mt-3 grid grid-cols-[1fr_1fr_80px] items-end gap-4">
-              <!-- Package Type -->
-              <div class="relative flex flex-col gap-1">
-                <label class="font-body text-[12px] font-medium text-[#45565b]">Package Type</label>
+          <!-- PACKAGING section (Figma: 14px regular #5b6b72 with horizontal line) -->
+          <div class="mt-5 flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <h3 class="font-body text-[14px] font-normal leading-none text-[#5b6b72]">
+                PACKAGING
+              </h3>
+              <div class="h-px flex-1 bg-[#e4eaed]"></div>
+            </div>
+
+            <!-- Row: Package Type + Box Size (combined label+value selects) + Cost -->
+            <div class="flex items-center gap-4">
+              <!-- Package Type select: w-[222px], h-[38px], inline label+value -->
+              <div class="relative w-[222px] shrink-0">
                 <button type="button"
                   (click)="togglePicker('pkgType', $event)"
                   data-testid="button-package-type"
-                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
-                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
-                    [ngClass]="draft().details.packaging.packageType ? 'text-[#0b1516]' : 'text-[#7f9199]'">
-                    {{ draft().details.packaging.packageType || 'Select' }}
+                  class="flex h-[38px] w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white px-2 py-[2px] text-left">
+                  <span class="flex min-w-0 items-baseline gap-2 truncate text-[14px] leading-[1.43]">
+                    <span class="text-[#45565b]">Package Type</span>
+                    <span *ngIf="draft().details.packaging.packageType" class="truncate font-medium text-[#0b1516]">
+                      {{ draft().details.packaging.packageType }}
+                    </span>
                   </span>
-                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-6 w-6 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M7 10l5 5 5-5z"/>
                   </svg>
                 </button>
                 <div *ngIf="openPicker() === 'pkgType'"
-                  class="absolute left-0 top-[60px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  class="absolute left-0 top-[42px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
                   (click)="$event.stopPropagation()">
                   <button *ngFor="let pt of PACKAGE_TYPES"
                     type="button"
@@ -266,23 +273,24 @@
                 </div>
               </div>
 
-              <!-- Box Size -->
-              <div class="relative flex flex-col gap-1">
-                <label class="font-body text-[12px] font-medium text-[#45565b]">Box Size</label>
+              <!-- Box Size select: flex-1, h-[38px], inline label+value -->
+              <div class="relative flex-1">
                 <button type="button"
                   (click)="togglePicker('box', $event)"
                   data-testid="button-box-size"
-                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
-                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
-                    [ngClass]="draft().details.packaging.boxSizeLabel ? 'text-[#0b1516]' : 'text-[#7f9199]'">
-                    {{ draft().details.packaging.boxSizeLabel || 'Select' }}
+                  class="flex h-[38px] w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white px-2 py-[2px] text-left">
+                  <span class="flex min-w-0 items-baseline gap-2 truncate text-[14px] leading-[1.43]">
+                    <span class="text-[#45565b]">Box Size</span>
+                    <span *ngIf="draft().details.packaging.boxSizeLabel" class="truncate font-medium text-[#0b1516]">
+                      {{ draft().details.packaging.boxSizeLabel }}
+                    </span>
                   </span>
-                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-6 w-6 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M7 10l5 5 5-5z"/>
                   </svg>
                 </button>
                 <div *ngIf="openPicker() === 'box'"
-                  class="absolute left-0 top-[60px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  class="absolute left-0 top-[42px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
                   (click)="$event.stopPropagation()">
                   <button *ngFor="let b of BOX_SIZES"
                     type="button"
@@ -295,18 +303,18 @@
                 </div>
               </div>
 
-              <!-- Cost readout -->
-              <div class="flex flex-col gap-1">
-                <span class="font-body text-[12px] font-medium text-[#45565b]">Cost</span>
-                <span class="font-body text-[14px] text-[#0b1516]"
+              <!-- Cost readout (Figma: w-[57px]) -->
+              <div class="flex w-[57px] shrink-0 flex-col gap-1">
+                <span class="font-body text-[12px] font-normal text-[#0b1516]">Cost</span>
+                <span class="font-body text-[14px] font-medium text-[#0b1516]"
                   data-testid="text-packaging-cost">
                   {{ fmt(summary().packagingCost) }}
                 </span>
               </div>
             </div>
 
-            <!-- Dimensions row: Length / Width / Height / Weight -->
-            <div class="mt-4 grid grid-cols-4 gap-4">
+            <!-- Dimensions row: Length / Width / Height / Weight (Figma: 1fr each, gap-[16px]) -->
+            <div class="mt-1 grid grid-cols-4 gap-4">
               <ng-container *ngFor="let dim of [
                 { key: 'lengthIn',  label: 'Length (in)' },
                 { key: 'widthIn',   label: 'Width (in)' },
@@ -314,7 +322,7 @@
                 { key: 'weightLbs', label: 'Weight (lbs)' }
               ]">
                 <div class="flex flex-col gap-1">
-                  <label class="font-body text-[12px] font-medium text-[#7f9199]">{{ dim.label }}</label>
+                  <label class="font-body text-[12px] font-normal text-[#0b1516]">{{ dim.label }}</label>
                   <div class="relative">
                     <input type="number"
                       min="0"
