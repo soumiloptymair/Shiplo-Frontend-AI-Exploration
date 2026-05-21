@@ -1,0 +1,153 @@
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-8"
+  (click)="onCancel()"
+  data-testid="modal-packaging-backdrop">
+  <div
+    class="my-auto w-[480px] max-w-[95vw] overflow-hidden rounded-lg bg-surface shadow-[0_1px_16px_rgba(0,0,0,0.25)]"
+    (click)="$event.stopPropagation(); closePicker()"
+    role="dialog"
+    aria-modal="true"
+    data-testid="modal-packaging">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between border-b border-divider px-5 py-4">
+      <h2 class="font-body text-[18px] font-semibold leading-[1.43] text-fg-primary"
+        data-testid="text-packaging-modal-title">
+        {{ isEdit() ? 'Edit Packaging' : 'Add Packaging' }}
+      </h2>
+      <button type="button"
+        (click)="onCancel()"
+        aria-label="Close"
+        data-testid="button-close-packaging-modal"
+        class="flex h-8 w-8 items-center justify-center rounded-full text-fg-secondary hover:bg-surface-light-primary">
+        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Body -->
+    <div class="flex flex-col gap-4 bg-surface-light-primary px-5 py-5">
+
+      <!-- Row 1: Name + Type -->
+      <div class="grid grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1">
+          <span class="font-body text-[12px] font-medium text-fg-primary">Packaging Name</span>
+          <input type="text"
+            placeholder="Enter Name"
+            [value]="name()"
+            (input)="name.set($any($event.target).value)"
+            data-testid="input-packaging-name"
+            class="h-10 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"/>
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span class="font-body text-[12px] font-medium text-fg-primary">Packaging Type</span>
+          <div class="relative">
+            <button type="button"
+              (click)="toggleTypePicker($event)"
+              data-testid="select-packaging-type"
+              class="flex h-10 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] outline-none focus:border-action-primary"
+              [ngClass]="type() ? 'text-fg-primary' : 'text-fg-tertiary'">
+              <span>{{ type() || 'Box' }}</span>
+              <svg class="h-3.5 w-3.5 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+            <ul *ngIf="typePickerOpen()"
+              (click)="$event.stopPropagation()"
+              data-testid="menu-packaging-types"
+              class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-auto rounded-token border border-divider bg-surface py-1 shadow-lg">
+              <li *ngFor="let t of TYPES">
+                <button type="button"
+                  (click)="selectType(t, $event)"
+                  [attr.data-testid]="'option-type-' + t.toLowerCase().replace(' ', '-')"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary"
+                  [class.bg-surface-light-primary]="type() === t">
+                  {{ t }}
+                </button>
+              </li>
+            </ul>
+          </div>
+        </label>
+      </div>
+
+      <!-- Row 2: Length / Width / Height -->
+      <div class="grid grid-cols-3 gap-3">
+        <label class="flex flex-col gap-1">
+          <span class="font-body text-[12px] font-medium text-fg-primary">Length (in)</span>
+          <input type="number" min="0" step="0.01" placeholder="0"
+            [value]="length()"
+            (input)="setNum(length, $any($event.target).value)"
+            data-testid="input-packaging-length"
+            class="h-10 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"/>
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="font-body text-[12px] font-medium text-fg-primary">Width (in)</span>
+          <input type="number" min="0" step="0.01" placeholder="0"
+            [value]="width()"
+            (input)="setNum(width, $any($event.target).value)"
+            data-testid="input-packaging-width"
+            class="h-10 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"/>
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="font-body text-[12px] font-medium text-fg-primary">Height (in)</span>
+          <input type="number" min="0" step="0.01" placeholder="0"
+            [value]="height()"
+            (input)="setNum(height, $any($event.target).value)"
+            data-testid="input-packaging-height"
+            class="h-10 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"/>
+        </label>
+      </div>
+
+      <!-- Row 3: Packaging Weight + Maximum Weight -->
+      <div class="grid grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1">
+          <span class="font-body text-[12px] font-medium text-fg-primary">Packaging Weight (lb)</span>
+          <input type="number" min="0" step="0.01" placeholder="0"
+            [value]="tareWeight()"
+            (input)="setNum(tareWeight, $any($event.target).value)"
+            data-testid="input-packaging-tare-weight"
+            class="h-10 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"/>
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="font-body text-[12px] font-medium text-fg-primary">Maximum Weight (lb)</span>
+          <input type="number" min="0" step="0.01" placeholder="0"
+            [value]="maxWeight()"
+            (input)="setNum(maxWeight, $any($event.target).value)"
+            data-testid="input-packaging-max-weight"
+            class="h-10 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"/>
+        </label>
+      </div>
+
+      <!-- Row 4: Cost -->
+      <label class="flex flex-col gap-1">
+        <span class="font-body text-[12px] font-medium text-fg-primary">Cost</span>
+        <div class="relative flex h-10 items-center rounded-token border border-divider bg-surface focus-within:border-action-primary">
+          <span class="px-3 text-[13px] text-fg-secondary">$</span>
+          <input type="number" min="0" step="0.01" placeholder="0"
+            [value]="cost()"
+            (input)="setNum(cost, $any($event.target).value)"
+            data-testid="input-packaging-cost"
+            class="h-full flex-1 bg-transparent pr-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary"/>
+        </div>
+      </label>
+    </div>
+
+    <!-- Footer -->
+    <footer class="flex items-center justify-end gap-3 border-t border-divider px-5 py-4">
+      <button type="button"
+        (click)="onCancel()"
+        data-testid="button-cancel-packaging"
+        class="h-9 rounded-token bg-transparent px-3 text-[13px] font-medium text-fg-primary hover:underline">
+        Cancel
+      </button>
+      <button type="button"
+        (click)="onSave()"
+        [disabled]="!canSave()"
+        data-testid="button-save-packaging"
+        class="h-9 rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action transition-colors hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50">
+        Save
+      </button>
+    </footer>
+  </div>
+</div>

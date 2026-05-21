@@ -37,6 +37,21 @@ export const routes: Routes = [
       import('./pages/automations/automations.component').then((m) => m.AutomationsComponent),
   },
   {
+    path: 'settings/defaults',
+    loadComponent: () =>
+      import('./pages/defaults/defaults.component').then((m) => m.DefaultsComponent),
+    children: [
+      { path: '', redirectTo: 'packaging', pathMatch: 'full' },
+      {
+        path: 'packaging',
+        loadComponent: () =>
+          import('./pages/defaults/packaging/packaging.component').then(
+            (m) => m.PackagingDefaultsComponent,
+          ),
+      },
+    ],
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./pages/not-found/not-found.component').then((m) => m.NotFoundComponent),
