@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
 /** Response from `/api/usps/city-state?zip=`. */
 export interface UspsCityState {
@@ -28,6 +28,15 @@ export interface UspsValidatePayload {
   zip: string;
 }
 
+/** One row in the address typeahead dropdown. */
+export interface AddressSuggestion {
+  street1: string;
+  city: string;
+  state: string;
+  zip: string;
+  displayLabel: string;
+}
+
 /**
  * Thin client for the USPS address proxy that the Express server in
  * `angular-app/server/index.mjs` exposes under `/api/usps/*`. The browser
@@ -52,5 +61,20 @@ export class UspsService {
   /** Convenience wrapper that swallows errors and returns null on failure. */
   safeCityState(zip: string): Observable<UspsCityState | null> {
     return this.cityStateFromZip(zip).pipe(catchError(() => of(null)));
+  }
+
+  /**
+   * Typeahead. Returns a small ranked list of address suggestions for `q`.
+   * Resolves to `[]` on any error or when the query is too short.
+   */
+  autocomplete(q: string): Observable<AddressSuggestion[]> {
+    return this.http
+      .get<{ suggestions: AddressSuggestion[] }>('/api/usps/autocomplete', {
+        params: { q },
+      })
+      .pipe(
+        map((r) => r.suggestions ?? []),
+        catchError(() => of([] as AddressSuggestion[])),
+      );
   }
 }

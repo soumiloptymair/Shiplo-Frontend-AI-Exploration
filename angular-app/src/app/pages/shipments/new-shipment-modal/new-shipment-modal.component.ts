@@ -44,8 +44,8 @@ import {
 import { ShipmentService } from '../../../core/services/shipment.service';
 import { Shipment } from '../../../core/models/shipment.model';
 import {
+  AddressSuggestion,
   UspsService,
-  UspsValidatedAddress,
 } from '../../../core/services/usps.service';
 
 /** Field keys that gate Step 2 — used for touched/error tracking. */
@@ -58,16 +58,6 @@ export type CustomerFieldKey =
   | 'city'
   | 'state'
   | 'postalCode';
-
-/** Status of the inline USPS address verification banner. */
-export type AddressVerifyState =
-  | 'idle'
-  | 'verifying'
-  | 'matches'
-  | 'suggested'
-  | 'invalid'
-  | 'unconfigured'
-  | 'error';
 
 /**
  * "Create New Shipment" modal — foundation for User Story ES-R8.
@@ -106,11 +96,13 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   /** True once the user has attempted to leave Step 2 — forces all errors visible. */
   readonly submitAttempted = signal<boolean>(false);
 
-  /** Pending USPS suggestion to accept; null if nothing to suggest. */
-  readonly addressSuggestion = signal<UspsValidatedAddress | null>(null);
-  readonly addressVerifyState = signal<AddressVerifyState>('idle');
-  readonly addressVerifyMessage = signal<string>('');
+  /** Address typeahead state — drives the dropdown under Address Line 1. */
+  readonly addressSuggestions = signal<readonly AddressSuggestion[]>([]);
+  readonly addressLoading = signal<boolean>(false);
+  readonly addressDropdownOpen = signal<boolean>(false);
 
+  private addressLookupTimer: ReturnType<typeof setTimeout> | null = null;
+  private addressLookupSeq = 0;
   private zipLookupTimer: ReturnType<typeof setTimeout> | null = null;
   private lastZipLookup = '';
 
@@ -257,14 +249,9 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
       ...d,
       customer: { ...d.customer, [key]: value },
     }));
-    // Any edit invalidates a stale USPS suggestion / banner.
-    if (key === 'street1' || key === 'street2' || key === 'city' ||
-        key === 'state' || key === 'postalCode') {
-      if (this.addressVerifyState() !== 'idle') {
-        this.addressVerifyState.set('idle');
-        this.addressVerifyMessage.set('');
-        this.addressSuggestion.set(null);
-      }
+    // Street typing triggers the typeahead; clear it when the user blanks the input.
+    if (key === 'street1' && typeof value === 'string') {
+      this.scheduleAddressLookup(value);
     }
     // ZIP → City/State autofill (debounced).
     if (key === 'postalCode' && typeof value === 'string') {
@@ -350,74 +337,86 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     });
   }
 
-  /** Click handler for the "Verify with USPS" button. */
-  verifyAddress() {
-    const c = this.draft().customer;
-    if (!c.street1.trim() || (!c.postalCode.trim() && (!c.city.trim() || !c.state.trim()))) {
-      this.addressVerifyState.set('invalid');
-      this.addressVerifyMessage.set('Enter an address before verifying.');
+  // --- Address typeahead --------------------------------------------------
+
+  /** Debounce typeahead requests so we don't hammer the proxy per keystroke. */
+  private scheduleAddressLookup(raw: string) {
+    // Any input change supersedes outstanding requests, regardless of length.
+    if (this.addressLookupTimer) clearTimeout(this.addressLookupTimer);
+    this.addressLookupTimer = null;
+    const seq = ++this.addressLookupSeq;
+    const q = raw.trim();
+    if (q.length < 3) {
+      this.addressSuggestions.set([]);
+      this.addressDropdownOpen.set(false);
+      this.addressLoading.set(false);
       return;
     }
-    this.addressVerifyState.set('verifying');
-    this.addressVerifyMessage.set('Checking with USPS…');
-    this.uspsService
-      .validate({
-        street1: c.street1.trim(),
-        street2: c.street2.trim() || undefined,
-        city: c.city.trim(),
-        state: c.state.trim(),
-        zip: c.postalCode.replace(/\D/g, '').slice(0, 5),
-      })
-      .subscribe({
-        next: (res) => {
-          const same =
-            res.street1.toUpperCase() === c.street1.trim().toUpperCase() &&
-            res.city.toUpperCase()    === c.city.trim().toUpperCase() &&
-            res.state.toUpperCase()   === c.state.trim().toUpperCase() &&
-            res.zip                   === c.postalCode.replace(/\D/g, '').slice(0, 5);
-          this.addressSuggestion.set(res);
-          if (same) {
-            this.addressVerifyState.set('matches');
-            this.addressVerifyMessage.set('Address verified.');
-          } else {
-            this.addressVerifyState.set('suggested');
-            this.addressVerifyMessage.set('We found a standardized version of this address.');
-          }
-        },
-        error: (err) => {
-          const status = err?.status ?? 500;
-          if (status === 503) {
-            this.addressVerifyState.set('unconfigured');
-            this.addressVerifyMessage.set('Address verification is not configured on the server.');
-          } else if (status === 400 || status === 404) {
-            this.addressVerifyState.set('invalid');
-            this.addressVerifyMessage.set('We could not match this address. Double-check the street, city, state, and zip.');
-          } else {
-            this.addressVerifyState.set('error');
-            this.addressVerifyMessage.set('Address verification is unavailable right now.');
-          }
-        },
+    this.addressDropdownOpen.set(true);
+    this.addressLoading.set(true);
+    this.addressLookupTimer = setTimeout(() => {
+      this.uspsService.autocomplete(q).subscribe((rows) => {
+        // Ignore results from stale, superseded requests.
+        if (seq !== this.addressLookupSeq) return;
+        this.addressSuggestions.set(rows);
+        this.addressLoading.set(false);
       });
+    }, 300);
   }
 
-  /** Apply the standardized USPS suggestion into the form. */
-  applyAddressSuggestion() {
-    const s = this.addressSuggestion();
-    if (!s) return;
+  /** Apply a typeahead suggestion to the draft and close the dropdown. */
+  selectAddressSuggestion(s: AddressSuggestion) {
     this.draft.update((d) => ({
       ...d,
       customer: {
         ...d.customer,
         street1: s.street1 || d.customer.street1,
-        street2: s.street2 || d.customer.street2,
         city:    s.city    || d.customer.city,
         state:   s.state   || d.customer.state,
         postalCode: s.zip  || d.customer.postalCode,
       },
     }));
-    this.addressVerifyState.set('matches');
-    this.addressVerifyMessage.set('Standardized address applied.');
-    this.addressSuggestion.set(null);
+    this.markCustomerTouched('street1');
+    if (s.city)  this.markCustomerTouched('city');
+    if (s.state) this.markCustomerTouched('state');
+    if (s.zip)   this.markCustomerTouched('postalCode');
+    this.closeAddressDropdown();
+  }
+
+  /** "Enter address manually" — closes the typeahead and hands control back. */
+  closeAddressDropdown() {
+    if (this.addressLookupTimer) clearTimeout(this.addressLookupTimer);
+    this.addressLookupTimer = null;
+    // Bump the seq so any in-flight HTTP response is also discarded.
+    this.addressLookupSeq++;
+    this.addressDropdownOpen.set(false);
+    this.addressSuggestions.set([]);
+    this.addressLoading.set(false);
+  }
+
+  /**
+   * Escape inside the street1 combobox should dismiss only the dropdown — not
+   * the whole modal. Stops the document-level Esc handler from firing.
+   */
+  onStreetEscape(evt: Event) {
+    if (this.addressDropdownOpen()) {
+      evt.stopPropagation();
+      this.closeAddressDropdown();
+    }
+  }
+
+  /** Close the dropdown when the input loses focus to anything outside it. */
+  onStreetBlur() {
+    this.markCustomerTouched('street1');
+    // Defer so a click on a <li> still fires `selectAddressSuggestion` first.
+    setTimeout(() => this.closeAddressDropdown(), 120);
+  }
+
+  /** Re-open the dropdown on focus when there are stashed suggestions to show. */
+  reopenAddressDropdownIfPopulated() {
+    if (this.addressSuggestions().length > 0) {
+      this.addressDropdownOpen.set(true);
+    }
   }
 
   toggleMaterial(key: keyof NewShipmentDraft['details']['materials']) {

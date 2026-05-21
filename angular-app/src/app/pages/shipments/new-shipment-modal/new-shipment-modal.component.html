@@ -491,15 +491,21 @@
 
               <!-- Address block -->
               <div class="flex w-full flex-col gap-4">
-                <!-- Address Line 1 -->
-                <div class="flex w-full flex-col gap-1">
+                <!-- Address Line 1 (with typeahead) -->
+                <div class="relative flex w-full flex-col gap-1">
                   <label for="customer-street1" class="font-body text-[12px] leading-[1.43] text-[#0b1516]">
                     Address Line 1 <span class="text-[#cb2b2b]" aria-hidden="true">*</span>
                   </label>
-                  <input id="customer-street1" type="text" autocomplete="address-line1" required
+                  <input id="customer-street1" type="text" autocomplete="off" required
+                    role="combobox"
+                    [attr.aria-expanded]="addressDropdownOpen()"
+                    aria-autocomplete="list"
+                    aria-controls="customer-street1-listbox"
                     [value]="draft().customer.street1"
                     (input)="onCustomerInput('street1', $event)"
-                    (blur)="markCustomerTouched('street1')"
+                    (focus)="reopenAddressDropdownIfPopulated()"
+                    (blur)="onStreetBlur()"
+                    (keydown.escape)="onStreetEscape($event)"
                     [attr.aria-invalid]="hasError('street1') || null"
                     [attr.aria-describedby]="hasError('street1') ? 'err-street1' : null"
                     data-testid="input-customer-street1"
@@ -511,6 +517,40 @@
                     data-testid="error-customer-street1">
                     {{ customerErrors().street1 }}
                   </p>
+
+                  <!-- Typeahead dropdown -->
+                  <ul *ngIf="addressDropdownOpen()"
+                    id="customer-street1-listbox"
+                    role="listbox"
+                    data-testid="listbox-address-suggestions"
+                    class="absolute left-0 right-0 top-full z-20 mt-1 max-h-[260px] overflow-y-auto rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+                    (mousedown)="$event.preventDefault()">
+                    <li *ngIf="addressLoading() && addressSuggestions().length === 0"
+                      class="px-3 py-2 text-[13px] text-[#7f9199]"
+                      data-testid="text-address-loading">
+                      Searching addresses…
+                    </li>
+                    <li *ngIf="!addressLoading() && addressSuggestions().length === 0"
+                      class="px-3 py-2 text-[13px] text-[#7f9199]"
+                      data-testid="text-address-empty">
+                      No matches.
+                    </li>
+                    <li *ngFor="let s of addressSuggestions(); let i = index"
+                      role="option"
+                      [attr.data-testid]="'option-address-suggestion-' + i"
+                      (click)="selectAddressSuggestion(s)"
+                      class="cursor-pointer px-3 py-2 text-[13px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                      {{ s.displayLabel }}
+                    </li>
+                    <li class="border-t border-[#e4eaed]">
+                      <button type="button"
+                        (click)="closeAddressDropdown()"
+                        data-testid="button-enter-address-manually"
+                        class="w-full cursor-pointer px-3 py-2 text-left text-[13px] text-[#45565b] hover:bg-[#f6f9fb]">
+                        Enter address manually
+                      </button>
+                    </li>
+                  </ul>
                 </div>
 
                 <!-- Address Line 2 | Country -->
@@ -629,53 +669,6 @@
                   </div>
                 </div>
 
-                <!-- USPS verify CTA + result banner -->
-                <div class="flex flex-col gap-2">
-                  <div class="flex items-center justify-between gap-3">
-                    <p class="font-body text-[12px] text-[#7f9199]">
-                      Tip: enter a 5-digit zip code to auto-fill City and State.
-                    </p>
-                    <button type="button"
-                      (click)="verifyAddress()"
-                      [disabled]="addressVerifyState() === 'verifying'"
-                      data-testid="button-verify-address"
-                      class="inline-flex h-8 items-center gap-1 rounded-[4px] border border-[#328ac9] px-3 text-[12px] font-medium text-[#328ac9] hover:bg-[#eef5fb] disabled:cursor-wait disabled:opacity-60">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z" stroke="currentColor" stroke-width="1.6"/>
-                        <circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/>
-                      </svg>
-                      {{ addressVerifyState() === 'verifying' ? 'Verifying…' : 'Verify address' }}
-                    </button>
-                  </div>
-
-                  <div *ngIf="addressVerifyState() !== 'idle' && addressVerifyState() !== 'verifying'"
-                    class="flex flex-col gap-2 rounded-[4px] border px-3 py-2 text-[12px]"
-                    [ngClass]="{
-                      'border-[#a7e0c3] bg-[#eef9f3] text-[#0b6b3b]': addressVerifyState() === 'matches',
-                      'border-[#f4d28a] bg-[#fdf6e6] text-[#7a5a00]': addressVerifyState() === 'suggested',
-                      'border-[#f1b3b3] bg-[#fdecec] text-[#9a1f1f]':
-                        addressVerifyState() === 'invalid' || addressVerifyState() === 'error',
-                      'border-[#e4eaed] bg-[#f6f9fb] text-[#45565b]': addressVerifyState() === 'unconfigured'
-                    }"
-                    role="status"
-                    data-testid="banner-address-verify">
-                    <p class="font-medium">{{ addressVerifyMessage() }}</p>
-                    <ng-container *ngIf="addressVerifyState() === 'suggested' && addressSuggestion() as s">
-                      <p class="text-[#0b1516]">
-                        {{ s.street1 }}<ng-container *ngIf="s.street2">, {{ s.street2 }}</ng-container>,
-                        {{ s.city }}, {{ s.state }} {{ s.zip }}<ng-container *ngIf="s.zipPlus4">-{{ s.zipPlus4 }}</ng-container>
-                      </p>
-                      <div>
-                        <button type="button"
-                          (click)="applyAddressSuggestion()"
-                          data-testid="button-apply-address-suggestion"
-                          class="inline-flex h-7 items-center rounded-[4px] bg-[#008572] px-3 text-[12px] font-medium text-white hover:bg-[#006e5e]">
-                          Use suggested address
-                        </button>
-                      </div>
-                    </ng-container>
-                  </div>
-                </div>
 
                 <!-- Residential address checkbox -->
                 <button type="button"

@@ -30,6 +30,8 @@ const USPS_ENABLED = Boolean(USPS_CLIENT_ID && USPS_CLIENT_SECRET);
 const ZIPPOPOTAM_BASE = 'https://api.zippopotam.us/us';
 const CENSUS_ONELINE =
   'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress';
+const NOMINATIM_SEARCH = 'https://nominatim.openstreetmap.org/search';
+const NOMINATIM_UA = 'shiplo-angular-app/1.0 (dev; address-autocomplete)';
 
 /** @type {{ token: string, expiresAt: number } | null} */
 let uspsToken = null;
@@ -173,6 +175,93 @@ app.get('/api/usps/city-state', async (req, res) => {
     res.status(e.status ?? 500).json({ error: e.message, detail: e.detail });
   }
 });
+
+/**
+ * Address typeahead. Returns up to 7 ranked US address suggestions for the
+ * given query (free-form, e.g. "2153 Ju"). Backed by Nominatim (OSM).
+ *
+ * Nominatim's usage policy caps us at ~1 req/sec and asks for a descriptive
+ * User-Agent. We honor both with:
+ *   - A short in-memory TTL cache (5 min) keyed by lowercased query.
+ *   - A global ≥1s spacing between outbound calls (`nominatimGate`).
+ *   - Quiet fallback to `{ suggestions: [] }` on upstream 429/5xx so the UI
+ *     degrades to "no matches" instead of throwing.
+ */
+const NOMINATIM_TTL_MS = 5 * 60 * 1000;
+const NOMINATIM_MIN_GAP_MS = 1000;
+/** @type {Map<string, { at: number, suggestions: any[] }>} */
+const nominatimCache = new Map();
+let nominatimLastCallAt = 0;
+let nominatimChain = Promise.resolve();
+
+function nominatimGate() {
+  // Serialize outbound calls and enforce ≥NOMINATIM_MIN_GAP_MS spacing.
+  const run = nominatimChain.then(async () => {
+    const wait = Math.max(0, NOMINATIM_MIN_GAP_MS - (Date.now() - nominatimLastCallAt));
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    nominatimLastCallAt = Date.now();
+  });
+  nominatimChain = run.catch(() => {});
+  return run;
+}
+
+app.get('/api/usps/autocomplete', async (req, res) => {
+  const q = String(req.query.q ?? '').trim();
+  if (q.length < 3) return res.json({ suggestions: [] });
+  const key = q.toLowerCase();
+  const cached = nominatimCache.get(key);
+  if (cached && Date.now() - cached.at < NOMINATIM_TTL_MS) {
+    return res.json({ suggestions: cached.suggestions });
+  }
+  try {
+    await nominatimGate();
+    const url =
+      `${NOMINATIM_SEARCH}?format=json&addressdetails=1` +
+      `&countrycodes=us&limit=7&q=${encodeURIComponent(q)}`;
+    const data = await fetchJson(url, {
+      headers: { 'User-Agent': NOMINATIM_UA, Accept: 'application/json' },
+    });
+    const suggestions = (Array.isArray(data) ? data : [])
+      .map((row) => normalizeNominatim(row))
+      .filter((s) => s.street1 && s.city && s.state);
+    nominatimCache.set(key, { at: Date.now(), suggestions });
+    res.json({ suggestions });
+  } catch (e) {
+    // Degrade gracefully on rate-limit / upstream failures.
+    res.json({ suggestions: [] });
+  }
+});
+
+function normalizeNominatim(row) {
+  const a = row.address ?? {};
+  const street1 = [a.house_number, a.road].filter(Boolean).join(' ').trim();
+  const city = a.city || a.town || a.village || a.hamlet || a.suburb || '';
+  // ISO3166-2-lvl4 looks like "US-CA"; fall back to full state name lookup.
+  const iso = a['ISO3166-2-lvl4'] || '';
+  const state = iso.startsWith('US-') ? iso.slice(3) : stateAbbrev(a.state ?? '');
+  const zip = (a.postcode || '').split('-')[0];
+  const tail = [city, state, zip].filter(Boolean).join(', ');
+  const displayLabel = [street1, tail].filter(Boolean).join(' — ') || row.display_name;
+  return { street1, city, state, zip, displayLabel };
+}
+
+const US_STATE_ABBREV = {
+  alabama:'AL', alaska:'AK', arizona:'AZ', arkansas:'AR', california:'CA',
+  colorado:'CO', connecticut:'CT', delaware:'DE', 'district of columbia':'DC',
+  florida:'FL', georgia:'GA', hawaii:'HI', idaho:'ID', illinois:'IL',
+  indiana:'IN', iowa:'IA', kansas:'KS', kentucky:'KY', louisiana:'LA',
+  maine:'ME', maryland:'MD', massachusetts:'MA', michigan:'MI', minnesota:'MN',
+  mississippi:'MS', missouri:'MO', montana:'MT', nebraska:'NE', nevada:'NV',
+  'new hampshire':'NH', 'new jersey':'NJ', 'new mexico':'NM', 'new york':'NY',
+  'north carolina':'NC', 'north dakota':'ND', ohio:'OH', oklahoma:'OK',
+  oregon:'OR', pennsylvania:'PA', 'rhode island':'RI', 'south carolina':'SC',
+  'south dakota':'SD', tennessee:'TN', texas:'TX', utah:'UT', vermont:'VT',
+  virginia:'VA', washington:'WA', 'west virginia':'WV', wisconsin:'WI',
+  wyoming:'WY',
+};
+function stateAbbrev(name) {
+  return US_STATE_ABBREV[String(name).trim().toLowerCase()] || '';
+}
 
 app.post('/api/usps/validate', async (req, res) => {
   try {
