@@ -638,13 +638,13 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
 
   /**
    * True while the user must wait on (or resolve) the Confirm Address card.
-   * Blocks Continue both while a request is in flight and while a card is
-   * awaiting the user's choice — closes the race where Continue is clicked
-   * before the in-flight validation has had a chance to surface a card.
+   * Blocks Continue while a request is in flight, while a recommendation is
+   * awaiting the user's choice, and when validation outright failed (the
+   * red "Invalid address" variant — user must Reset or edit to proceed).
    */
   readonly addressBlocksContinue = computed(() => {
     const s = this.addressConfirmState();
-    return s === 'needs-confirm' || s === 'validating';
+    return s === 'needs-confirm' || s === 'validating' || s === 'failed';
   });
 
   toggleMaterial(key: keyof NewShipmentDraft['details']['materials']) {

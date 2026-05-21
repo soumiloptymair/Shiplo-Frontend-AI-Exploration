@@ -688,7 +688,7 @@
                   </span>
                 </button>
 
-                <!-- Confirm Address card (shown when standardized differs from entered) -->
+                <!-- Confirm Address card (success variant: recommendation differs from entered) -->
                 <div *ngIf="addressConfirmState() === 'needs-confirm' && addressRecommended() as rec"
                   class="rounded-[6px] border border-[#008572] bg-white p-4"
                   data-testid="card-confirm-address">
@@ -759,6 +759,54 @@
                       class="inline-flex h-8 items-center rounded-[4px] bg-[#008572] px-3 text-[12px] font-medium text-white hover:bg-[#006e5e]">
                       Confirm
                     </button>
+                  </div>
+                </div>
+
+                <!-- Confirm Address card (error variant: validation failed / address not found) -->
+                <div *ngIf="addressConfirmState() === 'failed'"
+                  class="rounded-[6px] border border-[#cb2b2b] bg-[#fdecec] p-4"
+                  data-testid="card-confirm-address-error">
+                  <p class="font-body text-[14px] font-semibold text-[#0b1516]">Confirm Address</p>
+
+                  <div class="mt-3">
+                    <label class="flex flex-col gap-2 rounded-[4px] border-2 border-[#cb2b2b] bg-white p-3"
+                      data-testid="option-address-entered-error">
+                      <span class="flex items-center gap-2">
+                        <input type="radio" name="address-choice-error" value="entered"
+                          class="h-4 w-4 accent-[#cb2b2b]"
+                          checked disabled
+                          data-testid="radio-address-entered-error"/>
+                        <span class="font-body text-[13px] font-medium text-[#0b1516]">What you entered</span>
+                      </span>
+                      <div class="font-body text-[13px] leading-[1.45] text-[#0b1516]"
+                        data-testid="text-address-entered-error">
+                        <p *ngFor="let line of enteredAddressLines()">
+                          <ng-container *ngFor="let tok of line; let last = last">{{ tok.endsWith('\0') ? tok.slice(0, -1) : tok }}<ng-container *ngIf="!last"> </ng-container></ng-container>
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="mt-3 flex items-center justify-between gap-3">
+                    <p class="font-body text-[12px] font-medium text-[#cb2b2b]"
+                      role="alert"
+                      data-testid="text-address-error">
+                      Invalid address format or address not found
+                    </p>
+                    <div class="flex items-center gap-2">
+                      <button type="button"
+                        (click)="resetAddress()"
+                        data-testid="button-reset-address-error"
+                        class="inline-flex h-8 items-center rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[12px] font-medium text-[#0b1516] hover:bg-[#f6f9fb]">
+                        Reset
+                      </button>
+                      <button type="button"
+                        disabled
+                        data-testid="button-confirm-address-disabled"
+                        class="inline-flex h-8 cursor-not-allowed items-center rounded-[4px] bg-[#008572] px-3 text-[12px] font-medium text-white opacity-50">
+                        Confirm
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
