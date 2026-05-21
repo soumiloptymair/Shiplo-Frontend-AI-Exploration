@@ -50,11 +50,11 @@
             [attr.aria-current]="currentStep() === s.num ? 'step' : null"
             [attr.data-testid]="'button-step-' + s.num"
             class="group flex items-start gap-3 text-left">
-            <!-- Numbered circle -->
-            <span class="mt-[2px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[12px] font-medium leading-none transition-colors"
+            <!-- Numbered circle (outlined teal; active = bolder ring + teal text) -->
+            <span class="mt-[2px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[12px] leading-none transition-colors"
               [ngClass]="currentStep() === s.num
-                ? 'border-[#008572] bg-[#008572] text-white'
-                : 'border-[#b8c6cc] bg-white text-[#45565b]'">
+                ? 'border-[1.5px] border-[#008572] font-semibold text-[#008572]'
+                : 'border border-[#b8c6cc] font-medium text-[#7f9199]'">
               {{ s.num }}
             </span>
             <!-- Title + subtitle -->
@@ -70,7 +70,7 @@
           </button>
           <!-- Dashed connector between rows (skip after the last step) -->
           <div *ngIf="i < STEPS.length - 1"
-            class="ml-[11px] h-4 w-px border-l border-dashed border-[#b8c6cc]"></div>
+            class="ml-[11px] h-4 w-px border-l border-dashed border-[#008572]"></div>
         </ng-container>
       </nav>
 
@@ -131,6 +131,7 @@
                   <button *ngFor="let f of FREIGHT_TYPES"
                     type="button"
                     (click)="setFreightType(f)"
+                    [attr.data-testid]="'option-freight-' + f"
                     class="flex w-full items-center px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
                     {{ f }}
                   </button>
@@ -175,6 +176,7 @@
                   <button *ngFor="let p of PRODUCT_OPTIONS"
                     type="button"
                     (click)="setItemProduct(item.id, p.sku)"
+                    [attr.data-testid]="'option-item-product-' + i + '-' + p.sku"
                     class="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
                     <span class="truncate">{{ p.name }}</span>
                     <span class="text-[12px] text-[#7f9199]">{{ p.sku }}</span>
@@ -260,6 +262,7 @@
                   <button *ngFor="let pt of PACKAGE_TYPES"
                     type="button"
                     (click)="setPackageType(pt)"
+                    [attr.data-testid]="'option-package-type-' + pt"
                     class="flex w-full items-center px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
                     {{ pt }}
                   </button>
@@ -287,6 +290,7 @@
                   <button *ngFor="let b of BOX_SIZES"
                     type="button"
                     (click)="setBoxSize(b.label)"
+                    [attr.data-testid]="'option-box-size-' + b.label"
                     class="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
                     <span>{{ b.label }}</span>
                     <span class="text-[12px] text-[#7f9199]">{{ fmt(b.cost) }}</span>
@@ -303,6 +307,45 @@
                 </span>
               </div>
             </div>
+
+            <!-- Dimensions row: Length / Width / Height / Weight -->
+            <div class="mt-4 grid grid-cols-4 gap-4">
+              <ng-container *ngFor="let dim of [
+                { key: 'lengthIn',  label: 'Length (in)' },
+                { key: 'widthIn',   label: 'Width (in)' },
+                { key: 'heightIn',  label: 'Height (in)' },
+                { key: 'weightLbs', label: 'Weight (lbs)' }
+              ]">
+                <div class="flex flex-col gap-1">
+                  <label class="font-body text-[12px] font-medium text-[#7f9199]">{{ dim.label }}</label>
+                  <div class="relative">
+                    <input type="number"
+                      min="0"
+                      [value]="$any(draft().details.packaging)[dim.key] ?? ''"
+                      (input)="setDimension($any(dim.key), $any($event.target).value)"
+                      [attr.data-testid]="'input-dim-' + dim.key"
+                      placeholder="0"
+                      class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-7 text-[14px] text-[#0b1516] outline-none placeholder:text-[#b8c6cc] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"/>
+                    <div class="absolute right-1 top-1/2 flex -translate-y-1/2 flex-col">
+                      <button type="button"
+                        (click)="bumpDimension($any(dim.key), 1)"
+                        [attr.data-testid]="'button-dim-up-' + dim.key"
+                        class="flex h-4 w-5 items-center justify-center text-[#45565b] hover:text-[#0b1516]"
+                        aria-label="Increase">
+                        <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
+                      </button>
+                      <button type="button"
+                        (click)="bumpDimension($any(dim.key), -1)"
+                        [attr.data-testid]="'button-dim-down-' + dim.key"
+                        class="flex h-4 w-5 items-center justify-center text-[#45565b] hover:text-[#0b1516]"
+                        aria-label="Decrease">
+                        <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
           </div>
 
           <!-- MATERIALS section -->
@@ -311,46 +354,31 @@
               Materials
             </h3>
             <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-[#e4eaed] pt-3">
-              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
-                <input type="checkbox"
-                  [checked]="draft().details.materials.lithium"
-                  (change)="toggleMaterial('lithium')"
-                  data-testid="checkbox-material-lithium"
-                  class="h-4 w-4 rounded accent-[#008572]"/>
-                Contains Lithium Batteries
-              </label>
-              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
-                <input type="checkbox"
-                  [checked]="draft().details.materials.tempSensitive"
-                  (change)="toggleMaterial('tempSensitive')"
-                  data-testid="checkbox-material-temp"
-                  class="h-4 w-4 rounded accent-[#008572]"/>
-                Contains Temperature Sensitive Items
-              </label>
-              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
-                <input type="checkbox"
-                  [checked]="draft().details.materials.hazmat"
-                  (change)="toggleMaterial('hazmat')"
-                  data-testid="checkbox-material-hazmat"
-                  class="h-4 w-4 rounded accent-[#008572]"/>
-                Contains Hazmats
-              </label>
-              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
-                <input type="checkbox"
-                  [checked]="draft().details.materials.perishable"
-                  (change)="toggleMaterial('perishable')"
-                  data-testid="checkbox-material-perishable"
-                  class="h-4 w-4 rounded accent-[#008572]"/>
-                Contains Perishables
-              </label>
-              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
-                <input type="checkbox"
-                  [checked]="draft().details.materials.fragile"
-                  (change)="toggleMaterial('fragile')"
-                  data-testid="checkbox-material-fragile"
-                  class="h-4 w-4 rounded accent-[#008572]"/>
-                Contains Fragile Items
-              </label>
+              <ng-container *ngFor="let m of [
+                { key: 'lithium',       label: 'Contains Lithium Batteries',          tid: 'lithium' },
+                { key: 'tempSensitive', label: 'Contains Temperature Sensitive Items', tid: 'temp' },
+                { key: 'hazmat',        label: 'Contains Hazmats',                     tid: 'hazmat' },
+                { key: 'perishable',    label: 'Contains Perishables',                 tid: 'perishable' },
+                { key: 'fragile',       label: 'Contains Fragile Items',               tid: 'fragile' }
+              ]">
+                <button type="button"
+                  (click)="toggleMaterial($any(m.key))"
+                  [attr.data-testid]="'checkbox-material-' + m.tid"
+                  [attr.aria-pressed]="$any(draft().details.materials)[m.key]"
+                  class="flex items-center gap-2 text-left font-body text-[14px] leading-[1.43]"
+                  [ngClass]="$any(draft().details.materials)[m.key] ? 'text-[#0b1516]' : 'text-[#45565b]'">
+                  <!-- Green-check circle when on; outlined empty circle when off -->
+                  <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
+                    [ngClass]="$any(draft().details.materials)[m.key]
+                      ? 'bg-[#008572] text-white'
+                      : 'border border-[#b8c6cc] text-transparent'">
+                    <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </span>
+                  {{ m.label }}
+                </button>
+              </ng-container>
             </div>
           </div>
         </ng-container>

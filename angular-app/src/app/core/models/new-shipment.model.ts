@@ -62,6 +62,12 @@ export interface NewShipmentItem {
 export interface NewShipmentPackaging {
   packageType: PackageTypeOption | '';
   boxSizeLabel: string;
+  /** Dimensions in inches; null when the user hasn't entered a value yet. */
+  lengthIn: number | null;
+  widthIn: number | null;
+  heightIn: number | null;
+  /** Weight in pounds. */
+  weightLbs: number | null;
 }
 
 /** Step-1 hazardous-material disclosures. */
@@ -130,7 +136,14 @@ export function blankDraft(): NewShipmentDraft {
       shipmentType: 'order',
       freightType: '',
       items: [blankItem()],
-      packaging: { packageType: '', boxSizeLabel: '' },
+      packaging: {
+        packageType: '',
+        boxSizeLabel: '',
+        lengthIn: null,
+        widthIn: null,
+        heightIn: null,
+        weightLbs: null,
+      },
       materials: {
         lithium: false,
         hazmat: false,

@@ -146,6 +146,32 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy {
     this.openPicker.set(null);
   }
 
+  setDimension(
+    key: 'lengthIn' | 'widthIn' | 'heightIn' | 'weightLbs',
+    raw: string | number,
+  ) {
+    const trimmed = String(raw ?? '').trim();
+    const value = trimmed === '' ? null : Number(trimmed);
+    this.draft.update((d) => ({
+      ...d,
+      details: { ...d.details, packaging: { ...d.details.packaging, [key]: value } },
+    }));
+  }
+
+  bumpDimension(
+    key: 'lengthIn' | 'widthIn' | 'heightIn' | 'weightLbs',
+    delta: number,
+  ) {
+    this.draft.update((d) => {
+      const cur = d.details.packaging[key] ?? 0;
+      const next = Math.max(0, Number((cur + delta).toFixed(2)));
+      return {
+        ...d,
+        details: { ...d.details, packaging: { ...d.details.packaging, [key]: next } },
+      };
+    });
+  }
+
   toggleMaterial(key: keyof NewShipmentDraft['details']['materials']) {
     this.draft.update((d) => ({
       ...d,
