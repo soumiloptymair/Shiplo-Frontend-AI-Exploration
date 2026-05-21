@@ -70,6 +70,14 @@ export class ShipmentService {
     });
   }
 
+  /**
+   * Insert a fully-formed shipment at the top of the list (most-recent-first).
+   * Used by the New Shipment wizard on Submit.
+   */
+  addShipment(shipment: Shipment) {
+    this.allShipments.update((prev) => [shipment, ...prev]);
+  }
+
   openPanel(id: string) {
     this.panelShipmentId.set(this.panelShipmentId() === id ? null : id);
   }

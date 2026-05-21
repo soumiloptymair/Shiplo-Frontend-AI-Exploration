@@ -10,18 +10,30 @@ import {
   Output,
   ViewChild,
   computed,
+  inject,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   BOX_SIZE_OPTIONS,
+  CARRIER_ACCOUNT_OPTIONS,
+  CARRIER_ADDONS,
+  CarrierAddOn,
+  CarrierRateOption,
   FREIGHT_TYPE_OPTIONS,
   FreightTypeOption,
+  LABEL_FORMAT_OPTIONS,
+  LabelFormat,
   NewShipmentCustomer,
   NewShipmentDraft,
+  NewShipmentLabel,
   NewShipmentSummary,
   PACKAGE_TYPE_OPTIONS,
+  PICKUP_WINDOW_OPTIONS,
   PackageTypeOption,
+  PickupWindow,
+  SAMPLE_CARRIER_RATES,
   SAMPLE_PRODUCT_OPTIONS,
   ShipmentTypeChoice,
   WIZARD_STEPS,
@@ -29,6 +41,8 @@ import {
   blankDraft,
   blankItem,
 } from '../../../core/models/new-shipment.model';
+import { ShipmentService } from '../../../core/services/shipment.service';
+import { Shipment } from '../../../core/models/shipment.model';
 
 /**
  * "Create New Shipment" modal — foundation for User Story ES-R8.
@@ -48,7 +62,7 @@ import {
 @Component({
   selector: 'app-new-shipment-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './new-shipment-modal.component.html',
 })
 export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnInit {
@@ -59,6 +73,8 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   @Input() initialDraft?: NewShipmentDraft;
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
 
+  private readonly shipmentService = inject(ShipmentService);
+
   /** Element that held focus before the modal opened; restored on close. */
   private previouslyFocused: HTMLElement | null = null;
 
@@ -67,6 +83,10 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   readonly PACKAGE_TYPES = PACKAGE_TYPE_OPTIONS;
   readonly BOX_SIZES = BOX_SIZE_OPTIONS;
   readonly PRODUCT_OPTIONS = SAMPLE_PRODUCT_OPTIONS;
+  readonly CARRIER_RATES = SAMPLE_CARRIER_RATES;
+  readonly CARRIER_ADDONS = CARRIER_ADDONS;
+  readonly LABEL_FORMATS = LABEL_FORMAT_OPTIONS;
+  readonly PICKUP_WINDOWS = PICKUP_WINDOW_OPTIONS;
 
   /** Draft form state held entirely in-memory for the foundation task. */
   draft = signal<NewShipmentDraft>(blankDraft());
@@ -233,6 +253,85 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   }
 
   // ============================================================
+  // Step 3 — Carrier & Add Ons mutators
+  // ============================================================
+
+  setCarrierRate(rateId: string) {
+    this.draft.update((d) => {
+      const rate = this.CARRIER_RATES.find((r) => r.id === rateId);
+      // When swapping carriers, reset the account selection so the user picks
+      // one that actually belongs to the new carrier.
+      const account =
+        rate && d.carrier.account &&
+        (CARRIER_ACCOUNT_OPTIONS[rate.carrier] ?? []).includes(d.carrier.account)
+          ? d.carrier.account
+          : '';
+      return { ...d, carrier: { ...d.carrier, rateId, account } };
+    });
+  }
+
+  setCarrierAccount(account: string) {
+    this.draft.update((d) => ({ ...d, carrier: { ...d.carrier, account } }));
+    this.openPicker.set(null);
+  }
+
+  toggleAddOn(key: CarrierAddOn['key']) {
+    this.draft.update((d) => ({
+      ...d,
+      carrier: {
+        ...d.carrier,
+        addOns: { ...d.carrier.addOns, [key]: !d.carrier.addOns[key] },
+      },
+    }));
+  }
+
+  selectedRate = computed<CarrierRateOption | undefined>(() =>
+    this.CARRIER_RATES.find((r) => r.id === this.draft().carrier.rateId),
+  );
+
+  /** Accounts available for the currently selected carrier (empty until a rate is picked). */
+  carrierAccountOptions = computed<string[]>(() => {
+    const rate = this.selectedRate();
+    return rate ? CARRIER_ACCOUNT_OPTIONS[rate.carrier] ?? [] : [];
+  });
+
+  addOnTotal = computed<number>(() => {
+    const flags = this.draft().carrier.addOns;
+    return this.CARRIER_ADDONS.reduce(
+      (sum, a) => (flags[a.key] ? sum + a.cost : sum),
+      0,
+    );
+  });
+
+  // ============================================================
+  // Step 4 — Label & Pickup mutators
+  // ============================================================
+
+  setLabelFormat(format: LabelFormat) {
+    this.draft.update((d) => ({ ...d, label: { ...d.label, format } }));
+  }
+
+  toggleSchedulePickup() {
+    this.draft.update((d) => ({
+      ...d,
+      label: { ...d.label, schedulePickup: !d.label.schedulePickup },
+    }));
+  }
+
+  setPickupDate(value: string) {
+    this.draft.update((d) => ({ ...d, label: { ...d.label, pickupDate: value } }));
+  }
+
+  setPickupWindow(value: PickupWindow) {
+    this.draft.update((d) => ({ ...d, label: { ...d.label, pickupWindow: value } }));
+    this.openPicker.set(null);
+  }
+
+  setLabelField(field: keyof NewShipmentLabel, value: string) {
+    this.draft.update((d) => ({ ...d, label: { ...d.label, [field]: value } as NewShipmentLabel }));
+  }
+
+  // ============================================================
   // Right-rail Summary — derived live from the draft.
   // ============================================================
 
@@ -243,8 +342,8 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
       0,
     );
     const packagingCost = this.boxFor(d.details.packaging.boxSizeLabel)?.cost ?? 0;
-    // Carrier pricing isn't wired up yet — leave at $0 per task scope.
-    const shipmentCost = 0;
+    const ratePrice = this.selectedRate()?.price ?? 0;
+    const shipmentCost = ratePrice + this.addOnTotal();
     const total = orderValue + shipmentCost + packagingCost;
     // Placeholder margin so the footer line isn't always blank.
     const profit = total > 0 ? Number((total * 0.18).toFixed(2)) : 0;
@@ -284,9 +383,63 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     if (n < 4) {
       this.currentStep.set((n + 1) as WizardStepNum);
     } else {
-      // Foundation: Submit just closes. Persistence is a follow-up task.
-      this.requestClose();
+      this.submit();
     }
+  }
+
+  /**
+   * Build a `Shipment` from the wizard draft and hand it to `ShipmentService.addShipment`.
+   * The new row appears at the top of the grid as a Pending shipment so the user sees
+   * their work persist immediately.
+   */
+  private submit() {
+    const d = this.draft();
+    const s = this.summary();
+    const rate = this.selectedRate();
+    const ts = Date.now();
+    const idSuffix = ts.toString(36);
+    const shipmentLabel = `#NEW-${ts}`;
+
+    const products = d.details.items
+      .filter((it) => it.productSku)
+      .map((it) => {
+        const p = this.productFor(it.productSku);
+        return {
+          sku: p?.sku ?? it.productSku,
+          name: p?.name ?? it.productSku,
+          qty: it.quantity,
+          unitValue: p?.unitValue ?? 0,
+        };
+      });
+
+    const shipment: Shipment = {
+      id: `s-new-${idSuffix}`,
+      shipmentId: shipmentLabel,
+      freightType: d.details.freightType || '',
+      orderRefId: shipmentLabel,
+      orderRefKind: d.details.shipmentType === 'return' ? 'return' : 'order',
+      status: 'Pending',
+      createdOn: this.formatToday(),
+      value: this.fmt(s.total),
+      source: 'Manual entry',
+      warehouse: 'KS Fulfilment center',
+      shipping: rate ? `${rate.carrier} ${rate.service}` : 'To be assigned',
+      method: d.label.schedulePickup ? 'Pickup' : 'Standard',
+      customer: 'New Customer',
+      tags: [],
+      products,
+      materials: { ...d.details.materials },
+    };
+
+    this.shipmentService.addShipment(shipment);
+    this.requestClose();
+  }
+
+  private formatToday(): string {
+    const d = new Date();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${mm}/${dd}/${d.getFullYear()}`;
   }
 
   /** Used by the template to swap the rightmost button label on step 4. */

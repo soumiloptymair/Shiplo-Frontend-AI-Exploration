@@ -108,16 +108,99 @@ export interface NewShipmentCustomer {
   country: string;
 }
 
-/**
- * Top-level draft. Steps 3–4 are intentionally open `Record`s so they can be
- * implemented later without reshaping. Subsequent tasks will replace them
- * with strongly-typed interfaces.
- */
+// ============================================================
+// Step 3 — Carrier & Add Ons
+// ============================================================
+
+/** A single carrier service rendered in the rate-shop list. */
+export interface CarrierRateOption {
+  id: string;
+  carrier: string;
+  service: string;
+  /** Human-readable ETA, e.g. "2 business days". */
+  eta: string;
+  /** Quoted price in USD. */
+  price: number;
+}
+
+export const SAMPLE_CARRIER_RATES: CarrierRateOption[] = [
+  { id: 'r-ups-ground',   carrier: 'UPS',   service: 'Ground',              eta: '3-5 business days', price: 12.40 },
+  { id: 'r-ups-3day',     carrier: 'UPS',   service: '3 Day Select',        eta: '3 business days',   price: 18.95 },
+  { id: 'r-ups-2day',     carrier: 'UPS',   service: '2nd Day Air',         eta: '2 business days',   price: 24.50 },
+  { id: 'r-fedex-ground', carrier: 'FedEx', service: 'Ground',              eta: '3-5 business days', price: 11.80 },
+  { id: 'r-fedex-2day',   carrier: 'FedEx', service: '2Day',                eta: '2 business days',   price: 22.95 },
+  { id: 'r-usps-priority',carrier: 'USPS',  service: 'Priority Mail',       eta: '2-3 business days', price: 9.65 },
+  { id: 'r-usps-express', carrier: 'USPS',  service: 'Priority Mail Express', eta: '1-2 business days', price: 28.40 },
+];
+
+/** Saved carrier accounts the user can bill against. */
+export const CARRIER_ACCOUNT_OPTIONS: Record<string, string[]> = {
+  UPS:   ['UPS — Main (#A1234)', 'UPS — West Coast (#A5571)'],
+  FedEx: ['FedEx — Main (#F9981)', 'FedEx — Returns (#F3320)'],
+  USPS:  ['USPS — Stamps.com (#S0042)'],
+};
+
+export interface CarrierAddOn {
+  key: 'signature' | 'insurance' | 'saturday' | 'adultSignature';
+  label: string;
+  /** Flat cost added to shipmentCost when checked. */
+  cost: number;
+}
+
+export const CARRIER_ADDONS: CarrierAddOn[] = [
+  { key: 'signature',      label: 'Signature Required',       cost: 4.50 },
+  { key: 'adultSignature', label: 'Adult Signature (21+)',    cost: 6.25 },
+  { key: 'insurance',      label: 'Insurance (declared value)', cost: 3.00 },
+  { key: 'saturday',       label: 'Saturday Delivery',        cost: 16.00 },
+];
+
+export interface NewShipmentCarrier {
+  /** `id` of the selected `CarrierRateOption`. */
+  rateId: string;
+  /** Carrier account label selected from `CARRIER_ACCOUNT_OPTIONS`. */
+  account: string;
+  /** Checked add-on keys. */
+  addOns: Record<CarrierAddOn['key'], boolean>;
+}
+
+// ============================================================
+// Step 4 — Label & Pickup
+// ============================================================
+
+export const LABEL_FORMAT_OPTIONS = [
+  { value: 'pdf-4x6',    label: 'PDF 4" × 6" (thermal)' },
+  { value: 'pdf-letter', label: 'PDF 8.5" × 11" (laser)' },
+  { value: 'zpl',        label: 'ZPL (Zebra)' },
+  { value: 'png',        label: 'PNG image' },
+] as const;
+export type LabelFormat = (typeof LABEL_FORMAT_OPTIONS)[number]['value'];
+
+export const PICKUP_WINDOW_OPTIONS = [
+  '8:00 AM – 10:00 AM',
+  '10:00 AM – 12:00 PM',
+  '12:00 PM – 2:00 PM',
+  '2:00 PM – 4:00 PM',
+  '4:00 PM – 6:00 PM',
+] as const;
+export type PickupWindow = (typeof PICKUP_WINDOW_OPTIONS)[number];
+
+export interface NewShipmentLabel {
+  format: LabelFormat;
+  schedulePickup: boolean;
+  pickupDate: string;
+  pickupWindow: PickupWindow | '';
+  pickupInstructions: string;
+  poNumber: string;
+  departmentNumber: string;
+  rmaNumber: string;
+}
+
+/** Top-level draft. */
 export interface NewShipmentDraft {
   details: NewShipmentDetails;
   customer: NewShipmentCustomer;
-  carrier: Record<string, unknown>;
-  label: Record<string, unknown>;
+  carrier: NewShipmentCarrier;
+  label: NewShipmentLabel;
 }
 
 export function blankCustomer(): NewShipmentCustomer {
@@ -206,7 +289,20 @@ export function blankDraft(): NewShipmentDraft {
       },
     },
     customer: blankCustomer(),
-    carrier: {},
-    label: {},
+    carrier: {
+      rateId: '',
+      account: '',
+      addOns: { signature: false, insurance: false, saturday: false, adultSignature: false },
+    },
+    label: {
+      format: 'pdf-4x6',
+      schedulePickup: false,
+      pickupDate: '',
+      pickupWindow: '',
+      pickupInstructions: '',
+      poNumber: '',
+      departmentNumber: '',
+      rmaNumber: '',
+    },
   };
 }

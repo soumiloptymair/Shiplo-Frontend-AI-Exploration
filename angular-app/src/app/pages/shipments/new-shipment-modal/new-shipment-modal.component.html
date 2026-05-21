@@ -507,21 +507,219 @@
           </div>
         </ng-container>
 
-        <!-- ----- Steps 3, 4: placeholder ----- -->
-        <ng-container *ngIf="currentStep() === 3 || currentStep() === 4">
-          <div class="flex h-full min-h-[400px] flex-col items-center justify-center text-center"
-            [attr.data-testid]="'placeholder-step-' + currentStep()">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#f6f9fb] text-[#7f9199]">
-              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/>
-              </svg>
+        <!-- ----- Step 3: Carrier & Add Ons ----- -->
+        <ng-container *ngIf="currentStep() === 3">
+          <div data-testid="step-3-carrier">
+            <h3 class="font-body text-[14px] font-medium text-[#0b1516]">Carrier &amp; Service</h3>
+            <p class="mt-1 font-body text-[12px] text-[#7f9199]">
+              Choose the carrier service for this shipment. Prices and ETAs come from your saved rate-shop accounts.
+            </p>
+
+            <!-- Rate-shop list -->
+            <div class="mt-4 overflow-hidden rounded-[6px] border border-[#e4eaed]"
+              role="radiogroup"
+              aria-label="Carrier rates"
+              data-testid="list-carrier-rates">
+              <div class="grid grid-cols-[32px_1fr_1fr_140px_100px] items-center gap-3 bg-[#f6f9fb] px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-[#7f9199]">
+                <span></span>
+                <span>Carrier</span>
+                <span>Service</span>
+                <span>ETA</span>
+                <span class="text-right">Price</span>
+              </div>
+              <label *ngFor="let rate of CARRIER_RATES"
+                [attr.data-testid]="'row-rate-' + rate.id"
+                class="grid grid-cols-[32px_1fr_1fr_140px_100px] cursor-pointer items-center gap-3 border-t border-[#e4eaed] px-3 py-3 text-[14px] transition-colors"
+                [ngClass]="draft().carrier.rateId === rate.id ? 'bg-[#e6f4f1]' : 'hover:bg-[#f6f9fb]'">
+                <input type="radio"
+                  name="carrier-rate"
+                  class="h-4 w-4 accent-[#008572]"
+                  [attr.data-testid]="'radio-rate-' + rate.id"
+                  [checked]="draft().carrier.rateId === rate.id"
+                  (change)="setCarrierRate(rate.id)"/>
+                <span class="font-medium text-[#0b1516]">{{ rate.carrier }}</span>
+                <span class="text-[#0b1516]">{{ rate.service }}</span>
+                <span class="text-[#45565b]">{{ rate.eta }}</span>
+                <span class="text-right font-medium text-[#0b1516]"
+                  [attr.data-testid]="'text-rate-price-' + rate.id">
+                  {{ fmt(rate.price) }}
+                </span>
+              </label>
             </div>
-            <p class="mt-4 font-body text-[16px] font-medium text-[#0b1516]">
-              {{ STEPS[currentStep() - 1].title }} — coming soon
-            </p>
-            <p class="mt-1 font-body text-[14px] text-[#7f9199]">
-              This step will be built in a follow-up.
-            </p>
+
+            <!-- Carrier account selector -->
+            <div class="mt-6 grid grid-cols-2 gap-6">
+              <div class="relative flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]">Carrier Account</label>
+                <button type="button"
+                  (click)="togglePicker('carrierAccount', $event)"
+                  [disabled]="!selectedRate()"
+                  data-testid="button-carrier-account"
+                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left disabled:cursor-not-allowed disabled:bg-[#f6f9fb] disabled:text-[#b8c6cc]">
+                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
+                    [ngClass]="draft().carrier.account ? 'text-[#0b1516]' : 'text-[#7f9199]'">
+                    {{ draft().carrier.account || (selectedRate() ? 'Select an account' : 'Pick a carrier first') }}
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'carrierAccount' && carrierAccountOptions().length"
+                  class="absolute left-0 top-[60px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  (click)="$event.stopPropagation()"
+                  data-testid="dropdown-carrier-account">
+                  <button *ngFor="let acct of carrierAccountOptions()"
+                    type="button"
+                    (click)="setCarrierAccount(acct)"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    {{ acct }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add-ons -->
+            <h3 class="mt-8 font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
+              Add Ons
+            </h3>
+            <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-[#e4eaed] pt-3">
+              <label *ngFor="let addon of CARRIER_ADDONS"
+                class="flex items-center justify-between gap-3 font-body text-[14px] text-[#0b1516]">
+                <span class="flex items-center gap-2">
+                  <input type="checkbox"
+                    [checked]="draft().carrier.addOns[addon.key]"
+                    (change)="toggleAddOn(addon.key)"
+                    [attr.data-testid]="'checkbox-addon-' + addon.key"
+                    class="h-4 w-4 rounded accent-[#008572]"/>
+                  {{ addon.label }}
+                </span>
+                <span class="text-[12px] text-[#45565b]">+{{ fmt(addon.cost) }}</span>
+              </label>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ----- Step 4: Label & Pickup ----- -->
+        <ng-container *ngIf="currentStep() === 4">
+          <div data-testid="step-4-label">
+            <!-- Label format -->
+            <h3 class="font-body text-[14px] font-medium text-[#0b1516]">Label Format</h3>
+            <div class="mt-3 grid grid-cols-2 gap-3" role="radiogroup" aria-label="Label format">
+              <label *ngFor="let opt of LABEL_FORMATS"
+                [attr.data-testid]="'option-label-format-' + opt.value"
+                class="flex cursor-pointer items-center gap-3 rounded-[4px] border px-3 py-3 text-[14px] transition-colors"
+                [ngClass]="draft().label.format === opt.value
+                  ? 'border-[#008572] bg-[#e6f4f1] text-[#0b1516]'
+                  : 'border-[#e4eaed] bg-white text-[#45565b] hover:bg-[#f6f9fb]'">
+                <input type="radio"
+                  name="label-format"
+                  class="h-4 w-4 accent-[#008572]"
+                  [checked]="draft().label.format === opt.value"
+                  (change)="setLabelFormat(opt.value)"/>
+                {{ opt.label }}
+              </label>
+            </div>
+
+            <!-- Pickup scheduling -->
+            <h3 class="mt-8 font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
+              Pickup
+            </h3>
+            <label class="mt-3 flex items-center gap-2 border-t border-[#e4eaed] pt-3 font-body text-[14px] text-[#0b1516]">
+              <input type="checkbox"
+                [checked]="draft().label.schedulePickup"
+                (change)="toggleSchedulePickup()"
+                data-testid="checkbox-schedule-pickup"
+                class="h-4 w-4 rounded accent-[#008572]"/>
+              Schedule a carrier pickup
+            </label>
+
+            <div *ngIf="draft().label.schedulePickup"
+              class="mt-4 grid grid-cols-2 gap-6"
+              data-testid="group-pickup-fields">
+              <div class="flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]" for="pickup-date">
+                  Pickup Date
+                </label>
+                <input id="pickup-date"
+                  type="date"
+                  [value]="draft().label.pickupDate"
+                  (input)="setPickupDate($any($event.target).value)"
+                  data-testid="input-pickup-date"
+                  class="h-10 rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none"/>
+              </div>
+              <div class="relative flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]">Pickup Window</label>
+                <button type="button"
+                  (click)="togglePicker('pickupWindow', $event)"
+                  data-testid="button-pickup-window"
+                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
+                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
+                    [ngClass]="draft().label.pickupWindow ? 'text-[#0b1516]' : 'text-[#7f9199]'">
+                    {{ draft().label.pickupWindow || 'Select a window' }}
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'pickupWindow'"
+                  class="absolute left-0 top-[60px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  (click)="$event.stopPropagation()"
+                  data-testid="dropdown-pickup-window">
+                  <button *ngFor="let w of PICKUP_WINDOWS"
+                    type="button"
+                    (click)="setPickupWindow(w)"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    {{ w }}
+                  </button>
+                </div>
+              </div>
+              <div class="col-span-2 flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]" for="pickup-instructions">
+                  Pickup Instructions
+                </label>
+                <textarea id="pickup-instructions"
+                  rows="2"
+                  [value]="draft().label.pickupInstructions"
+                  (input)="setLabelField('pickupInstructions', $any($event.target).value)"
+                  data-testid="input-pickup-instructions"
+                  placeholder="Loading dock, gate code, etc."
+                  class="rounded-[4px] border border-[#e4eaed] bg-white px-3 py-2 text-[14px] text-[#0b1516] outline-none"></textarea>
+              </div>
+            </div>
+
+            <!-- Reference fields -->
+            <h3 class="mt-8 font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
+              References
+            </h3>
+            <div class="mt-3 grid grid-cols-3 gap-6 border-t border-[#e4eaed] pt-3">
+              <div class="flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]" for="po-number">PO #</label>
+                <input id="po-number"
+                  type="text"
+                  [value]="draft().label.poNumber"
+                  (input)="setLabelField('poNumber', $any($event.target).value)"
+                  data-testid="input-po-number"
+                  class="h-10 rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none"/>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]" for="dept-number">Department #</label>
+                <input id="dept-number"
+                  type="text"
+                  [value]="draft().label.departmentNumber"
+                  (input)="setLabelField('departmentNumber', $any($event.target).value)"
+                  data-testid="input-department-number"
+                  class="h-10 rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none"/>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]" for="rma-number">RMA #</label>
+                <input id="rma-number"
+                  type="text"
+                  [value]="draft().label.rmaNumber"
+                  (input)="setLabelField('rmaNumber', $any($event.target).value)"
+                  data-testid="input-rma-number"
+                  class="h-10 rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none"/>
+              </div>
+            </div>
           </div>
         </ng-container>
       </main>
