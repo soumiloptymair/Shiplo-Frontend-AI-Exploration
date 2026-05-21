@@ -378,20 +378,20 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
           this.addressSuggestion.set(res);
           if (same) {
             this.addressVerifyState.set('matches');
-            this.addressVerifyMessage.set('Address verified with USPS.');
+            this.addressVerifyMessage.set('Address verified.');
           } else {
             this.addressVerifyState.set('suggested');
-            this.addressVerifyMessage.set('USPS suggests a standardized address.');
+            this.addressVerifyMessage.set('We found a standardized version of this address.');
           }
         },
         error: (err) => {
           const status = err?.status ?? 500;
           if (status === 503) {
             this.addressVerifyState.set('unconfigured');
-            this.addressVerifyMessage.set('USPS credentials not configured on the server.');
-          } else if (status === 400) {
+            this.addressVerifyMessage.set('Address verification is not configured on the server.');
+          } else if (status === 400 || status === 404) {
             this.addressVerifyState.set('invalid');
-            this.addressVerifyMessage.set('USPS could not match this address.');
+            this.addressVerifyMessage.set('We could not match this address. Double-check the street, city, state, and zip.');
           } else {
             this.addressVerifyState.set('error');
             this.addressVerifyMessage.set('Address verification is unavailable right now.');
@@ -416,7 +416,7 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
       },
     }));
     this.addressVerifyState.set('matches');
-    this.addressVerifyMessage.set('Standardized USPS address applied.');
+    this.addressVerifyMessage.set('Standardized address applied.');
     this.addressSuggestion.set(null);
   }
 

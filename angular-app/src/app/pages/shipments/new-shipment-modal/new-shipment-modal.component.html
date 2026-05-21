@@ -633,7 +633,7 @@
                 <div class="flex flex-col gap-2">
                   <div class="flex items-center justify-between gap-3">
                     <p class="font-body text-[12px] text-[#7f9199]">
-                      Tip: enter a 5-digit zip code to auto-fill City and State from USPS.
+                      Tip: enter a 5-digit zip code to auto-fill City and State.
                     </p>
                     <button type="button"
                       (click)="verifyAddress()"
@@ -644,7 +644,7 @@
                         <path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z" stroke="currentColor" stroke-width="1.6"/>
                         <circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/>
                       </svg>
-                      {{ addressVerifyState() === 'verifying' ? 'Verifying…' : 'Verify with USPS' }}
+                      {{ addressVerifyState() === 'verifying' ? 'Verifying…' : 'Verify address' }}
                     </button>
                   </div>
 
