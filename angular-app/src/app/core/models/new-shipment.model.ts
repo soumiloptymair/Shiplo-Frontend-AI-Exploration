@@ -167,19 +167,51 @@ export const CARRIER_ACCOUNT_OPTIONS: Record<string, string[]> = {
   USPS:  ['USPS — Stamps.com (#S0042)'],
 };
 
+/**
+ * Add-on key vocabulary. `insurance` is rendered as its own top-level
+ * checkbox in Step 3 (Figma 27004-16323); every other key is selectable
+ * from the "Select from Add Ons" multi-select dropdown.
+ */
+export type CarrierAddOnKey =
+  | 'insurance'
+  | 'signature'
+  | 'adultSignature'
+  | 'saturday'
+  | 'holdAtLocation'
+  | 'deliveryConfirm'
+  | 'returnReceipt'
+  | 'fragileHandling'
+  | 'verbalConfirm'
+  | 'tempControl'
+  | 'whiteGlove'
+  | 'specialHandling'
+  | 'photoProof';
+
 export interface CarrierAddOn {
-  key: 'signature' | 'insurance' | 'saturday' | 'adultSignature';
+  key: CarrierAddOnKey;
   label: string;
   /** Flat cost added to shipmentCost when checked. */
   cost: number;
 }
 
 export const CARRIER_ADDONS: CarrierAddOn[] = [
-  { key: 'signature',      label: 'Signature Required',       cost: 4.50 },
-  { key: 'adultSignature', label: 'Adult Signature (21+)',    cost: 6.25 },
-  { key: 'insurance',      label: 'Insurance (declared value)', cost: 3.00 },
-  { key: 'saturday',       label: 'Saturday Delivery',        cost: 16.00 },
+  { key: 'insurance',       label: 'Insurance (declared value)', cost: 3.00 },
+  { key: 'signature',       label: 'Signature Required',         cost: 4.50 },
+  { key: 'adultSignature',  label: 'Adult Signature (21+)',      cost: 6.25 },
+  { key: 'saturday',        label: 'Saturday Delivery',          cost: 16.00 },
+  { key: 'holdAtLocation',  label: 'Hold at Location',           cost: 2.50 },
+  { key: 'deliveryConfirm', label: 'Delivery Confirmation',      cost: 1.25 },
+  { key: 'returnReceipt',   label: 'Return Receipt',             cost: 3.75 },
+  { key: 'fragileHandling', label: 'Fragile Handling',           cost: 5.00 },
+  { key: 'verbalConfirm',   label: 'Verbal Confirmation',        cost: 1.50 },
+  { key: 'tempControl',     label: 'Temperature Control',        cost: 12.00 },
+  { key: 'whiteGlove',      label: 'White-Glove Delivery',       cost: 25.00 },
+  { key: 'specialHandling', label: 'Special Handling',           cost: 7.50 },
+  { key: 'photoProof',      label: 'Photo Proof of Delivery',    cost: 1.00 },
 ];
+
+/** Hard cap on the number of add-ons a single shipment can carry. */
+export const MAX_ADD_ONS = 20;
 
 export interface NewShipmentCarrier {
   /** `id` of the selected `CarrierRateOption`. */
@@ -188,8 +220,8 @@ export interface NewShipmentCarrier {
   account: string;
   /** Origin warehouse for the shipment — selected from `WAREHOUSE_OPTIONS`. */
   warehouse: WarehouseName | '';
-  /** Checked add-on keys. */
-  addOns: Record<CarrierAddOn['key'], boolean>;
+  /** Checked add-on keys. Sparse: only `true` flags are meaningful. */
+  addOns: Partial<Record<CarrierAddOnKey, boolean>>;
 }
 
 // ============================================================
@@ -323,7 +355,7 @@ export function blankDraft(): NewShipmentDraft {
       rateId: '',
       account: '',
       warehouse: '',
-      addOns: { signature: false, insurance: false, saturday: false, adultSignature: false },
+      addOns: {},
     },
     label: {
       format: 'pdf-4x6',

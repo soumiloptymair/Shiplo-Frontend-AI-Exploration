@@ -21,7 +21,9 @@ import {
   CARRIER_ADDONS,
   CARRIER_OPTIONS,
   CarrierAddOn,
+  CarrierAddOnKey,
   CarrierName,
+  MAX_ADD_ONS,
   CarrierRateOption,
   FREIGHT_TYPE_OPTIONS,
   FreightTypeOption,
@@ -142,6 +144,9 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   readonly PRODUCT_OPTIONS = SAMPLE_PRODUCT_OPTIONS;
   readonly CARRIER_RATES = SAMPLE_CARRIER_RATES;
   readonly CARRIER_ADDONS = CARRIER_ADDONS;
+  /** Add-ons shown in the "Select from Add Ons" multi-select (insurance is a separate top-level checkbox). */
+  readonly SELECTABLE_ADDONS = CARRIER_ADDONS.filter((a) => a.key !== 'insurance');
+  readonly MAX_ADDONS = MAX_ADD_ONS;
   readonly WAREHOUSES = WAREHOUSE_OPTIONS;
   readonly CARRIERS = CARRIER_OPTIONS;
   readonly SERVICE_TYPES = SERVICE_TYPE_OPTIONS;
@@ -774,15 +779,30 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   /** Receiver postal code echoed in the "Shipping to" read-only field. */
   readonly shippingToZip = computed(() => this.draft().customer.postalCode || '—');
 
-  toggleAddOn(key: CarrierAddOn['key']) {
+  toggleAddOn(key: CarrierAddOnKey) {
+    const current = !!this.draft().carrier.addOns[key];
+    // Block check if already at the cap; uncheck is always allowed.
+    if (!current && this.selectedAddOnCount() >= this.MAX_ADDONS) return;
     this.draft.update((d) => ({
       ...d,
       carrier: {
         ...d.carrier,
-        addOns: { ...d.carrier.addOns, [key]: !d.carrier.addOns[key] },
+        addOns: { ...d.carrier.addOns, [key]: !current },
       },
     }));
   }
+
+  /** True when the user has the insurance add-on checked. */
+  readonly insuranceChecked = computed<boolean>(() => !!this.draft().carrier.addOns.insurance);
+
+  /** All currently checked add-ons (in catalog order). */
+  readonly selectedAddOns = computed<CarrierAddOn[]>(() => {
+    const flags = this.draft().carrier.addOns;
+    return this.CARRIER_ADDONS.filter((a) => flags[a.key]);
+  });
+
+  /** Total number of checked add-ons, used by the "Selected (N/20)" counter. */
+  readonly selectedAddOnCount = computed<number>(() => this.selectedAddOns().length);
 
   selectedRate = computed<CarrierRateOption | undefined>(() =>
     this.CARRIER_RATES.find((r) => r.id === this.draft().carrier.rateId),
@@ -794,14 +814,14 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     return rate ? CARRIER_ACCOUNT_OPTIONS[rate.carrier] ?? [] : [];
   });
 
-  /**
-   * Add-on cost. The Add-Ons UI was removed from Step 3 (Figma 27004-12245),
-   * so users can no longer see or edit these flags. Zero out the cost here to
-   * avoid invisible charges from a restored saved-quote draft that still has
-   * legacy add-on flags set. The flags themselves stay in the draft for
-   * back-compat with quote round-tripping.
-   */
-  addOnTotal = computed<number>(() => 0);
+  /** Sum of the flat costs of every checked add-on (Figma 27004-16323). */
+  addOnTotal = computed<number>(() => {
+    const flags = this.draft().carrier.addOns;
+    return this.CARRIER_ADDONS.reduce(
+      (sum, a) => (flags[a.key] ? sum + a.cost : sum),
+      0,
+    );
+  });
 
   // ============================================================
   // Step 4 — Label & Pickup mutators

@@ -1041,6 +1041,79 @@
                 No carrier services match the selected filters.
               </div>
             </div>
+
+            <!-- ===== ADD ONS section (Figma 27004-16323) ===== -->
+            <h3 class="mt-8 font-body text-[11px] font-semibold uppercase tracking-[0.06em] text-[#7f9199]">
+              Add Ons
+            </h3>
+            <div class="mt-2 border-t border-[#e4eaed] pt-4">
+              <!-- Add Insurance (top-level checkbox) -->
+              <label class="flex w-fit cursor-pointer items-center gap-2 font-body text-[14px] text-[#0b1516]"
+                data-testid="label-add-insurance">
+                <input type="checkbox"
+                  class="h-4 w-4 rounded accent-[#008572]"
+                  [checked]="insuranceChecked()"
+                  (change)="toggleAddOn('insurance')"
+                  data-testid="checkbox-add-insurance"/>
+                Add Insurance
+              </label>
+
+              <!-- Select from Add Ons (multi-select) -->
+              <div class="relative mt-4 max-w-[420px] flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]">
+                  Select from Add Ons
+                </label>
+                <button type="button"
+                  (click)="togglePicker('addOns', $event)"
+                  data-testid="button-addons"
+                  class="mt-1 flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
+                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
+                    [ngClass]="selectedAddOnCount() > (insuranceChecked() ? 1 : 0)
+                      ? 'text-[#0b1516]'
+                      : 'text-[#7f9199]'">
+                    <ng-container *ngIf="selectedAddOnCount() - (insuranceChecked() ? 1 : 0) as picked; else placeholder">
+                      <ng-container *ngIf="picked > 0; else placeholder">
+                        {{ picked }} selected
+                      </ng-container>
+                    </ng-container>
+                    <ng-template #placeholder>Select</ng-template>
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+
+                <div *ngIf="openPicker() === 'addOns'"
+                  class="absolute left-0 top-[68px] z-20 w-full overflow-hidden rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  (click)="$event.stopPropagation()"
+                  data-testid="dropdown-addons">
+                  <div class="max-h-[260px] overflow-y-auto">
+                    <label *ngFor="let a of SELECTABLE_ADDONS"
+                      [attr.data-testid]="'option-addon-' + a.key"
+                      class="flex cursor-pointer items-center justify-between gap-3 px-3 py-2 text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]"
+                      [class.cursor-not-allowed]="!draft().carrier.addOns[a.key] && selectedAddOnCount() >= MAX_ADDONS"
+                      [class.opacity-50]="!draft().carrier.addOns[a.key] && selectedAddOnCount() >= MAX_ADDONS">
+                      <span class="flex items-center gap-2">
+                        <input type="checkbox"
+                          class="h-4 w-4 rounded accent-[#008572]"
+                          [checked]="!!draft().carrier.addOns[a.key]"
+                          [disabled]="!draft().carrier.addOns[a.key] && selectedAddOnCount() >= MAX_ADDONS"
+                          (change)="toggleAddOn(a.key)"
+                          [attr.data-testid]="'checkbox-addon-' + a.key"/>
+                        {{ a.label }}
+                      </span>
+                      <span class="text-[12px] text-[#7f9199]">+{{ fmt(a.cost) }}</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selected (N/20) counter -->
+              <p class="mt-3 font-body text-[13px] font-semibold text-[#0b1516]"
+                data-testid="text-addons-selected-count">
+                Selected ({{ selectedAddOnCount() }}/{{ MAX_ADDONS }})
+              </p>
+            </div>
           </div>
         </ng-container>
 
