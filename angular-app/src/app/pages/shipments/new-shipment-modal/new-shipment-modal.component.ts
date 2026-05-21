@@ -15,6 +15,7 @@ import {
   BOX_SIZE_OPTIONS,
   FREIGHT_TYPE_OPTIONS,
   FreightTypeOption,
+  NewShipmentCustomer,
   NewShipmentDraft,
   NewShipmentSummary,
   PACKAGE_TYPE_OPTIONS,
@@ -172,6 +173,26 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  // ============================================================
+  // Step 2 — Customer Information mutators
+  // ============================================================
+
+  setCustomerField<K extends keyof NewShipmentCustomer>(
+    key: K,
+    value: NewShipmentCustomer[K],
+  ) {
+    this.draft.update((d) => ({
+      ...d,
+      customer: { ...d.customer, [key]: value },
+    }));
+  }
+
+  /** Inputs feed raw `string` values; this trampoline keeps the template terse. */
+  onCustomerInput(key: keyof NewShipmentCustomer, evt: Event) {
+    const value = (evt.target as HTMLInputElement).value;
+    this.setCustomerField(key, value);
+  }
+
   toggleMaterial(key: keyof NewShipmentDraft['details']['materials']) {
     this.draft.update((d) => ({
       ...d,
@@ -252,6 +273,7 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy {
   }
 
   continueOrSubmit() {
+    if (!this.canContinue()) return;
     const n = this.currentStep();
     if (n < 4) {
       this.currentStep.set((n + 1) as WizardStepNum);
@@ -263,6 +285,23 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy {
 
   /** Used by the template to swap the rightmost button label on step 4. */
   readonly primaryLabel = computed(() => (this.currentStep() === 4 ? 'Submit' : 'Continue'));
+
+  /**
+   * Whether the Continue / Submit button is enabled for the active step.
+   * Step 2 requires all contact + address fields except `company` / `street2`.
+   * Other steps don't gate yet — that lands with their own task.
+   */
+  readonly canContinue = computed(() => {
+    if (this.currentStep() !== 2) return true;
+    const c = this.draft().customer;
+    const required: (keyof NewShipmentCustomer)[] = [
+      'name', 'email', 'phone',
+      'street1', 'city', 'state', 'postalCode', 'country',
+    ];
+    if (!required.every((k) => c[k].trim().length > 0)) return false;
+    // Minimal email shape check so obvious typos can't slip past.
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email);
+  });
 
   requestClose() {
     this.openPicker.set(null);

@@ -380,8 +380,127 @@
           </div>
         </ng-container>
 
-        <!-- ----- Steps 2, 3, 4: placeholder ----- -->
-        <ng-container *ngIf="currentStep() !== 1">
+        <!-- ----- Step 2: Customer Information ----- -->
+        <ng-container *ngIf="currentStep() === 2">
+          <div data-testid="form-customer-info">
+            <h3 class="font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
+              Contact
+            </h3>
+            <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-4">
+              <div class="flex flex-col gap-1">
+                <label for="customer-name" class="font-body text-[12px] font-medium text-[#45565b]">
+                  Full Name <span class="text-[#cb2b2b]">*</span>
+                </label>
+                <input id="customer-name" type="text" autocomplete="name"
+                  [value]="draft().customer.name"
+                  (input)="onCustomerInput('name', $event)"
+                  data-testid="input-customer-name"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="customer-company" class="font-body text-[12px] font-medium text-[#45565b]">
+                  Company
+                </label>
+                <input id="customer-company" type="text" autocomplete="organization"
+                  [value]="draft().customer.company"
+                  (input)="onCustomerInput('company', $event)"
+                  data-testid="input-customer-company"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="customer-email" class="font-body text-[12px] font-medium text-[#45565b]">
+                  Email <span class="text-[#cb2b2b]">*</span>
+                </label>
+                <input id="customer-email" type="email" autocomplete="email"
+                  [value]="draft().customer.email"
+                  (input)="onCustomerInput('email', $event)"
+                  data-testid="input-customer-email"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="customer-phone" class="font-body text-[12px] font-medium text-[#45565b]">
+                  Phone <span class="text-[#cb2b2b]">*</span>
+                </label>
+                <input id="customer-phone" type="tel" autocomplete="tel"
+                  [value]="draft().customer.phone"
+                  (input)="onCustomerInput('phone', $event)"
+                  data-testid="input-customer-phone"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <h3 class="font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
+              Shipping Address
+            </h3>
+            <div class="mt-3 grid grid-cols-6 gap-x-6 gap-y-4">
+              <div class="col-span-6 flex flex-col gap-1">
+                <label for="customer-street1" class="font-body text-[12px] font-medium text-[#45565b]">
+                  Street Address <span class="text-[#cb2b2b]">*</span>
+                </label>
+                <input id="customer-street1" type="text" autocomplete="address-line1"
+                  [value]="draft().customer.street1"
+                  (input)="onCustomerInput('street1', $event)"
+                  data-testid="input-customer-street1"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+              <div class="col-span-6 flex flex-col gap-1">
+                <label for="customer-street2" class="font-body text-[12px] font-medium text-[#45565b]">
+                  Apt, Suite, Unit (optional)
+                </label>
+                <input id="customer-street2" type="text" autocomplete="address-line2"
+                  [value]="draft().customer.street2"
+                  (input)="onCustomerInput('street2', $event)"
+                  data-testid="input-customer-street2"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+              <div class="col-span-3 flex flex-col gap-1">
+                <label for="customer-city" class="font-body text-[12px] font-medium text-[#45565b]">
+                  City <span class="text-[#cb2b2b]">*</span>
+                </label>
+                <input id="customer-city" type="text" autocomplete="address-level2"
+                  [value]="draft().customer.city"
+                  (input)="onCustomerInput('city', $event)"
+                  data-testid="input-customer-city"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+              <div class="col-span-1 flex flex-col gap-1">
+                <label for="customer-state" class="font-body text-[12px] font-medium text-[#45565b]">
+                  State <span class="text-[#cb2b2b]">*</span>
+                </label>
+                <input id="customer-state" type="text" autocomplete="address-level1" maxlength="3"
+                  [value]="draft().customer.state"
+                  (input)="onCustomerInput('state', $event)"
+                  data-testid="input-customer-state"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] uppercase text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+              <div class="col-span-2 flex flex-col gap-1">
+                <label for="customer-postal" class="font-body text-[12px] font-medium text-[#45565b]">
+                  ZIP / Postal Code <span class="text-[#cb2b2b]">*</span>
+                </label>
+                <input id="customer-postal" type="text" autocomplete="postal-code"
+                  [value]="draft().customer.postalCode"
+                  (input)="onCustomerInput('postalCode', $event)"
+                  data-testid="input-customer-postal"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+              <div class="col-span-6 flex flex-col gap-1">
+                <label for="customer-country" class="font-body text-[12px] font-medium text-[#45565b]">
+                  Country <span class="text-[#cb2b2b]">*</span>
+                </label>
+                <input id="customer-country" type="text" autocomplete="country-name"
+                  [value]="draft().customer.country"
+                  (input)="onCustomerInput('country', $event)"
+                  data-testid="input-customer-country"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white px-3 text-[14px] text-[#0b1516] outline-none focus:border-[#008572]"/>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ----- Steps 3, 4: placeholder ----- -->
+        <ng-container *ngIf="currentStep() === 3 || currentStep() === 4">
           <div class="flex h-full min-h-[400px] flex-col items-center justify-center text-center"
             [attr.data-testid]="'placeholder-step-' + currentStep()">
             <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#f6f9fb] text-[#7f9199]">
@@ -474,8 +593,9 @@
         </button>
         <button type="button"
           (click)="continueOrSubmit()"
+          [disabled]="!canContinue()"
           data-testid="button-continue-step"
-          class="inline-flex h-10 items-center rounded-[4px] bg-[#008572] px-4 font-body text-[14px] font-medium text-white hover:bg-[#006a5a]">
+          class="inline-flex h-10 items-center rounded-[4px] bg-[#008572] px-4 font-body text-[14px] font-medium text-white hover:bg-[#006a5a] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#008572]">
           {{ primaryLabel() }}
         </button>
       </div>

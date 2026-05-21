@@ -89,15 +89,50 @@ export interface NewShipmentDetails {
 }
 
 /**
- * Top-level draft. Steps 2–4 are intentionally open `Record`s so the foundation
- * task can ship without locking in their shape. Subsequent tasks will replace
- * them with strongly-typed interfaces.
+ * Step-2 form state — recipient address + contact for the shipment.
+ *
+ * Required fields (gate the wizard's Continue button): `name`, `email`,
+ * `phone`, `street1`, `city`, `state`, `postalCode`, `country`. `company`
+ * and `street2` are optional.
+ */
+export interface NewShipmentCustomer {
+  name: string;
+  company: string;
+  email: string;
+  phone: string;
+  street1: string;
+  street2: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
+/**
+ * Top-level draft. Steps 3–4 are intentionally open `Record`s so they can be
+ * implemented later without reshaping. Subsequent tasks will replace them
+ * with strongly-typed interfaces.
  */
 export interface NewShipmentDraft {
   details: NewShipmentDetails;
-  customer: Record<string, unknown>;
+  customer: NewShipmentCustomer;
   carrier: Record<string, unknown>;
   label: Record<string, unknown>;
+}
+
+export function blankCustomer(): NewShipmentCustomer {
+  return {
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    street1: '',
+    street2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'United States',
+  };
 }
 
 /** Right-rail Summary panel values derived from the draft (all USD). */
@@ -152,7 +187,7 @@ export function blankDraft(): NewShipmentDraft {
         perishable: false,
       },
     },
-    customer: {},
+    customer: blankCustomer(),
     carrier: {},
     label: {},
   };
