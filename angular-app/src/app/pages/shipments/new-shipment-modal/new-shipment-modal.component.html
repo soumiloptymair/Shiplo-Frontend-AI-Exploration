@@ -1,0 +1,459 @@
+<!--
+  Create New Shipment modal — Figma `unEpC0FcuWKbB5yO1m7OyX` node `27004:10264`.
+  Dialog 1312×732 over 40%-black backdrop. Three-region body:
+   • Left rail   = light-blue 4-step wizard.
+   • Main        = white form area (only step 1 is fully built).
+   • Right rail  = light-blue live Summary panel.
+  Footer holds Cancel on the left, Save as Quote / Back / Continue on the right.
+-->
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-6"
+  (click)="onBackdrop($event)"
+  data-testid="modal-new-shipment-backdrop">
+  <div
+    #dialogRoot
+    class="relative flex h-[732px] max-h-[95vh] w-[1312px] max-w-[98vw] flex-col overflow-hidden rounded-lg bg-white shadow-[0_1px_16px_rgba(0,0,0,0.25)]"
+    (click)="onDialogClick(); $event.stopPropagation()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="new-shipment-title"
+    data-testid="modal-new-shipment">
+
+    <!-- ===================== Header ===================== -->
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#e4eaed] px-6">
+      <h2 id="new-shipment-title"
+        class="font-body text-[18px] font-semibold leading-[1.43] text-[#0b1516]"
+        data-testid="text-new-shipment-title">
+        New Shipment
+      </h2>
+      <button type="button"
+        (click)="requestClose()"
+        aria-label="Close"
+        data-testid="button-close-new-shipment"
+        class="flex h-8 w-8 items-center justify-center rounded-full text-[#45565b] hover:bg-[#f6f9fb]">
+        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- ===================== Body ===================== -->
+    <div class="flex min-h-0 flex-1">
+
+      <!-- ===== Left rail: 4-step wizard ===== -->
+      <nav aria-label="Wizard steps"
+        class="flex w-[200px] shrink-0 flex-col gap-4 bg-[#f6f9fb] px-5 py-6"
+        data-testid="wizard-steps">
+        <ng-container *ngFor="let s of STEPS; let i = index">
+          <button type="button"
+            (click)="goToStep(s.num)"
+            [attr.aria-current]="currentStep() === s.num ? 'step' : null"
+            [attr.data-testid]="'button-step-' + s.num"
+            class="group flex items-start gap-3 text-left">
+            <!-- Numbered circle -->
+            <span class="mt-[2px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[12px] font-medium leading-none transition-colors"
+              [ngClass]="currentStep() === s.num
+                ? 'border-[#008572] bg-[#008572] text-white'
+                : 'border-[#b8c6cc] bg-white text-[#45565b]'">
+              {{ s.num }}
+            </span>
+            <!-- Title + subtitle -->
+            <span class="flex flex-col leading-tight">
+              <span class="font-body text-[14px] leading-[1.43] transition-colors"
+                [ngClass]="currentStep() === s.num ? 'font-semibold text-[#0b1516]' : 'font-medium text-[#45565b]'">
+                {{ s.title }}
+              </span>
+              <span class="font-body text-[12px] leading-[1.4] text-[#7f9199]">
+                {{ s.subtitle }}
+              </span>
+            </span>
+          </button>
+          <!-- Dashed connector between rows (skip after the last step) -->
+          <div *ngIf="i < STEPS.length - 1"
+            class="ml-[11px] h-4 w-px border-l border-dashed border-[#b8c6cc]"></div>
+        </ng-container>
+      </nav>
+
+      <!-- ===== Main content: active step ===== -->
+      <main class="min-w-0 flex-1 overflow-y-auto bg-white px-8 py-6">
+
+        <!-- ----- Step 1: Shipment Details ----- -->
+        <ng-container *ngIf="currentStep() === 1">
+
+          <!-- Shipment Type + Freight Type row -->
+          <div class="grid grid-cols-2 gap-6">
+            <div class="flex flex-col gap-2">
+              <label class="font-body text-[12px] font-medium text-[#45565b]">Shipment Type</label>
+              <div class="inline-flex h-10 w-fit items-center rounded-[4px] border border-[#e4eaed] bg-white p-[2px]"
+                data-testid="toggle-shipment-type">
+                <button type="button"
+                  (click)="setShipmentType('order')"
+                  [attr.aria-pressed]="draft().details.shipmentType === 'order'"
+                  data-testid="button-shipment-type-order"
+                  class="flex h-full items-center justify-center rounded-[4px] px-4 text-[14px] leading-none transition-colors"
+                  [ngClass]="draft().details.shipmentType === 'order'
+                    ? 'bg-[#008572] font-medium text-white'
+                    : 'font-normal text-[#45565b] hover:bg-[#f6f9fb]'">
+                  Order
+                </button>
+                <button type="button"
+                  (click)="setShipmentType('return')"
+                  [attr.aria-pressed]="draft().details.shipmentType === 'return'"
+                  data-testid="button-shipment-type-return"
+                  class="flex h-full items-center justify-center rounded-[4px] px-4 text-[14px] leading-none transition-colors"
+                  [ngClass]="draft().details.shipmentType === 'return'
+                    ? 'bg-[#008572] font-medium text-white'
+                    : 'font-normal text-[#45565b] hover:bg-[#f6f9fb]'">
+                  Return
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-body text-[12px] font-medium text-[#45565b]">Freight Type</label>
+              <div class="relative">
+                <button type="button"
+                  (click)="togglePicker('freight', $event)"
+                  data-testid="button-freight-type"
+                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
+                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
+                    [ngClass]="draft().details.freightType ? 'text-[#0b1516]' : 'text-[#7f9199]'">
+                    {{ draft().details.freightType || 'Select' }}
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'freight'"
+                  class="absolute left-0 top-11 z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  (click)="$event.stopPropagation()"
+                  data-testid="dropdown-freight-type">
+                  <button *ngFor="let f of FREIGHT_TYPES"
+                    type="button"
+                    (click)="setFreightType(f)"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    {{ f }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Items section -->
+          <div class="mt-6">
+            <h3 class="font-body text-[14px] font-medium text-[#0b1516]">Items</h3>
+
+            <!-- Column headers -->
+            <div class="mt-3 grid grid-cols-[1fr_120px_120px_80px] items-end gap-4 border-b border-[#e4eaed] pb-2">
+              <span class="font-body text-[12px] font-medium text-[#45565b]">Product Name</span>
+              <span class="font-body text-[12px] font-medium text-[#45565b]">Quantity</span>
+              <span class="font-body text-[12px] font-medium text-[#45565b]">SKU</span>
+              <span class="font-body text-[12px] font-medium text-[#45565b]">Value</span>
+            </div>
+
+            <!-- Item rows -->
+            <div *ngFor="let item of draft().details.items; let i = index; trackBy: trackById"
+              class="grid grid-cols-[1fr_120px_120px_80px] items-center gap-4 py-3"
+              [attr.data-testid]="'row-item-' + i">
+              <!-- Product Name select -->
+              <div class="relative">
+                <button type="button"
+                  (click)="togglePicker('item:' + item.id, $event)"
+                  [attr.data-testid]="'button-item-product-' + i"
+                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
+                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
+                    [ngClass]="item.productSku ? 'text-[#0b1516]' : 'text-[#7f9199]'">
+                    {{ productFor(item.productSku)?.name || 'Select' }}
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'item:' + item.id"
+                  class="absolute left-0 top-11 z-20 max-h-64 w-full overflow-y-auto rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  (click)="$event.stopPropagation()">
+                  <button *ngFor="let p of PRODUCT_OPTIONS"
+                    type="button"
+                    (click)="setItemProduct(item.id, p.sku)"
+                    class="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    <span class="truncate">{{ p.name }}</span>
+                    <span class="text-[12px] text-[#7f9199]">{{ p.sku }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quantity stepper -->
+              <div class="relative">
+                <input type="number"
+                  min="0"
+                  [value]="item.quantity"
+                  (input)="setItemQuantity(item.id, $any($event.target).value)"
+                  [attr.data-testid]="'input-item-qty-' + i"
+                  class="h-10 w-full rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-7 text-[14px] text-[#0b1516] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"/>
+                <div class="absolute right-1 top-1/2 flex -translate-y-1/2 flex-col">
+                  <button type="button"
+                    (click)="incrementItemQty(item.id, 1)"
+                    [attr.data-testid]="'button-item-qty-up-' + i"
+                    class="flex h-4 w-5 items-center justify-center text-[#45565b] hover:text-[#0b1516]"
+                    aria-label="Increase quantity">
+                    <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
+                  </button>
+                  <button type="button"
+                    (click)="incrementItemQty(item.id, -1)"
+                    [attr.data-testid]="'button-item-qty-down-' + i"
+                    class="flex h-4 w-5 items-center justify-center text-[#45565b] hover:text-[#0b1516]"
+                    aria-label="Decrease quantity">
+                    <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- SKU readout -->
+              <span class="font-body text-[14px] text-[#0b1516]"
+                [attr.data-testid]="'text-item-sku-' + i">
+                {{ productFor(item.productSku)?.sku || '-' }}
+              </span>
+
+              <!-- Value readout -->
+              <span class="font-body text-[14px] text-[#0b1516]"
+                [attr.data-testid]="'text-item-value-' + i">
+                {{ fmt(itemValue(item.quantity, item.productSku)) }}
+              </span>
+            </div>
+
+            <!-- + Add Item -->
+            <button type="button"
+              (click)="addItem()"
+              data-testid="button-add-item"
+              class="mt-2 inline-flex items-center gap-1 font-body text-[14px] font-medium text-[#008572] hover:text-[#006a5a]">
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/>
+              </svg>
+              Add Item
+            </button>
+          </div>
+
+          <!-- PACKAGING section -->
+          <div class="mt-8">
+            <h3 class="font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
+              Packaging
+            </h3>
+            <div class="mt-3 grid grid-cols-[1fr_1fr_80px] items-end gap-4">
+              <!-- Package Type -->
+              <div class="relative flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]">Package Type</label>
+                <button type="button"
+                  (click)="togglePicker('pkgType', $event)"
+                  data-testid="button-package-type"
+                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
+                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
+                    [ngClass]="draft().details.packaging.packageType ? 'text-[#0b1516]' : 'text-[#7f9199]'">
+                    {{ draft().details.packaging.packageType || 'Select' }}
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'pkgType'"
+                  class="absolute left-0 top-[60px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  (click)="$event.stopPropagation()">
+                  <button *ngFor="let pt of PACKAGE_TYPES"
+                    type="button"
+                    (click)="setPackageType(pt)"
+                    class="flex w-full items-center px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    {{ pt }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Box Size -->
+              <div class="relative flex flex-col gap-1">
+                <label class="font-body text-[12px] font-medium text-[#45565b]">Box Size</label>
+                <button type="button"
+                  (click)="togglePicker('box', $event)"
+                  data-testid="button-box-size"
+                  class="flex h-10 w-full items-center justify-between gap-2 rounded-[4px] border border-[#e4eaed] bg-white pl-3 pr-2 text-left">
+                  <span class="flex-1 truncate text-[14px] leading-[1.43]"
+                    [ngClass]="draft().details.packaging.boxSizeLabel ? 'text-[#0b1516]' : 'text-[#7f9199]'">
+                    {{ draft().details.packaging.boxSizeLabel || 'Select' }}
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+                <div *ngIf="openPicker() === 'box'"
+                  class="absolute left-0 top-[60px] z-20 w-full rounded-[4px] border border-[#e4eaed] bg-white py-1 shadow-lg"
+                  (click)="$event.stopPropagation()">
+                  <button *ngFor="let b of BOX_SIZES"
+                    type="button"
+                    (click)="setBoxSize(b.label)"
+                    class="flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-[14px] text-[#0b1516] hover:bg-[#f6f9fb]">
+                    <span>{{ b.label }}</span>
+                    <span class="text-[12px] text-[#7f9199]">{{ fmt(b.cost) }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Cost readout -->
+              <div class="flex flex-col gap-1">
+                <span class="font-body text-[12px] font-medium text-[#45565b]">Cost</span>
+                <span class="font-body text-[14px] text-[#0b1516]"
+                  data-testid="text-packaging-cost">
+                  {{ fmt(summary().packagingCost) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MATERIALS section -->
+          <div class="mt-8">
+            <h3 class="font-body text-[12px] font-semibold uppercase tracking-wide text-[#7f9199]">
+              Materials
+            </h3>
+            <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-[#e4eaed] pt-3">
+              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
+                <input type="checkbox"
+                  [checked]="draft().details.materials.lithium"
+                  (change)="toggleMaterial('lithium')"
+                  data-testid="checkbox-material-lithium"
+                  class="h-4 w-4 rounded accent-[#008572]"/>
+                Contains Lithium Batteries
+              </label>
+              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
+                <input type="checkbox"
+                  [checked]="draft().details.materials.tempSensitive"
+                  (change)="toggleMaterial('tempSensitive')"
+                  data-testid="checkbox-material-temp"
+                  class="h-4 w-4 rounded accent-[#008572]"/>
+                Contains Temperature Sensitive Items
+              </label>
+              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
+                <input type="checkbox"
+                  [checked]="draft().details.materials.hazmat"
+                  (change)="toggleMaterial('hazmat')"
+                  data-testid="checkbox-material-hazmat"
+                  class="h-4 w-4 rounded accent-[#008572]"/>
+                Contains Hazmats
+              </label>
+              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
+                <input type="checkbox"
+                  [checked]="draft().details.materials.perishable"
+                  (change)="toggleMaterial('perishable')"
+                  data-testid="checkbox-material-perishable"
+                  class="h-4 w-4 rounded accent-[#008572]"/>
+                Contains Perishables
+              </label>
+              <label class="flex items-center gap-2 font-body text-[14px] text-[#0b1516]">
+                <input type="checkbox"
+                  [checked]="draft().details.materials.fragile"
+                  (change)="toggleMaterial('fragile')"
+                  data-testid="checkbox-material-fragile"
+                  class="h-4 w-4 rounded accent-[#008572]"/>
+                Contains Fragile Items
+              </label>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- ----- Steps 2, 3, 4: placeholder ----- -->
+        <ng-container *ngIf="currentStep() !== 1">
+          <div class="flex h-full min-h-[400px] flex-col items-center justify-center text-center"
+            [attr.data-testid]="'placeholder-step-' + currentStep()">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#f6f9fb] text-[#7f9199]">
+              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/>
+              </svg>
+            </div>
+            <p class="mt-4 font-body text-[16px] font-medium text-[#0b1516]">
+              {{ STEPS[currentStep() - 1].title }} — coming soon
+            </p>
+            <p class="mt-1 font-body text-[14px] text-[#7f9199]">
+              This step will be built in a follow-up.
+            </p>
+          </div>
+        </ng-container>
+      </main>
+
+      <!-- ===== Right rail: Summary ===== -->
+      <aside class="flex w-[220px] shrink-0 flex-col bg-[#f6f9fb] px-5 py-6"
+        data-testid="summary-panel">
+        <h3 class="font-body text-[14px] font-semibold text-[#0b1516]">Summary</h3>
+
+        <div class="mt-4 space-y-3">
+          <div class="flex items-baseline justify-between text-[13px]">
+            <span class="text-[#45565b]">Order Value:</span>
+            <span class="text-[#0b1516]" data-testid="text-summary-order-value">
+              {{ fmt(summary().orderValue) }}
+            </span>
+          </div>
+          <div class="flex items-baseline justify-between text-[13px]">
+            <span class="text-[#45565b]">Shipment Cost</span>
+            <span class="text-[#0b1516]" data-testid="text-summary-shipment-cost">
+              {{ fmt(summary().shipmentCost) }}
+            </span>
+          </div>
+          <div class="flex flex-col gap-1">
+            <div class="flex items-baseline justify-between text-[13px]">
+              <span class="text-[#45565b]">Packaging</span>
+              <span class="text-[#0b1516]" data-testid="text-summary-packaging-cost">
+                {{ fmt(summary().packagingCost) }}
+              </span>
+            </div>
+            <span *ngIf="summary().packagingDescription"
+              class="text-[12px] text-[#7f9199]">
+              {{ summary().packagingDescription }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Dashed divider pushes Totals to the bottom -->
+        <div class="mt-auto border-t border-dashed border-[#b8c6cc] pt-4">
+          <div class="flex items-baseline justify-between">
+            <span class="font-body text-[14px] font-medium text-[#0b1516]">Total</span>
+            <span class="font-body text-[16px] font-semibold text-[#0b1516]"
+              data-testid="text-summary-total">
+              {{ fmt(summary().total) }}
+            </span>
+          </div>
+          <div class="mt-1 flex items-baseline justify-between text-[12px] text-[#45565b]">
+            <span>Profit</span>
+            <span class="text-[#008572]" data-testid="text-summary-profit">
+              +{{ fmt(summary().profit) }}
+            </span>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ===================== Footer ===================== -->
+    <footer class="flex h-16 shrink-0 items-center justify-between border-t border-[#e4eaed] bg-white px-6">
+      <button type="button"
+        (click)="requestClose()"
+        data-testid="button-cancel-new-shipment"
+        class="font-body text-[14px] font-medium text-[#0b1516] hover:text-[#45565b]">
+        Cancel
+      </button>
+
+      <div class="flex items-center gap-2">
+        <button type="button"
+          data-testid="button-save-quote"
+          class="inline-flex h-10 items-center rounded-[4px] border border-[#e4eaed] bg-white px-4 font-body text-[14px] font-medium text-[#45565b] hover:bg-[#f6f9fb]">
+          Save as Quote
+        </button>
+        <button type="button"
+          (click)="back()"
+          [disabled]="currentStep() === 1"
+          data-testid="button-back-step"
+          class="inline-flex h-10 items-center rounded-[4px] border border-[#e4eaed] bg-white px-4 font-body text-[14px] font-medium text-[#45565b] hover:bg-[#f6f9fb] disabled:cursor-not-allowed disabled:opacity-50">
+          Back
+        </button>
+        <button type="button"
+          (click)="continueOrSubmit()"
+          data-testid="button-continue-step"
+          class="inline-flex h-10 items-center rounded-[4px] bg-[#008572] px-4 font-body text-[14px] font-medium text-white hover:bg-[#006a5a]">
+          {{ primaryLabel() }}
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>

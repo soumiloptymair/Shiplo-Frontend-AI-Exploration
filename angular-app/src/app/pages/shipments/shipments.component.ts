@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppShellComponent } from '../../layout/app-shell/app-shell.component';
 import { ShipmentDetailPanelComponent } from './shipment-detail-panel/shipment-detail-panel.component';
+import { NewShipmentModalComponent } from './new-shipment-modal/new-shipment-modal.component';
 import { ShipmentService, ShipmentTab } from '../../core/services/shipment.service';
 import { SHIPMENT_STATUSES, ShipmentStatus, STATUS_PILL_CLASS } from '../../core/models/shipment.model';
 
 @Component({
   selector: 'app-shipments',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppShellComponent, ShipmentDetailPanelComponent],
+  imports: [CommonModule, FormsModule, AppShellComponent, ShipmentDetailPanelComponent, NewShipmentModalComponent],
   templateUrl: './shipments.component.html',
 })
 export class ShipmentsComponent {
@@ -22,6 +23,15 @@ export class ShipmentsComponent {
   statusFilterOpen = signal(false);
   /** Id of the row whose 3-dot action menu is open; null when no menu is open. */
   openMenuId = signal<string | null>(null);
+  /** Drives the Create New Shipment modal. */
+  newShipmentOpen = signal<boolean>(false);
+
+  openNewShipment() {
+    this.newShipmentOpen.set(true);
+  }
+  closeNewShipment() {
+    this.newShipmentOpen.set(false);
+  }
 
   @HostListener('document:click')
   closeStatusDropdown() {

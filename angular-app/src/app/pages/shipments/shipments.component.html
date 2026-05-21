@@ -95,6 +95,7 @@
 
           <!-- New Shipment -->
           <button type="button" data-testid="button-new-shipment"
+            (click)="openNewShipment()"
             class="flex h-9 items-center gap-1 rounded bg-brand-secondary px-3 font-body text-sm font-medium text-white hover:opacity-90">
             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -321,4 +322,10 @@
       />
     </div>
   </div>
+
+  <!-- Create New Shipment modal -->
+  <app-new-shipment-modal
+    *ngIf="newShipmentOpen()"
+    (close)="closeNewShipment()"
+  />
 </app-shell>
