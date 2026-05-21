@@ -25,8 +25,8 @@ interface RailItem {
 })
 export class DefaultsComponent {
   readonly railItems: RailItem[] = [
-    { label: 'Brand Assets', description: 'Customize your brand defaults',   disabled: true },
-    { label: 'Packaging',    description: 'Modify your packaging defaults',  route: '/settings/defaults/packaging' },
+    { label: 'Brand Assets', description: 'Customize your brand defaults',  route: '/settings/defaults/brand-assets' },
+    { label: 'Packaging',    description: 'Modify your packaging defaults', route: '/settings/defaults/packaging' },
     { label: 'Label',        description: 'Enable or disable label features', disabled: true },
     { label: 'Add Ons',      description: 'Manage available add-ons',         disabled: true },
     { label: 'Tags',         description: 'Manage tag configuration',         route: '/settings/defaults/tags' },

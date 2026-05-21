@@ -56,6 +56,13 @@ export const routes: Routes = [
             (m) => m.TagsDefaultsComponent,
           ),
       },
+      {
+        path: 'brand-assets',
+        loadComponent: () =>
+          import('./pages/defaults/brand-assets/brand-assets.component').then(
+            (m) => m.BrandAssetsDefaultsComponent,
+          ),
+      },
     ],
   },
   {

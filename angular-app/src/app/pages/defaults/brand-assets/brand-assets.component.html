@@ -1,0 +1,199 @@
+<!-- Header bar -->
+<header class="flex h-[68px] shrink-0 items-center gap-3 border-b border-divider px-6"
+  data-testid="brand-assets-header">
+  <h2 class="font-heading text-[20px] font-semibold leading-[1.4] tracking-[0.15px] text-fg-primary">
+    Brand Assets
+  </h2>
+  <div class="ml-auto flex items-center gap-2">
+    <button type="button"
+      (click)="onCancel()"
+      data-testid="button-brand-assets-cancel"
+      class="inline-flex h-9 items-center rounded-token border border-divider bg-surface px-3 text-[13px] font-medium text-fg-primary transition-colors hover:bg-surface-light-primary">
+      Cancel
+    </button>
+    <button type="button"
+      (click)="onSave()"
+      data-testid="button-brand-assets-save"
+      class="inline-flex h-9 items-center rounded-token bg-action-primary px-3 text-[13px] font-medium text-fg-on-action transition-colors hover:bg-action-primary-hover">
+      Save
+    </button>
+  </div>
+</header>
+
+<!-- Body -->
+<div class="min-h-0 flex-1 overflow-auto px-6 py-5">
+
+  <!-- ============ COMPANY LOGO ============ -->
+  <section data-testid="section-company-logo">
+    <h3 class="font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-fg-primary">
+      Brand Logo
+    </h3>
+
+    <!-- Hidden file input (shared by empty + filled states) -->
+    <input #fileInput
+      type="file"
+      accept="image/png,image/jpeg"
+      class="hidden"
+      (change)="onFileSelected($event)"
+      data-testid="input-logo-file" />
+
+    <!-- Empty state: dropzone -->
+    <div *ngIf="!logo(); else filledState"
+      (click)="openFilePicker()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="openFilePicker()"
+      (keydown.space)="openFilePicker(); $event.preventDefault()"
+      data-testid="dropzone-logo"
+      class="mt-4 flex h-[160px] cursor-pointer flex-col items-center justify-center gap-2 rounded-token bg-surface-light-primary transition-colors"
+      [class.ring-2]="isDragging()"
+      [class.ring-action-primary]="isDragging()">
+      <svg class="h-7 w-7 text-action-primary" xmlns="http://www.w3.org/2000/svg"
+        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+      </svg>
+      <p class="font-body text-[13px] text-fg-secondary">
+        <span class="font-medium text-fg-link underline">Click to upload</span>
+        or drag and drop here
+      </p>
+      <p class="font-body text-[12px] text-fg-secondary">PNG or JPG, upto 5MB.</p>
+      <p class="font-body text-[12px] text-fg-secondary">Recommended 1,200x1,200px</p>
+    </div>
+
+    <!-- Filled state: preview + meta + Change/Delete -->
+    <ng-template #filledState>
+      <div class="mt-4 flex items-center gap-5 rounded-token border border-divider bg-surface p-4"
+        data-testid="card-company-logo">
+        <div class="flex h-[120px] w-[200px] items-center justify-center overflow-hidden rounded-token border border-divider bg-surface"
+          data-testid="logo-preview">
+          <img [src]="logo()!.dataUrl"
+            [alt]="logo()!.name"
+            class="max-h-full max-w-full object-contain"
+            data-testid="img-logo" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="font-body text-[14px] font-medium text-fg-primary"
+            data-testid="text-logo-filename">
+            {{ logo()!.name }}
+          </span>
+          <span class="font-body text-[12px] text-fg-secondary"
+            data-testid="text-logo-filesize">
+            {{ formatSize(logo()!.size) }}
+          </span>
+          <div class="mt-2 flex items-center gap-2">
+            <button type="button"
+              (click)="openFilePicker()"
+              data-testid="button-change-logo"
+              class="inline-flex h-8 w-fit items-center rounded-token border border-divider bg-surface px-3 text-[13px] font-medium text-fg-primary transition-colors hover:bg-surface-light-primary">
+              Change
+            </button>
+            <button type="button"
+              (click)="deleteLogo()"
+              data-testid="button-delete-logo"
+              class="inline-flex h-8 w-fit items-center rounded-token border border-divider bg-surface px-3 text-[13px] font-medium text-fg-negative transition-colors hover:bg-surface-light-primary">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- ============ ACCOUNT INFORMATION ============ -->
+  <section class="mt-8" data-testid="section-account-information">
+    <h3 class="font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-fg-primary">
+      Account Information
+    </h3>
+    <p class="mt-1 font-body text-[12px] leading-[1.4] text-fg-secondary">
+      Used on packing slips and automated email headers.
+    </p>
+
+    <div class="mt-4 flex max-w-[720px] flex-col gap-4">
+      <!-- Company Name (full width) -->
+      <label class="flex flex-col gap-1.5">
+        <span class="font-body text-[12px] text-fg-secondary">
+          Company Name <span class="text-fg-negative">*</span>
+        </span>
+        <input type="text"
+          [ngModel]="companyName()"
+          (ngModelChange)="companyName.set($event)"
+          data-testid="input-company-name"
+          class="h-9 w-full rounded-token border border-divider bg-surface px-3 font-body text-[13px] text-fg-primary outline-none transition-colors placeholder:text-fg-tertiary focus:border-action-primary" />
+      </label>
+
+      <!-- Address (full width) -->
+      <label class="flex flex-col gap-1.5">
+        <span class="font-body text-[12px] text-fg-secondary">
+          Address <span class="text-fg-negative">*</span>
+        </span>
+        <input type="text"
+          [ngModel]="addressLine()"
+          (ngModelChange)="addressLine.set($event)"
+          data-testid="input-address"
+          class="h-9 w-full rounded-token border border-divider bg-surface px-3 font-body text-[13px] text-fg-primary outline-none transition-colors placeholder:text-fg-tertiary focus:border-action-primary" />
+      </label>
+
+      <!-- City / State / ZIP row -->
+      <div class="grid gap-4" style="grid-template-columns: 1fr 120px 140px;">
+        <label class="flex flex-col gap-1.5">
+          <span class="font-body text-[12px] text-fg-secondary">
+            City <span class="text-fg-negative">*</span>
+          </span>
+          <input type="text"
+            [ngModel]="city()"
+            (ngModelChange)="city.set($event)"
+            data-testid="input-city"
+            class="h-9 w-full rounded-token border border-divider bg-surface px-3 font-body text-[13px] text-fg-primary outline-none transition-colors placeholder:text-fg-tertiary focus:border-action-primary" />
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="font-body text-[12px] text-fg-secondary">
+            State <span class="text-fg-negative">*</span>
+          </span>
+          <input type="text"
+            [ngModel]="state()"
+            (ngModelChange)="state.set($event)"
+            data-testid="input-state"
+            class="h-9 w-full rounded-token border border-divider bg-surface px-3 font-body text-[13px] text-fg-primary outline-none transition-colors placeholder:text-fg-tertiary focus:border-action-primary" />
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="font-body text-[12px] text-fg-secondary">
+            ZIP <span class="text-fg-negative">*</span>
+          </span>
+          <input type="text"
+            [ngModel]="zip()"
+            (ngModelChange)="zip.set($event)"
+            data-testid="input-zip"
+            class="h-9 w-full rounded-token border border-divider bg-surface px-3 font-body text-[13px] text-fg-primary outline-none transition-colors placeholder:text-fg-tertiary focus:border-action-primary" />
+        </label>
+      </div>
+
+      <!-- Phone / Email row -->
+      <div class="grid gap-4" style="grid-template-columns: 240px 1fr;">
+        <label class="flex flex-col gap-1.5">
+          <span class="font-body text-[12px] text-fg-secondary">
+            Phone <span class="text-fg-negative">*</span>
+          </span>
+          <input type="tel"
+            [ngModel]="phone()"
+            (ngModelChange)="phone.set($event)"
+            data-testid="input-phone"
+            class="h-9 w-full rounded-token border border-divider bg-surface px-3 font-body text-[13px] text-fg-primary outline-none transition-colors placeholder:text-fg-tertiary focus:border-action-primary" />
+        </label>
+        <label class="flex flex-col gap-1.5">
+          <span class="font-body text-[12px] text-fg-secondary">
+            Email <span class="text-fg-negative">*</span>
+          </span>
+          <input type="email"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
+            data-testid="input-email"
+            class="h-9 w-full rounded-token border border-divider bg-surface px-3 font-body text-[13px] text-fg-primary outline-none transition-colors placeholder:text-fg-tertiary focus:border-action-primary" />
+        </label>
+      </div>
+    </div>
+  </section>
+</div>
