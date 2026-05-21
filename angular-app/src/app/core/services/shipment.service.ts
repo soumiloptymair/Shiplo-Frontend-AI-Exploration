@@ -1,5 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { SAMPLE_SHIPMENTS, Shipment, ShipmentStatus, ShipmentProduct } from '../models/shipment.model';
+import { NewShipmentDraft, SAMPLE_PRODUCT_OPTIONS, SavedQuote } from '../models/new-shipment.model';
 
 export type ShipmentTab = 'All' | 'Orders' | 'Returns';
 
@@ -23,6 +24,10 @@ export class ShipmentService {
   readonly searchQuery = signal('');
   readonly selectedIds = signal<Set<string>>(new Set());
   readonly panelShipmentId = signal<string | null>(null);
+
+  /** Drafts persisted via the New Shipment modal's "Save as Quote" button. */
+  readonly quotes = signal<SavedQuote[]>([]);
+  private nextQuoteSeq = 1;
 
   readonly filtered = computed(() => {
     const tab = this.activeTab();
@@ -254,6 +259,51 @@ export class ShipmentService {
     if (this.panelShipmentId() === mergedId) this.panelShipmentId.set(null);
 
     return { restoredIds: restored.map((r) => r.id), mergedLabel: row.shipmentId };
+  }
+
+  /**
+   * Persist a New Shipment wizard draft as a quote the user can reopen later.
+   * Deep-clones the draft so further edits in the modal don't mutate the saved copy.
+   */
+  saveQuote(draft: NewShipmentDraft): SavedQuote {
+    const seq = this.nextQuoteSeq++;
+    const items = draft.details.items.filter((it) => it.quantity > 0);
+    const itemCount = items.reduce((sum, it) => sum + it.quantity, 0);
+    const totalValue = items.reduce((sum, it) => {
+      const prod = SAMPLE_PRODUCT_OPTIONS.find((p) => p.sku === it.productSku);
+      return sum + (prod ? prod.unitValue * it.quantity : 0);
+    }, 0);
+    const dateLabel = new Date().toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    });
+    const itemWord = itemCount === 1 ? 'item' : 'items';
+    const quote: SavedQuote = {
+      id: `q-${Date.now()}-${seq}`,
+      label: `Quote #${seq} · ${itemCount} ${itemWord} · ${dateLabel}`,
+      savedAt: new Date().toISOString(),
+      itemCount,
+      totalValue,
+      draft: this.cloneDraft(draft),
+    };
+    this.quotes.update((qs) => [quote, ...qs]);
+    return quote;
+  }
+
+  /** Remove a quote by id. */
+  deleteQuote(id: string): void {
+    this.quotes.update((qs) => qs.filter((q) => q.id !== id));
+  }
+
+  /** Return a deep-cloned copy of a saved quote's draft, safe to mutate. */
+  getQuoteDraft(id: string): NewShipmentDraft | null {
+    const q = this.quotes().find((x) => x.id === id);
+    return q ? this.cloneDraft(q.draft) : null;
+  }
+
+  /** Deep-clone helper that survives `JSON.stringify` for our plain-object draft shape. */
+  private cloneDraft(draft: NewShipmentDraft): NewShipmentDraft {
+    return JSON.parse(JSON.stringify(draft)) as NewShipmentDraft;
   }
 
   /**

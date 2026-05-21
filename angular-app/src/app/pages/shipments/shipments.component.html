@@ -93,6 +93,53 @@
             Filters
           </button>
 
+          <!-- Saved Quotes -->
+          <div class="relative" (click)="$event.stopPropagation()">
+            <button type="button" data-testid="button-saved-quotes"
+              (click)="toggleQuotesMenu($event)"
+              [attr.aria-expanded]="quotesMenuOpen()"
+              class="relative flex h-9 items-center gap-1 rounded border border-neutral-300 bg-white px-3 font-body text-sm font-medium text-neutral-900 hover:bg-neutral-100">
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3-7 3V5z"/>
+              </svg>
+              Quotes
+              <span *ngIf="svc.quotes().length > 0"
+                data-testid="badge-quotes-count"
+                class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-secondary px-1.5 text-[11px] font-medium text-white">
+                {{ svc.quotes().length }}
+              </span>
+            </button>
+            <div *ngIf="quotesMenuOpen()"
+              data-testid="dropdown-saved-quotes"
+              class="absolute right-0 top-10 z-30 w-[300px] rounded-md border border-[#e4eaed] bg-white py-1 shadow-lg">
+              <div *ngIf="svc.quotes().length === 0"
+                class="px-3 py-4 text-center font-body text-sm text-[#7f9199]"
+                data-testid="text-quotes-empty">
+                No saved quotes yet.
+              </div>
+              <div *ngFor="let q of svc.quotes()"
+                class="group flex items-center justify-between gap-2 px-3 py-2 hover:bg-[#f6f9fb]"
+                [attr.data-testid]="'row-quote-' + q.id">
+                <button type="button"
+                  (click)="resumeQuote(q.id, $event)"
+                  [attr.data-testid]="'button-resume-quote-' + q.id"
+                  class="flex min-w-0 flex-1 flex-col text-left">
+                  <span class="truncate font-body text-sm font-medium text-[#0b1516]">{{ q.label }}</span>
+                  <span class="truncate font-body text-xs text-[#7f9199]">${{ q.totalValue.toFixed(2) }} order value</span>
+                </button>
+                <button type="button"
+                  (click)="deleteQuote(q.id, $event)"
+                  [attr.data-testid]="'button-delete-quote-' + q.id"
+                  aria-label="Delete quote"
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[#7f9199] opacity-0 hover:bg-white hover:text-[#0b1516] group-hover:opacity-100">
+                  <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- New Shipment -->
           <button type="button" data-testid="button-new-shipment"
             (click)="openNewShipment()"
@@ -326,6 +373,8 @@
   <!-- Create New Shipment modal -->
   <app-new-shipment-modal
     *ngIf="newShipmentOpen()"
+    [initialDraft]="pendingQuoteDraft() ?? undefined"
     (close)="closeNewShipment()"
+    (saveAsQuote)="onSaveAsQuote($event)"
   />
 </app-shell>

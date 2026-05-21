@@ -4,7 +4,9 @@ import {
   ElementRef,
   EventEmitter,
   HostListener,
+  Input,
   OnDestroy,
+  OnInit,
   Output,
   ViewChild,
   computed,
@@ -49,8 +51,12 @@ import {
   imports: [CommonModule],
   templateUrl: './new-shipment-modal.component.html',
 })
-export class NewShipmentModalComponent implements AfterViewInit, OnDestroy {
+export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnInit {
   @Output() close = new EventEmitter<void>();
+  /** Emitted when the user clicks "Save as Quote". Parent persists the draft. */
+  @Output() saveAsQuote = new EventEmitter<NewShipmentDraft>();
+  /** Optional draft to seed the wizard with (used when reopening a saved quote). */
+  @Input() initialDraft?: NewShipmentDraft;
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
 
   /** Element that held focus before the modal opened; restored on close. */
@@ -308,6 +314,22 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy {
     this.draft.set(blankDraft());
     this.currentStep.set(1);
     this.close.emit();
+  }
+
+  /**
+   * Emit the current draft for the parent to persist as a quote.
+   * The parent is responsible for the toast + closing the modal.
+   */
+  onSaveAsQuote() {
+    this.openPicker.set(null);
+    this.saveAsQuote.emit(this.draft());
+  }
+
+  ngOnInit(): void {
+    if (this.initialDraft) {
+      // Deep-clone so editing the wizard doesn't mutate the stored quote.
+      this.draft.set(JSON.parse(JSON.stringify(this.initialDraft)) as NewShipmentDraft);
+    }
   }
 
   /** Close on Escape. */

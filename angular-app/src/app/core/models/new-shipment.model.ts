@@ -165,6 +165,24 @@ export function blankItem(): NewShipmentItem {
   };
 }
 
+/**
+ * A draft persisted via "Save as Quote". Quotes live in-memory on the
+ * `ShipmentService` and can be reopened back into the wizard.
+ */
+export interface SavedQuote {
+  id: string;
+  /** Human-readable label rendered in the Saved Quotes dropdown. */
+  label: string;
+  /** ISO timestamp captured at save time. */
+  savedAt: string;
+  /** Item count snapshot — used to build the label without re-walking the draft. */
+  itemCount: number;
+  /** Order-value subtotal at save time, in USD. */
+  totalValue: number;
+  /** Deep-cloned draft state to restore. */
+  draft: NewShipmentDraft;
+}
+
 export function blankDraft(): NewShipmentDraft {
   return {
     details: {
