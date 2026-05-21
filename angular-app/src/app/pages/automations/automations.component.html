@@ -105,20 +105,14 @@
               </svg>
             </button>
 
-            <!-- IF column: rule name + Match All + condition chips -->
+            <!-- IF column: Match All + condition chips -->
             <div class="flex flex-col gap-1.5 pr-4" [attr.data-testid]="'cell-if-' + rule.id">
-              <!-- Rule name + Disabled pill -->
-              <div class="flex items-center gap-2">
-                <span class="font-body text-[13px] font-medium text-fg-primary" [attr.data-testid]="'text-rule-name-' + rule.id">
-                  {{ rule.name }}
-                </span>
-                <span *ngIf="!rule.enabled"
-                  class="inline-flex h-[18px] items-center rounded-token bg-chip-yellow px-1.5 text-[10px] font-medium uppercase tracking-wide text-fg-primary"
-                  [attr.data-testid]="'pill-disabled-' + rule.id">
-                  Disabled
-                </span>
-              </div>
               <div class="flex flex-wrap items-center gap-1.5">
+              <span *ngIf="!rule.enabled"
+                class="inline-flex h-[18px] items-center rounded-token bg-chip-yellow px-1.5 text-[10px] font-medium uppercase tracking-wide text-fg-primary"
+                [attr.data-testid]="'pill-disabled-' + rule.id">
+                Disabled
+              </span>
               <span class="inline-flex h-[26px] items-center rounded-token border border-divider bg-surface px-2 text-[12px] font-medium text-fg-primary"
                 data-testid="chip-match">
                 {{ rule.conditionMatch === 'all' ? 'Match All' : 'Match Any' }}
