@@ -46,6 +46,7 @@ import { Shipment } from '../../../core/models/shipment.model';
 import {
   AddressSuggestion,
   UspsService,
+  UspsValidatedAddress,
 } from '../../../core/services/usps.service';
 
 /** Field keys that gate Step 2 — used for touched/error tracking. */
@@ -101,8 +102,27 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   readonly addressLoading = signal<boolean>(false);
   readonly addressDropdownOpen = signal<boolean>(false);
 
+  /**
+   * Confirm-address card state machine:
+   *   idle          → not enough info yet, or user is still editing
+   *   validating    → request in flight
+   *   matched       → server matches what user typed; auto-confirmed
+   *   needs-confirm → server has a recommendation that differs; show card
+   *   confirmed     → user picked one and pressed Confirm
+   *   failed        → upstream error; don't block the user
+   */
+  readonly addressConfirmState = signal<
+    'idle' | 'validating' | 'matched' | 'needs-confirm' | 'confirmed' | 'failed'
+  >('idle');
+  readonly addressRecommended = signal<UspsValidatedAddress | null>(null);
+  readonly addressConfirmChoice = signal<'entered' | 'recommended'>('entered');
+  /** Snapshot of inputs the last completed validation was run against. */
+  private addressConfirmSnapshot = '';
+
   private addressLookupTimer: ReturnType<typeof setTimeout> | null = null;
   private addressLookupSeq = 0;
+  private addressConfirmTimer: ReturnType<typeof setTimeout> | null = null;
+  private addressConfirmSeq = 0;
   private zipLookupTimer: ReturnType<typeof setTimeout> | null = null;
   private lastZipLookup = '';
 
@@ -257,6 +277,11 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     if (key === 'postalCode' && typeof value === 'string') {
       this.scheduleZipAutofill(value);
     }
+    // Any address-field edit invalidates a prior confirmation and requeues validation.
+    if (key === 'street1' || key === 'street2' || key === 'city' ||
+        key === 'state'   || key === 'postalCode') {
+      this.scheduleAddressConfirm();
+    }
   }
 
   /** Inputs feed raw `string` values; this trampoline keeps the template terse. */
@@ -334,6 +359,8 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
           state: d.customer.state.trim() ? d.customer.state : (res.state ?? ''),
         },
       }));
+      // City/state may have just become filled — kick off Confirm-Address validation.
+      this.scheduleAddressConfirm();
     });
   }
 
@@ -381,6 +408,8 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     if (s.state) this.markCustomerTouched('state');
     if (s.zip)   this.markCustomerTouched('postalCode');
     this.closeAddressDropdown();
+    // Picking a suggestion fills 4 required fields — kick off validation.
+    this.scheduleAddressConfirm();
   }
 
   /** "Enter address manually" — closes the typeahead and hands control back. */
@@ -418,6 +447,205 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
       this.addressDropdownOpen.set(true);
     }
   }
+
+  // --- Confirm-address card ----------------------------------------------
+
+  /**
+   * Debounced auto-validate. Fires once all four required address fields
+   * are populated (5-digit zip), and only when the input differs from the
+   * last validated snapshot. Shows a Confirm Address card when the server's
+   * standardized version differs from what the user typed.
+   */
+  private scheduleAddressConfirm() {
+    if (this.addressConfirmTimer) clearTimeout(this.addressConfirmTimer);
+    this.addressConfirmTimer = null;
+    // Any edit invalidates a prior confirmation immediately.
+    if (this.addressConfirmState() === 'confirmed' ||
+        this.addressConfirmState() === 'matched') {
+      this.addressConfirmState.set('idle');
+    }
+    const c = this.draft().customer;
+    const zip = c.postalCode.replace(/\D/g, '').slice(0, 5);
+    if (!c.street1.trim() || !c.city.trim() || !c.state.trim() || zip.length !== 5) {
+      // Not enough to validate — drop any in-flight result.
+      this.addressConfirmSeq++;
+      this.addressConfirmState.set('idle');
+      this.addressRecommended.set(null);
+      return;
+    }
+    const snap = `${c.street1.trim()}|${c.street2.trim()}|${c.city.trim()}|${c.state.trim()}|${zip}`;
+    if (snap === this.addressConfirmSnapshot &&
+        this.addressConfirmState() !== 'idle') {
+      return; // already validated this exact input
+    }
+    const seq = ++this.addressConfirmSeq;
+    this.addressConfirmTimer = setTimeout(() => {
+      this.addressConfirmState.set('validating');
+      this.uspsService
+        .validate({
+          street1: c.street1.trim(),
+          street2: c.street2.trim() || undefined,
+          city:    c.city.trim(),
+          state:   c.state.trim(),
+          zip,
+        })
+        .subscribe({
+          next: (res) => {
+            if (seq !== this.addressConfirmSeq) return;
+            this.addressConfirmSnapshot = snap;
+            this.addressRecommended.set(res);
+            if (this.recommendedMatchesEntered(res)) {
+              this.addressConfirmState.set('matched');
+              this.addressConfirmChoice.set('entered');
+            } else {
+              this.addressConfirmState.set('needs-confirm');
+              this.addressConfirmChoice.set('entered');
+            }
+          },
+          error: () => {
+            if (seq !== this.addressConfirmSeq) return;
+            // No match / upstream error — don't gate the user.
+            this.addressConfirmSnapshot = snap;
+            this.addressRecommended.set(null);
+            this.addressConfirmState.set('failed');
+          },
+        });
+    }, 600);
+  }
+
+  /** Compare server-standardized result against the user's typed address. */
+  private recommendedMatchesEntered(r: UspsValidatedAddress): boolean {
+    const c = this.draft().customer;
+    const norm = (s: string) => s.trim().toUpperCase().replace(/\s+/g, ' ');
+    const enteredZip = c.postalCode.replace(/\D/g, '').slice(0, 5);
+    return (
+      norm(r.street1)        === norm(c.street1) &&
+      norm(r.street2 ?? '')  === norm(c.street2) &&
+      norm(r.city)           === norm(c.city) &&
+      norm(r.state)          === norm(c.state) &&
+      r.zip                  === enteredZip
+    );
+  }
+
+  /** Pick between the entered version and the server's recommendation. */
+  setAddressChoice(choice: 'entered' | 'recommended') {
+    this.addressConfirmChoice.set(choice);
+  }
+
+  /** Apply the picked address and dismiss the card. */
+  confirmAddress() {
+    const r = this.addressRecommended();
+    if (this.addressConfirmChoice() === 'recommended' && r) {
+      this.draft.update((d) => ({
+        ...d,
+        customer: {
+          ...d.customer,
+          street1:    r.street1,
+          street2:    r.street2 ?? d.customer.street2,
+          city:       r.city,
+          state:      r.state,
+          postalCode: r.zipPlus4 ? `${r.zip}-${r.zipPlus4}` : r.zip,
+        },
+      }));
+      // Reset the snapshot so the (now-applied) recommended address is what
+      // a fresh validation would compare against — no re-prompt loop.
+      const c = this.draft().customer;
+      const zip = c.postalCode.replace(/\D/g, '').slice(0, 5);
+      this.addressConfirmSnapshot =
+        `${c.street1.trim()}|${c.street2.trim()}|${c.city.trim()}|${c.state.trim()}|${zip}`;
+    }
+    this.addressConfirmState.set('confirmed');
+  }
+
+  /** Clear all address fields and reset the card. */
+  resetAddress() {
+    if (this.addressConfirmTimer) clearTimeout(this.addressConfirmTimer);
+    this.addressConfirmTimer = null;
+    this.addressConfirmSeq++;
+    this.draft.update((d) => ({
+      ...d,
+      customer: {
+        ...d.customer,
+        street1: '', street2: '', city: '', state: '', postalCode: '',
+      },
+    }));
+    this.addressConfirmSnapshot = '';
+    this.addressRecommended.set(null);
+    this.addressConfirmState.set('idle');
+    this.addressConfirmChoice.set('entered');
+  }
+
+  /** Multi-line display tokens for the "What you entered" card. */
+  readonly enteredAddressLines = computed(() => {
+    const c = this.draft().customer;
+    return this.diffTokenize(
+      this.formatAddressLines(c.street1, c.street2, c.city, c.state, c.postalCode, c.country),
+      this.recommendedAddressLinesRaw(),
+    );
+  });
+
+  /** Multi-line display tokens for the "Recommended" card. */
+  readonly recommendedAddressLines = computed(() => {
+    const r = this.addressRecommended();
+    if (!r) return [] as string[][];
+    return this.diffTokenize(
+      this.recommendedAddressLinesRaw(),
+      this.formatAddressLines(
+        this.draft().customer.street1,
+        this.draft().customer.street2,
+        this.draft().customer.city,
+        this.draft().customer.state,
+        this.draft().customer.postalCode,
+        this.draft().customer.country,
+      ),
+    );
+  });
+
+  private recommendedAddressLinesRaw(): string[] {
+    const r = this.addressRecommended();
+    if (!r) return [];
+    const zip = r.zipPlus4 ? `${r.zip}-${r.zipPlus4}` : r.zip;
+    return this.formatAddressLines(
+      r.street1, r.street2 ?? '', r.city, r.state, zip,
+      this.draft().customer.country,
+    );
+  }
+
+  private formatAddressLines(
+    street1: string, street2: string, city: string,
+    state: string, zip: string, country: string,
+  ): string[] {
+    const line1 = [street1, street2].filter((s) => s && s.trim()).join(', ');
+    const line2 = `${city}, ${state}, ${zip}`;
+    return [line1, line2, country].filter((s) => s && s.trim());
+  }
+
+  /**
+   * Produce `[[token, ...], ...]` where each token is the original word
+   * (commas preserved) suffixed with `\0` if it doesn't appear in `other`.
+   * The template splits on that marker to apply the yellow highlight.
+   */
+  private diffTokenize(self: string[], other: string[]): string[][] {
+    const otherTokens = new Set(
+      other.flatMap((line) => line.split(/\s+/)).map((t) => t.toUpperCase()),
+    );
+    return self.map((line) =>
+      line.split(/\s+/).map((t) =>
+        otherTokens.has(t.toUpperCase()) ? t : `${t}\0`,
+      ),
+    );
+  }
+
+  /**
+   * True while the user must wait on (or resolve) the Confirm Address card.
+   * Blocks Continue both while a request is in flight and while a card is
+   * awaiting the user's choice — closes the race where Continue is clicked
+   * before the in-flight validation has had a chance to surface a card.
+   */
+  readonly addressBlocksContinue = computed(() => {
+    const s = this.addressConfirmState();
+    return s === 'needs-confirm' || s === 'validating';
+  });
 
   toggleMaterial(key: keyof NewShipmentDraft['details']['materials']) {
     this.draft.update((d) => ({
@@ -664,6 +892,8 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
     const email = this.draft().customer.email.trim();
     // Email stays optional per Figma; if present, must look like an email.
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+    // Block until the recommended-vs-entered card is resolved.
+    if (this.addressBlocksContinue()) return false;
     return true;
   });
 
@@ -749,6 +979,13 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
   }
 
   ngOnDestroy(): void {
+    // Drop any pending debounce timers and invalidate in-flight responses so
+    // they can't update destroyed signals.
+    if (this.addressLookupTimer)  clearTimeout(this.addressLookupTimer);
+    if (this.addressConfirmTimer) clearTimeout(this.addressConfirmTimer);
+    if (this.zipLookupTimer)      clearTimeout(this.zipLookupTimer);
+    this.addressLookupSeq++;
+    this.addressConfirmSeq++;
     // Restore focus to whatever opened the modal (typically the "+ New Shipment" button).
     this.previouslyFocused?.focus?.();
   }
