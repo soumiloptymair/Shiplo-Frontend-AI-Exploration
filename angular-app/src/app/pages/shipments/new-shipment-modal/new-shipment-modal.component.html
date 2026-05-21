@@ -40,37 +40,34 @@
     <!-- ===================== Body ===================== -->
     <div class="flex min-h-0 flex-1">
 
-      <!-- ===== Left rail: 4-step wizard ===== -->
+      <!-- ===== Left rail: 4-step wizard (Figma 27004-10781) ===== -->
       <nav aria-label="Wizard steps"
-        class="flex w-[200px] shrink-0 flex-col gap-4 bg-[#f6f9fb] px-5 py-6"
+        class="flex w-[260px] shrink-0 flex-col bg-[#f6f9fb] pl-5 pr-4 pt-[18px]"
         data-testid="wizard-steps">
         <ng-container *ngFor="let s of STEPS; let i = index">
           <button type="button"
             (click)="goToStep(s.num)"
             [attr.aria-current]="currentStep() === s.num ? 'step' : null"
             [attr.data-testid]="'button-step-' + s.num"
-            class="group flex items-start gap-3 text-left">
-            <!-- Numbered circle (outlined teal; active = bolder ring + teal text) -->
-            <span class="mt-[2px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[12px] leading-none transition-colors"
-              [ngClass]="currentStep() === s.num
-                ? 'border-[1.5px] border-[#008572] font-semibold text-[#008572]'
-                : 'border border-[#b8c6cc] font-medium text-[#7f9199]'">
+            class="flex items-start gap-4 text-left">
+            <!-- Numbered circle: 28px, white fill, teal border + teal numeral; inactive = 50% opacity -->
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#008572] bg-white text-[14px] leading-[1.43] text-[#008572] transition-opacity"
+              [class.opacity-50]="currentStep() !== s.num">
               {{ s.num }}
             </span>
-            <!-- Title + subtitle -->
-            <span class="flex flex-col leading-tight">
-              <span class="font-body text-[14px] leading-[1.43] transition-colors"
-                [ngClass]="currentStep() === s.num ? 'font-semibold text-[#0b1516]' : 'font-medium text-[#45565b]'">
+            <!-- Title + subtitle: 216px column, Roboto 16/1.43 -->
+            <span class="flex w-[216px] flex-col text-[16px] leading-[1.43]">
+              <span class="font-body font-bold text-[#0b1516]">
                 {{ s.title }}
               </span>
-              <span class="font-body text-[12px] leading-[1.4] text-[#7f9199]">
+              <span class="font-body font-normal text-[#5b6b72]">
                 {{ s.subtitle }}
               </span>
             </span>
           </button>
-          <!-- Dashed connector between rows (skip after the last step) -->
+          <!-- Dashed connector between rows: 40px tall, aligned to circle center (14px from rail left) -->
           <div *ngIf="i < STEPS.length - 1"
-            class="ml-[11px] h-4 w-px border-l border-dashed border-[#008572]"></div>
+            class="ml-[13.5px] h-10 w-px border-l border-dashed border-[#008572] opacity-50"></div>
         </ng-container>
       </nav>
 
