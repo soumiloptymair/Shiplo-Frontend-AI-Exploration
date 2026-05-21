@@ -49,6 +49,13 @@ export const routes: Routes = [
             (m) => m.PackagingDefaultsComponent,
           ),
       },
+      {
+        path: 'tags',
+        loadComponent: () =>
+          import('./pages/defaults/tags/tags.component').then(
+            (m) => m.TagsDefaultsComponent,
+          ),
+      },
     ],
   },
   {
