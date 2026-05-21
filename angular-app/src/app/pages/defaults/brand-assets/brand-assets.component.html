@@ -103,6 +103,25 @@
     </ng-template>
   </section>
 
+  <!-- ============ BRAND COLORS ============ -->
+  <section class="mt-8" data-testid="section-brand-colors">
+    <h3 class="font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-fg-primary">
+      Brand Colors
+    </h3>
+    <div class="mt-4 grid max-w-[640px] gap-4 sm:grid-cols-2">
+      <app-color-picker
+        label="Primary Color"
+        testIdPrefix="primary-color"
+        [value]="primaryColor()"
+        (valueChange)="primaryColor.set($event)"/>
+      <app-color-picker
+        label="Background Color"
+        testIdPrefix="background-color"
+        [value]="backgroundColor()"
+        (valueChange)="backgroundColor.set($event)"/>
+    </div>
+  </section>
+
   <!-- ============ ACCOUNT INFORMATION ============ -->
   <section class="mt-8" data-testid="section-account-information">
     <h3 class="font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-fg-primary">

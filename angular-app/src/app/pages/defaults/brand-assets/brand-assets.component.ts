@@ -2,6 +2,7 @@ import { Component, ElementRef, inject, signal, viewChild } from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
+import { ColorPickerComponent } from '../../../shared/components/color-picker/color-picker.component';
 
 interface UploadedLogo {
   dataUrl: string;
@@ -26,7 +27,7 @@ interface UploadedLogo {
 @Component({
   selector: 'app-brand-assets-defaults',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ColorPickerComponent],
   templateUrl: './brand-assets.component.html',
 })
 export class BrandAssetsDefaultsComponent {
@@ -40,6 +41,10 @@ export class BrandAssetsDefaultsComponent {
   zip = signal<string>('94105');
   phone = signal<string>('(415) 555-0142');
   email = signal<string>('support@companyname.com');
+
+  // Brand colors (Figma `25889-29595` — Primary + Background swatches)
+  primaryColor = signal<string>('#008572');
+  backgroundColor = signal<string>('#F6F9FB');
 
   // Logo
   logo = signal<UploadedLogo | null>(null);
