@@ -8,8 +8,17 @@ import { MergeRecommendationBannerComponent } from '../merge-recommendation-bann
 import { MergeShipmentModalComponent, MergeConfirmPayload } from '../merge-shipment-modal/merge-shipment-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
 import { ShipmentService } from '../../../core/services/shipment.service';
+import { TrackingDocument } from '../../../core/models/branded-tracking.model';
+import { TrackingDocumentPreviewComponent } from '../../branded-tracking/tracking-document-preview/tracking-document-preview.component';
 
 export type PanelTab = 'Label' | 'Details' | 'Products' | 'Notes' | 'Shipment Log';
+export type PanelMenuAction =
+  | 'split'
+  | 'merge'
+  | 'noop'
+  | 'view-label'
+  | 'view-receipt'
+  | 'view-packing-slip';
 
 interface DocFile { id: number; name: string; type: string; date: string; size: string; }
 interface PodImage { id: number; dataUrl: string; name: string; }
@@ -25,6 +34,7 @@ interface MaterialRow { key: keyof MaterialFlags; present: string; absent: strin
     SplitShipmentModalComponent,
     MergeRecommendationBannerComponent,
     MergeShipmentModalComponent,
+    TrackingDocumentPreviewComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
 })
@@ -59,6 +69,40 @@ export class ShipmentDetailPanelComponent implements OnChanges {
   mergeModalOpen = signal(false);
   /** Per-session set of shipment ids whose merge banner was dismissed. */
   dismissedMergeBanners = signal<Set<string>>(new Set());
+  previewDocumentIndex = signal<number | null>(null);
+
+  /** Sample shipment documents for preview (Figma node 24943:220509). */
+  readonly SHIPMENT_PREVIEW_DOCUMENTS: TrackingDocument[] = [
+    {
+      name: 'Shipping Label',
+      thumbnailSrc: 'figmaAssets/tracking-doc-label-01.png',
+      previewSrc: 'figmaAssets/tracking-doc-label-01.png',
+    },
+    {
+      name: 'Receipt',
+      thumbnailSrc: 'figmaAssets/tracking-doc-bill-of-lading.png',
+      previewSrc: 'figmaAssets/tracking-doc-bill-of-lading.png',
+    },
+    {
+      name: 'Packing Slip',
+      thumbnailSrc: 'figmaAssets/tracking-doc-packaging-slip.png',
+      previewSrc: 'figmaAssets/tracking-doc-packaging-slip.png',
+    },
+    {
+      name: 'Manifest',
+      thumbnailSrc: 'figmaAssets/tracking-doc-manifest.png',
+      previewSrc: 'figmaAssets/tracking-doc-manifest.png',
+    },
+  ];
+
+  private readonly previewDocumentKeys: Record<
+    'view-label' | 'view-receipt' | 'view-packing-slip',
+    number
+  > = {
+    'view-label': 0,
+    'view-receipt': 1,
+    'view-packing-slip': 2,
+  };
 
   private nextDocId = 1;
   private nextPodId = 1;
@@ -76,12 +120,13 @@ export class ShipmentDetailPanelComponent implements OnChanges {
     'Cancelled':     'bg-status-cancelled',
   };
 
-  readonly MENU_ITEMS = [
-    { label: 'Split Shipment', testid: 'menu-item-split-shipment', action: 'split' as const },
-    { label: 'Merge Shipments', testid: 'menu-item-merge-shipments', action: 'merge' as const },
-    { label: 'Edit Shipment',  testid: 'menu-item-edit-shipment',  action: 'noop'  as const },
-    { label: 'View Receipt',   testid: 'menu-item-view-receipt',   action: 'noop'  as const },
-    { label: 'View Label',     testid: 'menu-item-view-label',     action: 'noop'  as const },
+  readonly MENU_ITEMS: { label: string; testid: string; action: PanelMenuAction }[] = [
+    { label: 'Split Shipment', testid: 'menu-item-split-shipment', action: 'split' },
+    { label: 'Merge Shipments', testid: 'menu-item-merge-shipments', action: 'merge' },
+    { label: 'Edit Shipment', testid: 'menu-item-edit-shipment', action: 'noop' },
+    { label: 'View Receipt', testid: 'menu-item-view-receipt', action: 'view-receipt' },
+    { label: 'View Label', testid: 'menu-item-view-label', action: 'view-label' },
+    { label: 'View Packing Slip', testid: 'menu-item-view-packing-slip', action: 'view-packing-slip' },
   ];
 
   readonly showRecommendationBanner = computed(() => {
@@ -152,11 +197,55 @@ export class ShipmentDetailPanelComponent implements OnChanges {
     this.statusDropdownOpen.set(false);
   }
 
-  onMenuItem(action: 'split' | 'merge' | 'noop', event: Event) {
+  onMenuItem(action: PanelMenuAction, event: Event) {
     event.stopPropagation();
     this.menuOpen.set(false);
     if (action === 'split') this.openSplitModal();
     if (action === 'merge') this.openMergeModal();
+    if (action === 'view-label' || action === 'view-receipt' || action === 'view-packing-slip') {
+      this.openDocumentPreview(this.previewDocumentKeys[action]);
+    }
+  }
+
+  previewDocument(): TrackingDocument | null {
+    const index = this.previewDocumentIndex();
+    if (index === null) return null;
+    return this.SHIPMENT_PREVIEW_DOCUMENTS[index] ?? null;
+  }
+
+  shipmentPreviewLabel(): string {
+    return `Shipment: ${this.shipment.shipmentId}`;
+  }
+
+  openDocumentPreview(index: number): void {
+    this.previewDocumentIndex.set(index);
+  }
+
+  closeDocumentPreview(): void {
+    this.previewDocumentIndex.set(null);
+  }
+
+  showPreviousDocument(): void {
+    const index = this.previewDocumentIndex();
+    if (index === null || index <= 0) return;
+    this.previewDocumentIndex.set(index - 1);
+  }
+
+  showNextDocument(): void {
+    const index = this.previewDocumentIndex();
+    const last = this.SHIPMENT_PREVIEW_DOCUMENTS.length - 1;
+    if (index === null || index >= last) return;
+    this.previewDocumentIndex.set(index + 1);
+  }
+
+  hasPreviousDocument(): boolean {
+    const index = this.previewDocumentIndex();
+    return index !== null && index > 0;
+  }
+
+  hasNextDocument(): boolean {
+    const index = this.previewDocumentIndex();
+    return index !== null && index < this.SHIPMENT_PREVIEW_DOCUMENTS.length - 1;
   }
 
   openSplitModal() {

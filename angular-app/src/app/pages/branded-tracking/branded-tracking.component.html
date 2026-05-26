@@ -1,0 +1,284 @@
+<app-shell>
+  <section class="relative flex h-full min-h-0 gap-2 font-body" data-testid="page-branded-tracking">
+
+    <!-- ============ Configuration panel (400px) ============ -->
+    <div class="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-lg bg-surface">
+
+      <header class="flex h-[68px] shrink-0 items-center gap-2 border-b border-divider px-5"
+        data-testid="branded-tracking-header">
+        <span class="grid h-7 w-7 place-items-center rounded-token text-action-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+        </span>
+        <h1 class="font-heading text-2xl font-medium leading-[1.4] tracking-[0.15px] text-fg-primary">
+          Branded Tracking
+        </h1>
+      </header>
+
+      <div class="min-h-0 flex-1 overflow-auto p-5">
+
+        <!-- Logo upload -->
+        <section data-testid="section-brand-logo">
+          <input #fileInput type="file" accept="image/png,image/jpeg,image/svg+xml" class="hidden"
+            (change)="onFileSelected($event)" data-testid="input-logo-file" />
+
+          <!-- Empty state -->
+          <div *ngIf="!hasUploadedLogo(); else uploadedLogoState"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+            role="region"
+            aria-label="Brand logo upload"
+            data-testid="dropzone-logo"
+            class="flex w-full flex-col items-center gap-4 rounded-token border border-dashed border-divider bg-surface-light-primary px-4 py-6 text-center transition-colors"
+            [class.border-action-primary]="isDragging()"
+            [class.bg-surface-subtle]="isDragging()"
+            [class.ring-2]="isDragging()"
+            [class.ring-action-primary]="isDragging()">
+            <span class="grid h-12 w-12 place-items-center rounded-full bg-surface text-action-primary shadow-sm"
+              aria-hidden="true">
+              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+              </svg>
+            </span>
+
+            <div class="flex max-w-[280px] flex-col gap-1">
+              <p class="font-heading text-[15px] font-semibold leading-snug tracking-[0.15px] text-fg-primary">
+                Upload your brand logo
+              </p>
+              <p class="font-body text-[13px] leading-[1.5] text-fg-secondary">
+                Drag and drop your file here, or
+                <span class="font-medium text-fg-primary">choose a file</span>
+                to get started.
+              </p>
+            </div>
+
+            <button type="button"
+              (click)="openFilePicker()"
+              data-testid="button-upload-logo"
+              class="inline-flex h-9 items-center gap-1.5 rounded-token bg-action-primary px-4 text-[13px] font-medium text-fg-on-action transition-colors hover:bg-action-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action-primary">
+              <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+              </svg>
+              Upload logo
+            </button>
+
+            <div class="flex flex-col gap-0.5">
+              <p class="font-body text-[12px] leading-[1.43] text-fg-secondary">
+                <span class="font-semibold text-fg-primary">Recommended size:</span>
+                100px × 24px
+              </p>
+              <p class="font-body text-[12px] text-fg-tertiary">
+                PNG, JPG, or SVG · up to 5MB
+              </p>
+            </div>
+          </div>
+
+          <!-- Uploaded state -->
+          <ng-template #uploadedLogoState>
+            <div class="w-full rounded-token border border-divider bg-surface p-4"
+              data-testid="card-logo-uploaded">
+              <div class="flex items-start gap-4">
+                <div class="flex h-24 w-[140px] shrink-0 items-center justify-center overflow-hidden rounded-token border border-divider bg-surface-light-primary p-2"
+                  data-testid="logo-preview">
+                  <img [src]="brandSvc.draft().logoDataUrl!"
+                    [alt]="logoFileName() || 'Uploaded brand logo'"
+                    class="max-h-full max-w-full object-contain"
+                    data-testid="img-uploaded-logo" />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate font-body text-[14px] font-medium text-fg-primary"
+                    data-testid="text-logo-filename">
+                    {{ logoFileName() || 'Brand logo' }}
+                  </p>
+                  <p *ngIf="logoFileSize() as size"
+                    class="mt-1 font-body text-[12px] text-fg-secondary"
+                    data-testid="text-logo-filesize">
+                    {{ formatSize(size) }}
+                  </p>
+                  <p class="mt-1 font-body text-[12px] text-fg-secondary">
+                    Recommended: 100px × 24px
+                  </p>
+                  <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <button type="button"
+                      (click)="openFilePicker()"
+                      data-testid="button-reupload-logo"
+                      class="inline-flex h-8 items-center rounded-token border border-divider bg-surface px-3 text-[13px] font-medium text-fg-primary transition-colors hover:bg-surface-light-primary">
+                      Reupload
+                    </button>
+                    <button type="button"
+                      (click)="removeLogo()"
+                      data-testid="button-remove-logo"
+                      class="inline-flex h-8 items-center rounded-token border border-divider bg-surface px-3 text-[13px] font-medium text-fg-negative transition-colors hover:bg-surface-light-primary">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </section>
+
+        <!-- URL -->
+        <label class="mt-5 flex w-full flex-col gap-1">
+          <span class="text-[12px] text-fg-primary">URL</span>
+          <div class="flex h-10 items-center rounded-token border border-divider bg-surface pl-3 pr-2">
+            <span class="shrink-0 text-[14px] text-fg-tertiary">www.</span>
+            <input type="text"
+              [ngModel]="brandSvc.draft().logoUrl"
+              (ngModelChange)="onUrlChange($event)"
+              placeholder="shiplo.com"
+              data-testid="input-brand-url"
+              class="min-w-0 flex-1 bg-transparent px-1 font-body text-[14px] font-medium text-fg-primary outline-none placeholder:text-fg-tertiary" />
+          </div>
+          <span class="text-[12px] text-fg-secondary">Link used when logo image is clicked</span>
+        </label>
+
+        <!-- Brand colors -->
+        <div class="mt-5 grid grid-cols-2 gap-4">
+          <app-color-picker
+            label="Primary Color"
+            testIdPrefix="primary-color"
+            [value]="brandSvc.draft().primaryColor"
+            (valueChange)="brandSvc.updateDraft({ primaryColor: $event })" />
+          <app-color-picker
+            label="Background Color"
+            testIdPrefix="background-color"
+            [value]="brandSvc.draft().backgroundColor"
+            (valueChange)="brandSvc.updateDraft({ backgroundColor: $event })" />
+        </div>
+
+        <!-- Reason codes table -->
+        <section class="mt-6 w-full" data-testid="section-reason-codes">
+          <div class="overflow-hidden rounded-token border border-neutral-400">
+            <div class="grid grid-cols-[50px_minmax(0,1fr)_40px] bg-surface-light-primary">
+              <div class="flex h-8 items-center justify-center border-b border-divider px-2 text-[14px] font-medium text-fg-primary">
+                #
+              </div>
+              <div class="flex h-8 items-center border-b border-divider px-2 text-[14px] font-medium text-fg-primary">
+                Reason Code
+              </div>
+              <div class="h-8 border-b border-divider" aria-hidden="true"></div>
+            </div>
+
+            <div *ngFor="let row of brandSvc.draft().reasonCodes; let i = index"
+              class="grid grid-cols-[50px_minmax(0,1fr)_40px] bg-surface"
+              [attr.data-testid]="'reason-code-row-' + i">
+              <div class="flex h-8 items-center justify-center border-b border-divider px-2 text-[14px] text-fg-secondary">
+                {{ i + 1 }}
+              </div>
+              <div class="flex h-8 items-center border-b border-divider px-2">
+                <input type="text"
+                  [ngModel]="row.code"
+                  (ngModelChange)="brandSvc.updateReasonCode(row.id, $event)"
+                  [attr.data-testid]="'input-reason-code-' + i"
+                  [attr.aria-label]="'Reason code row ' + (i + 1)"
+                  placeholder="Enter reason code"
+                  class="h-full w-full bg-transparent font-body text-[14px] text-fg-secondary outline-none placeholder:text-fg-tertiary" />
+              </div>
+              <div class="flex h-8 items-center justify-end border-b border-divider px-2">
+                <button type="button"
+                  (click)="brandSvc.removeReasonCode(row.id)"
+                  [attr.data-testid]="'button-delete-reason-code-' + i"
+                  [attr.aria-label]="'Delete reason code row ' + (i + 1)"
+                  class="grid h-4 w-4 place-items-center rounded text-fg-secondary transition-colors hover:bg-surface-light-primary hover:text-fg-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button type="button"
+            (click)="brandSvc.addReasonCode()"
+            data-testid="button-add-reason-code"
+            class="mt-4 inline-flex h-[26px] items-center gap-1 rounded-token px-2 py-1 text-[12px] font-medium text-action-primary transition-colors hover:bg-surface-light-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+            </svg>
+            Add Reason Code
+          </button>
+        </section>
+
+        <!-- Display documents toggle -->
+        <label class="mt-6 flex cursor-pointer items-center gap-2"
+          data-testid="toggle-display-documents">
+          <button type="button"
+            role="switch"
+            [attr.aria-checked]="brandSvc.draft().displayDocuments"
+            (click)="brandSvc.updateDraft({ displayDocuments: !brandSvc.draft().displayDocuments })"
+            class="relative h-5 w-[34px] shrink-0 rounded-full transition-colors"
+            [class.bg-action-primary]="brandSvc.draft().displayDocuments"
+            [class.bg-neutral-400]="!brandSvc.draft().displayDocuments">
+            <span class="absolute top-0.5 h-4 w-4 rounded-full bg-surface shadow transition-transform"
+              [class.left-0.5]="!brandSvc.draft().displayDocuments"
+              [class.left-[14px]]="brandSvc.draft().displayDocuments"></span>
+          </button>
+          <span class="text-[12px] font-medium text-fg-secondary">Display Added Documents</span>
+        </label>
+      </div>
+
+      <footer class="flex h-[68px] shrink-0 items-center justify-end gap-2 border-t border-divider px-5"
+        data-testid="branded-tracking-footer">
+        <button type="button"
+          (click)="onResetBrand()"
+          [disabled]="!brandSvc.isDirty()"
+          data-testid="button-reset-brand"
+          class="inline-flex h-9 items-center rounded-token border border-neutral-400 bg-surface px-3 text-[14px] font-bold text-fg-primary transition-colors hover:bg-surface-light-primary disabled:cursor-not-allowed disabled:opacity-50">
+          Reset Brand
+        </button>
+        <button type="button"
+          (click)="onSaveBrand()"
+          [disabled]="!brandSvc.isDirty()"
+          data-testid="button-save-brand"
+          class="inline-flex h-9 items-center gap-1 rounded-token bg-action-primary px-3 text-[14px] font-bold text-fg-on-action transition-colors hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+          </svg>
+          Save Brand
+        </button>
+      </footer>
+    </div>
+
+    <!-- ============ Preview panel ============ -->
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg bg-surface"
+      data-testid="branded-tracking-preview-pane">
+
+      <div class="flex shrink-0 items-center justify-between border-b border-divider px-6 py-4">
+        <h2 class="font-body text-base font-medium text-fg-primary">Tracking Page Preview</h2>
+        <button type="button"
+          (click)="previewInNewWindow()"
+          data-testid="button-preview-new-window"
+          class="inline-flex h-9 items-center gap-1 rounded-token border border-neutral-400 bg-surface px-3 text-[14px] font-bold text-fg-primary transition-colors hover:bg-surface-light-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+          </svg>
+          Preview in New Window
+        </button>
+      </div>
+
+      <div class="relative min-h-0 flex-1 overflow-hidden p-4">
+        <div class="h-full min-h-0 overflow-hidden rounded-lg border border-divider">
+          <app-tracking-page-preview
+            [config]="brandSvc.draft()"
+            [compact]="true"
+            [fillFrame]="true" />
+        </div>
+      </div>
+    </div>
+  </section>
+</app-shell>

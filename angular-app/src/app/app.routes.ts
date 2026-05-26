@@ -37,6 +37,20 @@ export const routes: Routes = [
       import('./pages/automations/automations.component').then((m) => m.AutomationsComponent),
   },
   {
+    path: 'settings/branded-tracking',
+    loadComponent: () =>
+      import('./pages/branded-tracking/branded-tracking.component').then(
+        (m) => m.BrandedTrackingComponent,
+      ),
+  },
+  {
+    path: 'track/preview',
+    loadComponent: () =>
+      import('./pages/branded-tracking/customer-tracking-page/customer-tracking-page.component').then(
+        (m) => m.CustomerTrackingPageComponent,
+      ),
+  },
+  {
     path: 'settings/defaults',
     loadComponent: () =>
       import('./pages/defaults/defaults.component').then((m) => m.DefaultsComponent),

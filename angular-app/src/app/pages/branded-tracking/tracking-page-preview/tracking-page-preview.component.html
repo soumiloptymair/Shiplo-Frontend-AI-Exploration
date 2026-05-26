@@ -1,0 +1,353 @@
+<div class="font-body"
+  [class.mx-auto]="!fillFrame()"
+  [class.w-full]="fillFrame()"
+  [class.h-full]="fillFrame()"
+  [class.min-h-0]="fillFrame()"
+  [class.flex]="fillFrame()"
+  [class.flex-col]="fillFrame()"
+  [class.max-w-[960px]]="!compact() && !fillFrame()"
+  [class.min-h-screen]="!compact() && !fillFrame()"
+  [style.background-color]="config().backgroundColor"
+  data-testid="tracking-page-preview">
+
+  <!-- Brand header -->
+  <header class="flex shrink-0 justify-center px-4 pt-4 pb-2">
+    <a [href]="logoHref(config().logoUrl)"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center"
+      data-testid="link-brand-logo">
+      <img *ngIf="config().logoDataUrl; else defaultLogo"
+        [src]="config().logoDataUrl!"
+        alt="Brand logo"
+        class="h-6 max-w-[100px] object-contain"
+        data-testid="img-brand-logo-custom" />
+      <ng-template #defaultLogo>
+        <img [src]="defaultLogoSrc"
+          alt="Shiplo logo"
+          class="h-6 w-[86px] object-contain"
+          data-testid="img-brand-logo-default" />
+      </ng-template>
+    </a>
+  </header>
+
+  <div class="flex min-h-0 flex-col px-4 pb-4"
+    [class.flex-1]="fillFrame()"
+    [class.px-6]="!compact()"
+    [class.pb-8]="!compact() && !fillFrame()">
+
+    <!-- Status + timeline card -->
+    <section class="mb-3 shrink-0 rounded bg-surface p-3 shadow-sm"
+      [class.mb-4]="!compact()"
+      [class.p-4]="!compact()"
+      data-testid="card-tracking-status">
+      <div class="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p class="text-fg-secondary"
+            [class.text-[10px]]="compact()"
+            [class.text-sm]="!compact()">
+            Est Delivery:
+            <span class="font-medium" [style.color]="config().primaryColor">
+              {{ data().estDeliveryLabel }}
+            </span>
+          </p>
+          <p class="mt-1 text-fg-secondary"
+            [class.text-[9px]]="compact()"
+            [class.text-xs]="!compact()">
+            {{ data().statusSubtitle }}
+          </p>
+        </div>
+        <p class="text-fg-secondary"
+          [class.text-[9px]]="compact()"
+          [class.text-xs]="!compact()"
+          data-testid="text-order-number">
+          Order #{{ data().orderNumber }}
+        </p>
+      </div>
+
+      <!-- Timeline stepper -->
+      <div class="relative mt-5 px-1 sm:mt-6"
+        [class.mt-8]="!compact()"
+        data-testid="tracking-timeline">
+        <div class="absolute left-4 right-4 top-[10px] h-px bg-neutral-300"
+          [class.top-[11px]]="!compact()"></div>
+        <div class="absolute left-4 top-[10px] h-px"
+          [class.top-[11px]]="!compact()"
+          [style.width]="'72%'"
+          [style.background-color]="config().primaryColor"></div>
+
+        <ol class="relative flex justify-between">
+          <li *ngFor="let step of data().timeline"
+            class="flex min-w-0 flex-col items-center"
+            [style.width.%]="100 / data().timeline.length">
+            <span class="relative z-[1] grid place-items-center rounded-full border"
+              [class.h-[18px]]="compact()"
+              [class.w-[18px]]="compact()"
+              [class.h-5]="!compact()"
+              [class.w-5]="!compact()"
+              [style.border-color]="step.state === 'upcoming' ? '#72777E' : config().primaryColor"
+              [style.background-color]="step.state === 'upcoming' ? '#FFFFFF' : config().primaryColor">
+              <svg *ngIf="step.state !== 'upcoming'"
+                class="text-white"
+                [class.h-2.5]="compact()"
+                [class.w-2.5]="compact()"
+                [class.h-3]="!compact()"
+                [class.w-3]="!compact()"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span *ngIf="step.state === 'upcoming'"
+                class="rounded-full bg-neutral-500"
+                [class.h-1]="compact()"
+                [class.w-1]="compact()"
+                [class.h-1.5]="!compact()"
+                [class.w-1.5]="!compact()"></span>
+            </span>
+            <span class="mt-1 w-full truncate px-0.5 text-center leading-tight"
+              [class.text-[8px]]="compact()"
+              [class.text-[11px]]="!compact()"
+              [class.font-medium]="step.state === 'current'"
+              [class.text-fg-secondary]="step.state !== 'current'"
+              [style.color]="step.state === 'current' ? config().primaryColor : null">
+              {{ step.label }}
+            </span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="grid min-h-0 w-full gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(200px,32%)]"
+      [class.flex-1]="fillFrame()"
+      [class.gap-4]="!compact()"
+      [class.lg:grid-cols-[1fr_240px]]="!compact() && !fillFrame()">
+
+      <!-- Tracking history -->
+      <section class="flex min-h-0 min-w-0 flex-col rounded bg-surface p-3 shadow-sm"
+        [class.flex-1]="fillFrame()"
+        [class.p-4]="!compact()"
+        data-testid="card-tracking-history">
+        <h3 class="shrink-0 font-medium"
+          [class.text-xs]="compact()"
+          [class.text-sm]="!compact()"
+          [style.color]="config().primaryColor">
+          Tracking History
+        </h3>
+
+        <div class="relative mt-3 min-h-[120px] flex-1 overflow-hidden rounded border border-divider"
+          [class.h-[142px]]="!fillFrame() && compact()"
+          [class.h-[220px]]="!fillFrame() && !compact()"
+          data-testid="tracking-map">
+          <img src="figmaAssets/branded-tracking-map.png"
+            alt="Shipment route map"
+            class="h-full w-full object-cover" />
+          <div class="absolute left-3 top-3 rounded border border-neutral-400 bg-surface px-2 py-1 text-[10px] font-medium"
+            [style.color]="config().primaryColor">
+            View Larger Map
+          </div>
+          <div class="absolute left-1/2 top-[55%] -translate-x-1/2 rounded border border-divider bg-surface px-2 py-1 text-[10px] shadow-sm">
+            <span class="text-fg-secondary">Currently at:</span>
+            <span class="ml-1 font-medium text-fg-primary">{{ data().lastLocation.mapPinLabel }}</span>
+          </div>
+        </div>
+
+        <div class="mt-3 shrink-0">
+          <div class="flex items-baseline justify-between gap-2">
+            <span class="text-fg-secondary"
+              [class.text-[8px]]="compact()"
+              [class.text-xs]="!compact()">
+              {{ data().lastLocation.label }}
+            </span>
+            <span class="inline-flex items-center gap-1 text-success"
+              [class.text-[8px]]="compact()"
+              [class.text-xs]="!compact()">
+              <span class="inline-block h-1.5 w-1.5 rounded-full bg-success"></span>
+              {{ data().lastLocation.status }}
+            </span>
+          </div>
+          <p class="mt-1 font-medium text-fg-primary"
+            [class.text-[8px]]="compact()"
+            [class.text-xs]="!compact()">
+            {{ data().lastLocation.address }}
+          </p>
+          <p class="mt-0.5 text-fg-secondary"
+            [class.text-[8px]]="compact()"
+            [class.text-[11px]]="!compact()">
+            {{ data().lastLocation.timestamp }}
+          </p>
+        </div>
+
+        <button type="button"
+          class="mt-2 inline-flex shrink-0 items-center gap-1 bg-transparent p-0 text-[10px] font-normal"
+          [style.color]="config().primaryColor"
+          data-testid="button-see-all-updates">
+          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+          See All Updates
+        </button>
+
+        <div class="mt-3 min-h-0 flex-1 overflow-y-auto pr-1"
+          [class.max-h-[130px]]="!fillFrame() && compact()"
+          [class.max-h-[180px]]="!fillFrame() && !compact()"
+          data-testid="tracking-history-list">
+          <ng-container *ngFor="let day of data().history">
+            <p class="mb-2 font-medium text-fg-primary"
+              [class.text-[8px]]="compact()"
+              [class.text-xs]="!compact()">
+              {{ day.dateLabel }}
+            </p>
+            <div *ngFor="let event of day.events"
+              class="mb-2 flex gap-2"
+              [class.text-[8px]]="compact()"
+              [class.text-xs]="!compact()">
+              <span class="w-14 shrink-0 text-fg-primary">{{ event.time }}</span>
+              <span class="w-px shrink-0 bg-divider"></span>
+              <div class="min-w-0">
+                <p class="text-fg-primary">{{ event.status }}</p>
+                <p class="text-fg-secondary">{{ event.location }}</p>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </section>
+
+      <!-- Right column -->
+      <div class="flex min-h-0 min-w-0 flex-col gap-3"
+        [class.flex-1]="fillFrame()"
+        [class.gap-4]="!compact()">
+
+        <!-- Shipment information -->
+        <section class="shrink-0 rounded bg-surface p-3 shadow-sm"
+          [class.p-4]="!compact()"
+          data-testid="card-shipment-info">
+          <h3 class="font-medium"
+            [class.text-xs]="compact()"
+            [class.text-sm]="!compact()"
+            [style.color]="config().primaryColor">
+            Shipment Information
+          </h3>
+          <dl class="mt-3 space-y-2"
+            [class.text-[8px]]="compact()"
+            [class.text-xs]="!compact()">
+            <div>
+              <dt class="text-fg-secondary">Shipment ID</dt>
+              <dd class="font-medium text-fg-primary">{{ data().shipmentInfo.shipmentId }}</dd>
+            </div>
+            <div>
+              <dt class="text-fg-secondary">Carrier</dt>
+              <dd class="font-medium text-fg-primary">{{ data().shipmentInfo.carrier }}</dd>
+            </div>
+            <div>
+              <dt class="text-fg-secondary">Shipping Method</dt>
+              <dd class="font-medium text-fg-primary">{{ data().shipmentInfo.shippingMethod }}</dd>
+            </div>
+            <div>
+              <dt class="text-fg-secondary">Tracking ID</dt>
+              <dd>
+                <a href="#"
+                  class="font-medium text-fg-link underline-offset-2 hover:underline"
+                  data-testid="link-tracking-id">
+                  {{ data().shipmentInfo.trackingId }}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-fg-secondary">Shipping to</dt>
+              <dd class="font-medium leading-snug text-fg-primary">{{ data().shipmentInfo.shippingTo }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <!-- Items -->
+        <section class="shrink-0 rounded bg-surface p-3 shadow-sm"
+          [class.p-5]="!compact()"
+          data-testid="card-items">
+          <h3 class="font-medium"
+            [class.text-sm]="compact()"
+            [class.text-base]="!compact()"
+            [style.color]="config().primaryColor">
+            Items
+          </h3>
+          <div class="mt-3 flex items-end justify-between font-medium text-fg-primary"
+            [class.text-[10px]]="compact()"
+            [class.text-xs]="!compact()">
+            <span>Product Name</span>
+            <span>Qty</span>
+          </div>
+          <div class="my-2 border-b border-divider"></div>
+          <ul class="space-y-2"
+            [class.text-[10px]]="compact()"
+            [class.text-xs]="!compact()">
+            <li *ngFor="let item of data().items"
+              class="flex items-end justify-between gap-2">
+              <span class="min-w-0 flex-1 text-fg-secondary">{{ item.name }}</span>
+              <span class="shrink-0 font-medium text-fg-primary">{{ item.qty }}</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Documents -->
+        <section *ngIf="config().displayDocuments"
+          class="flex min-h-0 shrink-0 flex-col rounded bg-surface p-3 shadow-sm"
+          [class.p-5]="!compact()"
+          [class.flex-1]="fillFrame()"
+          data-testid="card-documents">
+          <h3 class="shrink-0 font-medium"
+            [class.text-sm]="compact()"
+            [class.text-base]="!compact()"
+            [style.color]="config().primaryColor">
+            Documents
+          </h3>
+          <div class="relative mt-3 min-w-0">
+            <div #documentsCarousel
+              class="flex items-center gap-3 overflow-x-auto pb-1 pr-8"
+              data-testid="documents-carousel">
+              <button *ngFor="let doc of data().documents; index as i"
+                type="button"
+                (click)="openDocumentPreview(i)"
+                class="group flex shrink-0 flex-col gap-1 rounded-[2px] text-left transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action-primary"
+                [attr.data-testid]="'button-open-document-' + i"
+                [attr.aria-label]="'Preview ' + doc.name">
+                <div class="h-[72px] w-[72px] overflow-hidden rounded-[2px] border border-divider bg-[#f2d9d9] ring-0 transition-shadow group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-action-primary">
+                  <img [src]="doc.thumbnailSrc"
+                    [alt]="doc.name"
+                    class="h-full w-full object-cover" />
+                </div>
+                <span class="max-w-[72px] truncate text-fg-secondary group-hover:text-fg-primary group-hover:underline"
+                  [class.text-[10px]]="compact()"
+                  [class.text-xs]="!compact()">
+                  {{ doc.name }}
+                </span>
+              </button>
+            </div>
+            <button type="button"
+              (click)="scrollDocumentsCarousel('next')"
+              aria-label="Scroll documents"
+              class="absolute right-0 top-6 grid h-8 w-8 place-items-center rounded-full text-fg-secondary hover:bg-surface-light-primary"
+              data-testid="button-documents-next">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+              </svg>
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <app-tracking-document-preview
+    [open]="previewDocumentIndex() !== null"
+    [activeDocument]="previewDocument()"
+    [shipmentLabel]="shipmentPreviewLabel()"
+    [hasPrevious]="hasPreviousDocument()"
+    [hasNext]="hasNextDocument()"
+    (close)="closeDocumentPreview()"
+    (previous)="showPreviousDocument()"
+    (next)="showNextDocument()" />
+
+  <footer class="flex shrink-0 items-center justify-center gap-1 pb-3 pt-1 text-fg-secondary"
+    [class.text-[8px]]="compact()"
+    [class.text-[11px]]="!compact()"
+    [class.pb-4]="!fillFrame()">
+    <span>powered by</span>
+    <img [src]="poweredByLogoSrc" alt="Shiplo" class="h-3 w-auto opacity-70" />
+  </footer>
+</div>

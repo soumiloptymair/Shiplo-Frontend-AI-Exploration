@@ -48,9 +48,10 @@ export class NavSidebarComponent {
   ];
 
   readonly settingsNavItems: NavItem[] = [
-    { label: 'Automations', matchPaths: ['/settings/automations'], route: '/settings/automations' },
-    { label: 'Defaults',    matchPaths: ['/settings/defaults'],    route: '/settings/defaults' },
-    { label: 'Marketplace', matchPaths: ['/marketplace'],          route: '/marketplace' },
+    { label: 'Automations',       matchPaths: ['/settings/automations'],       route: '/settings/automations' },
+    { label: 'Branded Tracking',  matchPaths: ['/settings/branded-tracking'],  route: '/settings/branded-tracking' },
+    { label: 'Defaults',          matchPaths: ['/settings/defaults'],          route: '/settings/defaults' },
+    { label: 'Marketplace',       matchPaths: ['/marketplace'],                route: '/marketplace' },
   ];
 
   resourcesExpanded = true;
