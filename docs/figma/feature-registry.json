@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "updatedAt": null,
+  "features": [
+    {
+      "id": "shipments",
+      "name": "Shipments",
+      "route": "/shipments",
+      "codePaths": ["src/app/pages/shipments"],
+      "figma": {
+        "pageNamePatterns": ["shipments", "shipment list", "orders"],
+        "nodeId": null,
+        "frameNamePatterns": ["shipments", "shipment list", "all shipments"]
+      },
+      "status": "implemented",
+      "priority": 1
+    },
+    {
+      "id": "shipment-detail-panel",
+      "name": "Shipment Detail Panel",
+      "route": "/shipments",
+      "codePaths": ["src/app/pages/shipments/shipment-detail-panel"],
+      "figma": {
+        "pageNamePatterns": ["shipments", "shipment detail"],
+        "nodeId": null,
+        "frameNamePatterns": ["detail panel", "shipment detail", "side panel"]
+      },
+      "status": "implemented",
+      "priority": 2
+    },
+    {
+      "id": "new-shipment-modal",
+      "name": "New Shipment Wizard",
+      "route": "/shipments",
+      "codePaths": ["src/app/pages/shipments/new-shipment-modal"],
+      "figma": {
+        "pageNamePatterns": ["shipments", "new shipment", "create shipment"],
+        "nodeId": null,
+        "frameNamePatterns": ["new shipment", "create shipment", "wizard"]
+      },
+      "status": "implemented",
+      "priority": 2
+    },
+    {
+      "id": "merge-split-shipments",
+      "name": "Merge & Split Shipments",
+      "route": "/shipments",
+      "codePaths": [
+        "src/app/pages/shipments/merge-shipment-modal",
+        "src/app/pages/shipments/split-shipment-modal",
+        "src/app/pages/shipments/merge-recommendation-banner",
+        "src/app/pages/shipments/split-recommendation-banner"
+      ],
+      "figma": {
+        "pageNamePatterns": ["shipments", "merge", "split"],
+        "nodeId": null,
+        "frameNamePatterns": ["merge", "split"]
+      },
+      "status": "implemented",
+      "priority": 2
+    },
+    {
+      "id": "pick-and-pack",
+      "name": "Pick and Pack",
+      "route": "/pick-and-pack",
+      "codePaths": ["src/app/pages/pick-and-pack"],
+      "figma": {
+        "pageNamePatterns": ["pick", "pack", "pick and pack"],
+        "nodeId": null,
+        "frameNamePatterns": ["pick and pack", "pick & pack"]
+      },
+      "status": "implemented",
+      "priority": 1
+    },
+    {
+      "id": "inventory",
+      "name": "Inventory",
+      "route": "/inventory",
+      "codePaths": [
+        "src/app/pages/inventory",
+        "src/app/pages/inventory/product-detail-panel",
+        "src/app/pages/inventory/variant-detail-panel"
+      ],
+      "figma": {
+        "pageNamePatterns": ["inventory", "catalog", "products"],
+        "nodeId": null,
+        "frameNamePatterns": ["inventory", "product detail", "variant"]
+      },
+      "status": "implemented",
+      "priority": 1
+    },
+    {
+      "id": "wallet",
+      "name": "Wallet",
+      "route": "/wallet",
+      "codePaths": ["src/app/pages/wallet"],
+      "figma": {
+        "pageNamePatterns": ["wallet", "billing", "transactions"],
+        "nodeId": null,
+        "frameNamePatterns": ["wallet", "transactions"]
+      },
+      "status": "implemented",
+      "priority": 1
+    },
+    {
+      "id": "marketplace",
+      "name": "Marketplace",
+      "route": "/marketplace",
+      "codePaths": [
+        "src/app/pages/marketplace",
+        "src/app/pages/marketplace/marketplace-detail-panel",
+        "src/app/pages/marketplace/connect-modal",
+        "src/app/pages/marketplace/configure-store-modal"
+      ],
+      "figma": {
+        "pageNamePatterns": ["marketplace", "integrations"],
+        "nodeId": null,
+        "frameNamePatterns": ["marketplace", "integrations", "connect"]
+      },
+      "status": "implemented",
+      "priority": 1
+    },
+    {
+      "id": "automations",
+      "name": "Automation Rules",
+      "route": "/settings/automations",
+      "codePaths": [
+        "src/app/pages/automations",
+        "src/app/pages/automations/automation-rule-modal"
+      ],
+      "figma": {
+        "pageNamePatterns": ["automation", "automations", "rules"],
+        "nodeId": null,
+        "frameNamePatterns": ["automation", "rules", "ltl"]
+      },
+      "status": "implemented",
+      "priority": 1,
+      "notes": "Includes LTL automation rule extensions when present in Figma."
+    },
+    {
+      "id": "branded-tracking",
+      "name": "Branded Tracking",
+      "route": "/settings/branded-tracking",
+      "codePaths": [
+        "src/app/pages/branded-tracking",
+        "src/app/pages/branded-tracking/tracking-page-preview",
+        "src/app/pages/branded-tracking/tracking-document-preview"
+      ],
+      "figma": {
+        "pageNamePatterns": ["branded tracking", "tracking config", "brand tracking"],
+        "nodeId": null,
+        "frameNamePatterns": ["branded tracking", "tracking settings"]
+      },
+      "status": "implemented",
+      "priority": 1
+    },
+    {
+      "id": "customer-tracking-preview",
+      "name": "Customer Tracking Page",
+      "route": "/track/preview",
+      "codePaths": ["src/app/pages/branded-tracking/customer-tracking-page"],
+      "figma": {
+        "pageNamePatterns": ["branded tracking", "customer tracking", "tracking page"],
+        "nodeId": null,
+        "frameNamePatterns": ["customer tracking", "tracking page preview", "track preview"]
+      },
+      "status": "implemented",
+      "priority": 2
+    },
+    {
+      "id": "defaults-packaging",
+      "name": "Defaults — Packaging",
+      "route": "/settings/defaults/packaging",
+      "codePaths": ["src/app/pages/defaults/packaging"],
+      "figma": {
+        "pageNamePatterns": ["defaults", "packaging"],
+        "nodeId": null,
+        "frameNamePatterns": ["packaging"]
+      },
+      "status": "implemented",
+      "priority": 2
+    },
+    {
+      "id": "defaults-tags",
+      "name": "Defaults — Tags",
+      "route": "/settings/defaults/tags",
+      "codePaths": ["src/app/pages/defaults/tags"],
+      "figma": {
+        "pageNamePatterns": ["defaults", "tags"],
+        "nodeId": null,
+        "frameNamePatterns": ["tags"]
+      },
+      "status": "implemented",
+      "priority": 2
+    },
+    {
+      "id": "defaults-brand-assets",
+      "name": "Defaults — Brand Assets",
+      "route": "/settings/defaults/brand-assets",
+      "codePaths": ["src/app/pages/defaults/brand-assets"],
+      "figma": {
+        "pageNamePatterns": ["defaults", "brand assets"],
+        "nodeId": null,
+        "frameNamePatterns": ["brand assets"]
+      },
+      "status": "implemented",
+      "priority": 2
+    },
+    {
+      "id": "defaults-printer",
+      "name": "Defaults — Printer",
+      "route": "/settings/defaults/printer",
+      "codePaths": ["src/app/pages/defaults/printer"],
+      "figma": {
+        "pageNamePatterns": ["defaults", "printer"],
+        "nodeId": null,
+        "frameNamePatterns": ["printer"]
+      },
+      "status": "implemented",
+      "priority": 3
+    },
+    {
+      "id": "defaults-label",
+      "name": "Defaults — Label",
+      "route": "/settings/defaults/label",
+      "codePaths": ["src/app/pages/defaults/label"],
+      "figma": {
+        "pageNamePatterns": ["defaults", "label"],
+        "nodeId": null,
+        "frameNamePatterns": ["label defaults", "label settings"]
+      },
+      "status": "implemented",
+      "priority": 3
+    },
+    {
+      "id": "app-shell",
+      "name": "App Shell & Navigation",
+      "route": null,
+      "codePaths": ["src/app/layout/app-shell", "src/app/layout/nav-sidebar"],
+      "figma": {
+        "pageNamePatterns": ["shell", "navigation", "sidebar", "nav"],
+        "nodeId": null,
+        "frameNamePatterns": ["sidebar", "navigation", "app shell"]
+      },
+      "status": "implemented",
+      "priority": 2
+    }
+  ]
+}

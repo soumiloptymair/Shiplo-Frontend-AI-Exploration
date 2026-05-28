@@ -1,6 +1,6 @@
 ---
 description: Table and data-grid column width rules — prevent cropped or wrapped cell text. Use with 15-data-grid.mdc.
-globs: angular-app/**/*.html, angular-app/src/styles.scss
+globs: src/**/*.html, src/styles.scss
 alwaysApply: false
 ---
 

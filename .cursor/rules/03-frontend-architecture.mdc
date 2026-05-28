@@ -1,0 +1,54 @@
+---
+description: Angular frontend architecture—pages, feature components, services, signals, and design tokens
+globs: src/**/*
+alwaysApply: false
+---
+
+# Frontend Architecture Rule
+
+Build the application like it will grow beyond the current Figma frames.
+
+## Preferred structure (Angular)
+
+Separate concerns clearly:
+
+- Pages/routes own layout and data orchestration (`src/app/pages/`).
+- Feature components own domain-specific UI.
+- Shared components own reusable UI patterns.
+- Services and repositories own data access and side effects.
+- Signals/computed values own reactive state where the codebase already uses them.
+- Utilities own pure helper functions.
+- Constants/config own static values.
+- Design tokens live in `src/styles.scss` and Tailwind config.
+
+## Component quality
+
+Good components should be:
+
+- Small
+- Focused
+- Reusable where appropriate
+- Easy to name
+- Easy to test
+- Easy to remove
+- Clear in their inputs/outputs
+- Not tightly coupled to unrelated data
+
+Use **Angular 18 standalone components** (no NgModules). Reuse `app-shell`, `nav-sidebar`, and existing page patterns.
+
+## Extract components when
+
+- A UI pattern appears more than once.
+- A section is too complex inside a page.
+- Logic can be isolated cleanly.
+- A component maps to a real product concept.
+- A visual pattern will likely appear again.
+
+## Guardrails
+
+- Do not create one giant component per screen.
+- Do not prematurely abstract everything.
+- Do not mix routing, API calls, formatting, and presentation in one component.
+- Do not create generic components with unclear responsibilities.
+- Do not duplicate design patterns.
+- Preserve stable `data-testid` attributes on interactive elements.

@@ -2,6 +2,30 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Angular: Dev server",
+      "type": "shell",
+      "command": "npm start",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Building|Compiling",
+          "endsPattern": "Application bundle generation complete|Compiled successfully|Local:"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
       "label": "GitHub: Auto-sync (background)",
       "type": "shell",
       "command": "${workspaceFolder}/scripts/github-auto-sync.sh",

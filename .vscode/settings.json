@@ -6,5 +6,6 @@
   "git.postCommitCommand": "push",
   "git.showProgress": true,
   "git.useIntegratedAskPass": true,
-  "task.allowAutomaticTasks": "on"
+  "task.allowAutomaticTasks": "on",
+  "angular.experimental-ivy": true
 }

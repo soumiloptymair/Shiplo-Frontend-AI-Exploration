@@ -1,6 +1,6 @@
 # Shiplo Angular App — UX Architecture & Test Specification
 
-**Scope:** `angular-app/` routes and implemented UI  
+**Scope:** `src/app/` routes and implemented UI  
 **Audience:** Product, QA, Engineering  
 **Method:** Workflow inventory → formal use cases → edge cases → executable test cases
 

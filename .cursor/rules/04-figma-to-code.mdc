@@ -1,0 +1,43 @@
+---
+description: Translate Figma frames into implementation specs before coding; reuse Angular components and tokens
+globs: src/**/*
+alwaysApply: false
+---
+
+# Figma-to-Code Rule
+
+When given a Figma frame, first translate it into an implementation specification before coding.
+
+## Before coding, identify
+
+1. Screen purpose
+2. Layout regions
+3. Visual hierarchy
+4. Reusable existing components
+5. New components needed
+6. Primary interactions
+7. Secondary interactions
+8. Required data
+9. Local state
+10. Server/API state assumptions
+11. Empty, loading, error, and success states
+12. Responsive behavior
+13. Accessibility requirements
+14. Risks or ambiguities
+
+## Design translation principles
+
+- Preserve hierarchy and spacing relationships.
+- Convert repeated styles into reusable tokens or classes.
+- Use semantic layout instead of absolute positioning when possible.
+- Avoid blindly copying every pixel value.
+- Prefer scalable components over one-off Figma replicas.
+- Preserve product intent over superficial pixel matching.
+- Map screens to `src/app/pages/`; update `.component.ts` / `.component.html`.
+
+## Guardrails
+
+- Do not hardcode text and data deep inside reusable components.
+- Do not create a new button, input, modal, or card style if one already exists.
+- Do not ignore responsive behavior just because the Figma frame is desktop-sized.
+- Do not assume a static mockup represents every app state.

@@ -1,0 +1,31 @@
+---
+description: All user-requested changes must be implemented in the Angular app only
+alwaysApply: true
+---
+
+# Angular-only guardrail
+
+This repository is **Angular-only**. All application code lives at the repo root under `src/app/`.
+
+## Required
+
+- Implement UI, features, fixes, and Figma-driven work under `src/app/`.
+- Use **Angular 18** standalone components (no NgModules), Angular Router, and Signals where the codebase already does.
+- Reuse existing layout (`app-shell`, `nav-sidebar`), services, models, and design tokens in `src/styles.scss` and `tailwind.config.js`.
+- Preserve stable `data-testid` attributes on interactive elements when adding or changing UI.
+
+## Forbidden
+
+- Do **not** add React, Vue, or other frontend frameworks.
+- Do **not** introduce Vite/shadcn/Radix UI patterns from legacy Replit exports.
+- Do **not** scatter mock data inside UI components — use services and fixtures.
+
+## When the user shares Figma or screenshots
+
+- Map designs to the matching **Angular** page under `src/app/pages/`.
+- Create or update `.component.ts` / `.component.html` (and scoped styles if needed).
+
+## Backend / API
+
+- The only server in this repo is `server/index.mjs` (USPS address proxy for dev).
+- UI still belongs in Angular; touch the proxy only when an API contract change is required.

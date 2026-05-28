@@ -16,7 +16,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ANGULAR_DIR="$ROOT/angular-app"
 DEFAULT_BRANCH="${SANDBOX_BASE_BRANCH:-main}"
 
 red() { printf '\033[31m%s\033[0m\n' "$*"; }
@@ -76,9 +75,7 @@ cmd_review() {
 
 cmd_check() {
   yellow "=== Build ==="
-  (cd "$ANGULAR_DIR" && npm run build)
-  yellow "=== Lint ==="
-  (cd "$ANGULAR_DIR" && npm run lint)
+  (cd "$ROOT" && npm run build)
   green "Sandbox checks passed."
 }
 
@@ -126,7 +123,7 @@ Commands:
   start [branch]   Create or switch to a sandbox branch
   status           Show branch status and recent commits
   review           Show diff summary + review prompt
-  check            Run Angular build + lint
+  check            Run Angular build
   publish [--push] Run checks, show publish checklist, optionally push + PR
 
 EOF

@@ -1,12 +1,12 @@
 ---
-description: Standard data grid / table header and cell styling from the Figma component library (Tags frame 27686:184938). Use for all tabular UI in angular-app.
-globs: angular-app/**/*.html, angular-app/src/styles.scss
+description: Standard data grid / table header and cell styling from the Figma component library (Tags frame 27686:184938). Use for all tabular UI in the Angular app.
+globs: src/**/*.html, src/styles.scss
 alwaysApply: true
 ---
 
 # Data Grid Rule
 
-All tabular data in the Angular app must use the **data grid tokens** defined in `angular-app/src/styles.scss` (Figma `27686:184938`).
+All tabular data in the Angular app must use the **data grid tokens** defined in `src/styles.scss` (Figma `27686:184938`).
 
 ## Sticky header + body scroll (required — global)
 

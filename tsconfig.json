@@ -1,23 +1,35 @@
 {
-  "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
+  "compileOnSave": false,
   "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
-    "module": "ESNext",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "lib": ["esnext", "dom", "dom.iterable"],
-    "jsx": "preserve",
-    "esModuleInterop": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
     "moduleResolution": "bundler",
-    "baseUrl": ".",
-    "types": ["node", "vite/client"],
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": ["ES2022", "dom"],
+    "baseUrl": "src",
     "paths": {
-      "@/*": ["./client/src/*"],
-      "@shared/*": ["./shared/*"]
+      "@app/*": ["app/*"],
+      "@core/*": ["app/core/*"],
+      "@env/*": ["environments/*"]
     }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
   }
 }
