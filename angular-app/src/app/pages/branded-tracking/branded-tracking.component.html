@@ -157,24 +157,24 @@
 
         <!-- Reason codes table -->
         <section class="mt-6 w-full" data-testid="section-reason-codes">
-          <div class="overflow-hidden rounded-token border border-neutral-400">
-            <div class="grid grid-cols-[50px_minmax(0,1fr)_40px] bg-surface-light-primary">
-              <div class="flex h-8 items-center justify-center border-b border-divider px-2 text-[14px] font-medium text-fg-primary">
-                #
-              </div>
-              <div class="flex h-8 items-center border-b border-divider px-2 text-[14px] font-medium text-fg-primary">
-                Reason Code
-              </div>
-              <div class="h-8 border-b border-divider" aria-hidden="true"></div>
+          <div class="data-grid data-grid--scroll max-h-[320px]">
+            <div class="data-grid__header"
+              style="grid-template-columns: 50px minmax(0,1fr) 40px;">
+              <span class="data-grid__header-cell justify-center">#</span>
+              <span class="data-grid__header-cell">Reason Code</span>
+              <span class="data-grid__header-cell" aria-hidden="true"></span>
             </div>
 
-            <div *ngFor="let row of brandSvc.draft().reasonCodes; let i = index"
-              class="grid grid-cols-[50px_minmax(0,1fr)_40px] bg-surface"
+            <div class="data-grid__body">
+            <ul>
+            <li *ngFor="let row of brandSvc.draft().reasonCodes; let i = index"
+              class="data-grid__row"
+              style="grid-template-columns: 50px minmax(0,1fr) 40px;"
               [attr.data-testid]="'reason-code-row-' + i">
-              <div class="flex h-8 items-center justify-center border-b border-divider px-2 text-[14px] text-fg-secondary">
+              <span class="data-grid__cell justify-center text-fg-secondary">
                 {{ i + 1 }}
-              </div>
-              <div class="flex h-8 items-center border-b border-divider px-2">
+              </span>
+              <span class="data-grid__cell">
                 <input type="text"
                   [ngModel]="row.code"
                   (ngModelChange)="brandSvc.updateReasonCode(row.id, $event)"
@@ -182,8 +182,8 @@
                   [attr.aria-label]="'Reason code row ' + (i + 1)"
                   placeholder="Enter reason code"
                   class="h-full w-full bg-transparent font-body text-[14px] text-fg-secondary outline-none placeholder:text-fg-tertiary" />
-              </div>
-              <div class="flex h-8 items-center justify-end border-b border-divider px-2">
+              </span>
+              <span class="data-grid__cell data-grid__cell--actions">
                 <button type="button"
                   (click)="brandSvc.removeReasonCode(row.id)"
                   [attr.data-testid]="'button-delete-reason-code-' + i"
@@ -194,7 +194,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-              </div>
+              </span>
+            </li>
+            </ul>
             </div>
           </div>
 

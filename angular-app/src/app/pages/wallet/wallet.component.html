@@ -266,7 +266,7 @@
       </div>
 
       <!-- ----- Transactions table (flush, no card wrapper) ----- -->
-      <div class="min-h-0 flex-1 overflow-auto" data-testid="transactions-pane">
+      <div class="min-h-0 flex-1 overflow-hidden" data-testid="transactions-pane">
         @if (filteredTxns().length === 0) {
           <div
             class="flex h-full min-h-[400px] flex-col items-center justify-center gap-3 text-center"
@@ -278,55 +278,44 @@
             <p class="text-subtitle-2 text-fg-secondary">All transaction history will show up here.</p>
           </div>
         } @else {
-          <table class="w-full table-fixed border-collapse" data-testid="table-transactions">
-            <colgroup>
-              <col style="width:120px"/>
-              <col style="width:166px"/>
-              <col style="width:148px"/>
-              <col style="width:140px"/>
-              <col style="width:140px"/>
-              <col style="width:140px"/>
-              <col style="width:86px"/>
-              <col style="width:80px"/>
-              <col style="width:100px"/>
-              <col style="width:252px"/>
-            </colgroup>
+          <div class="data-grid data-grid--scroll min-h-0 h-full">
+          <table class="data-grid-table" data-testid="table-transactions">
             <thead>
-              <tr class="h-8 bg-surface-light-primary text-left text-body-md uppercase tracking-[0.5px] text-fg-secondary">
-                <th class="px-3 font-medium">Type</th>
-                <th class="px-3 font-medium">Status</th>
-                <th class="px-3 font-medium">Date</th>
-                <th class="px-3 font-medium">Transaction ID</th>
-                <th class="px-3 font-medium">Shipment ID</th>
-                <th class="px-3 font-medium">Label ID</th>
-                <th class="px-3 font-medium">Carrier</th>
-                <th class="px-3 text-right font-medium">Amount</th>
-                <th class="px-3 text-right font-medium">Balance</th>
-                <th class="px-3"></th>
+              <tr>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Transaction ID</th>
+                <th>Shipment ID</th>
+                <th>Label ID</th>
+                <th>Carrier</th>
+                <th class="text-right">Amount</th>
+                <th class="text-right">Balance</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               @for (t of filteredTxns(); track t.id) {
                 <tr
-                  class="h-9 border-b border-divider text-subtitle-2 text-fg-primary"
+                  class="h-8"
                   [attr.data-testid]="'row-txn-' + t.id">
-                  <td class="px-3 truncate">{{ t.type }}</td>
-                  <td class="px-3">
+                  <td>{{ t.type }}</td>
+                  <td>
                     <app-status-pill
                       [tone]="toneFor(t.status)"
                       [testId]="'status-' + t.id">{{ t.status }}</app-status-pill>
                   </td>
-                  <td class="px-3 truncate">{{ t.date }}</td>
-                  <td class="px-3 truncate">{{ t.txnId }}</td>
-                  <td class="px-3 truncate">
+                  <td>{{ t.date }}</td>
+                  <td>{{ t.txnId }}</td>
+                  <td>
                     @if (t.shipmentId) {
                       <a class="text-fg-link hover:underline" href="javascript:void(0)">{{ t.shipmentId }}</a>
                     } @else { <span class="text-fg-secondary">-</span> }
                   </td>
-                  <td class="px-3 truncate">
+                  <td>
                     @if (t.labelId) { {{ t.labelId }} } @else { <span class="text-fg-secondary">-</span> }
                   </td>
-                  <td class="px-3">
+                  <td>
                     @if (t.carrier) {
                       <span class="inline-flex items-center gap-1">
                         <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#8B5A2B] text-[0px]">U</span>
@@ -335,11 +324,11 @@
                     } @else { <span class="text-fg-secondary">-</span> }
                   </td>
                   <td
-                    class="whitespace-nowrap px-3 text-right text-subtitle-2-md"
+                    class="whitespace-nowrap text-right font-medium"
                     [ngClass]="amountClass(t.amount)"
                     [attr.data-testid]="'amount-' + t.id">{{ formatAmount(t.amount) }}</td>
-                  <td class="px-3 text-right">${{ t.balance.toFixed(2) }}</td>
-                  <td class="px-3">
+                  <td class="text-right">${{ t.balance.toFixed(2) }}</td>
+                  <td>
                     <div class="flex items-center justify-end gap-2">
                       @if (canCancel(t)) {
                         <button
@@ -371,6 +360,7 @@
               }
             </tbody>
           </table>
+          </div>
         }
       </div>
     </div>

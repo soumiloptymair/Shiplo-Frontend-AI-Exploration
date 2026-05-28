@@ -77,6 +77,20 @@ export const routes: Routes = [
             (m) => m.BrandAssetsDefaultsComponent,
           ),
       },
+      {
+        path: 'printer',
+        loadComponent: () =>
+          import('./pages/defaults/printer/printer.component').then(
+            (m) => m.PrinterDefaultsComponent,
+          ),
+      },
+      {
+        path: 'label',
+        loadComponent: () =>
+          import('./pages/defaults/label/label.component').then(
+            (m) => m.LabelDefaultsComponent,
+          ),
+      },
     ],
   },
   {

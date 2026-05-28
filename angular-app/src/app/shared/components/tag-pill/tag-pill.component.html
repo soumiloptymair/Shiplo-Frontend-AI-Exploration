@@ -1,0 +1,51 @@
+<span class="inline-flex h-6 max-w-full items-center gap-1 rounded px-2 py-1 text-[14px] leading-[1.43]"
+  [style.background-color]="backgroundColor"
+  [style.color]="textColor"
+  [attr.data-testid]="testId">
+  <span class="truncate">{{ label }}</span>
+  @if (dismissible || showDismissIcon) {
+    @if (dismissible) {
+      <button type="button"
+        (click)="onDismissClick($event)"
+        [attr.aria-label]="'Remove ' + label"
+        [attr.data-testid]="testId ? testId + '-dismiss' : null"
+        class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded hover:opacity-70">
+        <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    } @else {
+      <svg class="h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    }
+  }
+</span>
+
+@if (confirming()) {
+  <div (click)="$event.stopPropagation()"
+    class="fixed z-[60] w-44 rounded border border-divider bg-surface p-2 shadow-lg"
+    role="dialog"
+    aria-label="Confirm tag removal"
+    [style.top.px]="confirmPosition()?.top"
+    [style.left.px]="confirmPosition()?.left"
+    [attr.data-testid]="testId ? testId + '-confirm' : null">
+    <p class="text-[12px] leading-[1.4] text-fg-primary">
+      Remove <span class="font-medium">{{ label }}</span>?
+    </p>
+    <div class="mt-2 flex justify-end gap-2">
+      <button type="button"
+        (click)="cancelConfirm($event)"
+        [attr.data-testid]="testId ? testId + '-confirm-cancel' : null"
+        class="h-7 rounded-token border border-divider bg-surface px-2 text-[12px] font-medium text-fg-primary hover:bg-surface-light-primary">
+        Cancel
+      </button>
+      <button type="button"
+        (click)="confirmRemove($event)"
+        [attr.data-testid]="testId ? testId + '-confirm-remove' : null"
+        class="h-7 rounded-token bg-status-error px-2 text-[12px] font-medium text-fg-on-action hover:opacity-90">
+        Remove
+      </button>
+    </div>
+  </div>
+}

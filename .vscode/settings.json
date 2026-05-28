@@ -1,0 +1,10 @@
+{
+  "git.autofetch": true,
+  "git.autofetchPeriod": 60,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.postCommitCommand": "push",
+  "git.showProgress": true,
+  "git.useIntegratedAskPass": true,
+  "task.allowAutomaticTasks": "on"
+}

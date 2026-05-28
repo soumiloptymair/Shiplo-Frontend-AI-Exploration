@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { InventoryService } from '../../../core/services/inventory.service';
 import { DEFAULT_VARIANT_ACTIVITY, VariantActivityEntry } from '../../../core/models/inventory.model';
 import { NotesTabComponent } from '../../../shared/notes-tab/notes-tab.component';
+import { EntityTagsComponent } from '../../../shared/components/entity-tags/entity-tags.component';
 
 type VariantTab = 'Inventory' | 'Details' | 'Activity' | 'Notes';
 
 @Component({
   selector: 'app-variant-detail-panel',
   standalone: true,
-  imports: [CommonModule, NotesTabComponent],
+  imports: [CommonModule, NotesTabComponent, EntityTagsComponent],
   templateUrl: './variant-detail-panel.component.html',
 })
 export class VariantDetailPanelComponent {
@@ -51,6 +52,12 @@ export class VariantDetailPanelComponent {
 
   setTab(t: VariantTab) { this.activeTab.set(t); }
   close() { this.svc.closeDetails(); }
+
+  onTagIdsChange(tagIds: string[]) {
+    const sel = this.variantSelection();
+    if (!sel) return;
+    this.svc.setVariantTagIds(sel.product.id, sel.variant.id, tagIds);
+  }
 
   incQty(_w: string) { /* hook for later */ }
   decQty(_w: string) { /* hook for later */ }

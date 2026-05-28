@@ -2,13 +2,14 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../../../core/services/inventory.service';
 import { NotesTabComponent } from '../../../shared/notes-tab/notes-tab.component';
+import { EntityTagsComponent } from '../../../shared/components/entity-tags/entity-tags.component';
 
 type DetailTab = 'Inventory' | 'Details' | 'Activity' | 'Notes';
 
 @Component({
   selector: 'app-product-detail-panel',
   standalone: true,
-  imports: [CommonModule, NotesTabComponent],
+  imports: [CommonModule, NotesTabComponent, EntityTagsComponent],
   templateUrl: './product-detail-panel.component.html',
 })
 export class ProductDetailPanelComponent {
@@ -53,4 +54,10 @@ export class ProductDetailPanelComponent {
   setTab(t: DetailTab) { this.activeTab.set(t); }
 
   close() { this.svc.closeDetails(); }
+
+  onProductTagIdsChange(tagIds: string[]) {
+    const sel = this.svc.selectedItem();
+    if (!sel || sel.kind !== 'product') return;
+    this.svc.setProductTagIds(sel.product.id, tagIds);
+  }
 }

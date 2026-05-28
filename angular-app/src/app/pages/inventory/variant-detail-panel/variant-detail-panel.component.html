@@ -59,6 +59,14 @@
       <p class="text-[12px] leading-[1.43] text-[#45565b]">
         Price: <span class="text-[#0b1516]" data-testid="text-variant-price">{{ sel.variant.value }}</span>
       </p>
+      <div class="mt-2">
+        <app-entity-tags
+          [tagIds]="sel.variant.tagIds"
+          category="Products"
+          variant="panel"
+          testIdPrefix="panel-variant-tags"
+          (tagIdsChange)="onTagIdsChange($event)" />
+      </div>
     </div>
   </div>
 

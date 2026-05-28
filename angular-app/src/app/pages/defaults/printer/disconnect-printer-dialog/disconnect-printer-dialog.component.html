@@ -1,0 +1,52 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+  (click)="onCancel()"
+  data-testid="modal-disconnect-printer-backdrop">
+  <div class="w-[489px] max-w-[95vw] overflow-hidden rounded-lg bg-surface shadow-[0_9px_46px_rgba(0,0,0,0.12),0_24px_38px_rgba(0,0,0,0.14),0_11px_15px_rgba(0,0,0,0.2)]"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="disconnect-printer-title"
+    data-testid="modal-disconnect-printer">
+
+    <header class="flex items-center justify-between px-4 py-4">
+      <h2 id="disconnect-printer-title"
+        class="font-body text-[20px] font-bold leading-normal text-fg-primary"
+        data-testid="text-disconnect-printer-title">
+        Disconnect Printer
+      </h2>
+      <button type="button"
+        (click)="onCancel()"
+        aria-label="Close"
+        data-testid="button-close-disconnect-printer"
+        class="flex h-9 w-10 items-center justify-center rounded-lg text-fg-secondary hover:bg-surface-light-primary">
+        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="px-4 pb-2">
+      <p class="font-body text-[16px] leading-[1.43] text-fg-primary"
+        data-testid="text-disconnect-printer-message">
+        Are you sure you want to disconnect
+        <span class="font-medium">{{ printerName }}</span>?
+        You will have to manually reconnect it later.
+      </p>
+    </div>
+
+    <footer class="flex items-center justify-end gap-4 px-[18px] py-4">
+      <button type="button"
+        (click)="onCancel()"
+        data-testid="button-cancel-disconnect-printer"
+        class="rounded-md px-3 py-2 text-[14px] font-normal text-fg-primary hover:bg-surface-light-primary">
+        Cancel
+      </button>
+      <button type="button"
+        (click)="onConfirm()"
+        data-testid="button-confirm-disconnect-printer"
+        class="rounded-md bg-status-error px-3 py-2 text-[14px] font-bold text-fg-on-action hover:opacity-90">
+        Disconnect
+      </button>
+    </footer>
+  </div>
+</div>

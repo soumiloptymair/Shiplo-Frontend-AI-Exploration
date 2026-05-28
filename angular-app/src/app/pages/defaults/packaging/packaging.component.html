@@ -1,50 +1,50 @@
-<!-- Header bar -->
-<header class="flex h-[68px] shrink-0 items-center gap-3 border-b border-divider px-6"
+<!-- Title bar — Figma `25741:1774` -->
+<header class="flex h-[68px] shrink-0 items-center justify-between border-b border-divider px-5 py-4"
   data-testid="packaging-header">
-  <h2 class="font-heading text-[20px] font-semibold leading-[1.4] tracking-[0.15px] text-fg-primary">
+  <h2 class="font-heading text-[24px] font-medium leading-[1.4] tracking-[0.15px] text-fg-primary">
     Packaging
   </h2>
   <button type="button"
     (click)="openCreate()"
     data-testid="button-add-packaging"
-    class="ml-auto inline-flex h-9 items-center gap-1.5 rounded-token bg-action-primary px-3 text-[13px] font-medium text-fg-on-action transition-colors hover:bg-action-primary-hover">
+    class="inline-flex h-9 items-center rounded-md bg-action-primary px-3 text-[14px] font-bold text-fg-on-action transition-colors hover:bg-action-primary-hover">
     Add Packaging
   </button>
 </header>
 
-<!-- Body -->
-<div class="min-h-0 flex-1 overflow-auto px-6 py-5">
+<!-- Body — Figma `25741:1779` -->
+<div class="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-5 pb-8 pt-4">
 
-  <!-- Section title + subtitle -->
-  <h3 class="font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-fg-primary"
-    data-testid="section-pre-defined">
-    PRE-DEFINED CARRIER PACKAGING
-  </h3>
-  <p class="mt-1 font-body text-[12px] leading-[1.4] text-fg-secondary">
-    Common packaging options to streamline your fulfillment process.
-  </p>
+  <div class="flex shrink-0 flex-col gap-1">
+    <h3 class="font-body text-[14px] font-medium uppercase leading-[1.43] text-fg-primary"
+      data-testid="section-pre-defined">
+      Pre-defined Carrier Packaging
+    </h3>
+    <p class="font-body text-[12px] leading-[1.43] text-[#72777e]">
+      Common packaging options to streamline your fulfillment process.
+    </p>
+  </div>
 
   <!-- Table -->
-  <div class="mt-4 overflow-hidden rounded-token" data-testid="table-packaging">
+  <div class="data-grid data-grid--scroll mt-0 min-h-0 flex-1" data-testid="table-packaging">
 
-    <!-- Header row -->
-    <div class="grid items-center border-b border-divider px-3 py-2 text-[12px] font-semibold text-fg-primary"
-      style="grid-template-columns: minmax(120px,1.4fr) 70px 80px 75px 80px 100px 100px 70px 48px 28px;">
-      <span data-testid="header-name">Name</span>
-      <span data-testid="header-type">Type</span>
-      <span data-testid="header-length">Length (in)</span>
-      <span data-testid="header-width">Width (in)</span>
-      <span data-testid="header-height">Height (in)</span>
-      <span data-testid="header-tare-weight">Tare Weight (lb)</span>
-      <span data-testid="header-max-weight">Max Weight (lb)</span>
-      <span data-testid="header-cost">Cost</span>
-      <span></span>
-      <span></span>
+    <div class="data-grid__header"
+      style="grid-template-columns: minmax(140px, 1.2fr) minmax(56px, max-content) minmax(96px, max-content) minmax(96px, max-content) minmax(96px, max-content) minmax(128px, max-content) minmax(128px, max-content) minmax(72px, max-content) 48px 40px;">
+      <span class="data-grid__header-cell" data-testid="header-name">Name</span>
+      <span class="data-grid__header-cell" data-testid="header-type">Type</span>
+      <span class="data-grid__header-cell" data-testid="header-length">Length (in)</span>
+      <span class="data-grid__header-cell" data-testid="header-width">Width (in)</span>
+      <span class="data-grid__header-cell" data-testid="header-height">Height (in)</span>
+      <span class="data-grid__header-cell" data-testid="header-tare-weight">Tare Weight (lb)</span>
+      <span class="data-grid__header-cell" data-testid="header-max-weight">Max Weight (lb)</span>
+      <span class="data-grid__header-cell" data-testid="header-cost">Cost</span>
+      <span class="data-grid__header-cell" aria-hidden="true"></span>
+      <span class="data-grid__header-cell" aria-hidden="true"></span>
     </div>
 
-    <!-- Empty state -->
+    <div class="data-grid__body">
     <div *ngIf="svc.configs().length === 0"
-      class="flex h-32 items-center justify-center text-[13px] text-fg-secondary"
+      class="data-grid__empty"
       data-testid="empty-packaging">
       No packaging configurations yet.
     </div>
@@ -52,35 +52,36 @@
     <!-- Rows -->
     <ul>
       <li *ngFor="let row of svc.configs(); trackBy: trackById"
-        class="grid items-center border-b border-divider px-3 py-3 text-[13px] text-fg-primary hover:bg-surface-light-primary"
+        class="data-grid__row data-grid__row--interactive"
         [class.opacity-60]="!row.enabled"
         [attr.data-testid]="'row-packaging-' + row.id"
-        style="grid-template-columns: minmax(120px,1.4fr) 70px 80px 75px 80px 100px 100px 70px 48px 28px;">
+        style="grid-template-columns: minmax(140px, 1.2fr) minmax(56px, max-content) minmax(96px, max-content) minmax(96px, max-content) minmax(96px, max-content) minmax(128px, max-content) minmax(128px, max-content) minmax(72px, max-content) 48px 40px;">
 
-        <span [attr.data-testid]="'cell-name-' + row.id">{{ row.name }}</span>
-        <span [attr.data-testid]="'cell-type-' + row.id">{{ row.type }}</span>
-        <span [attr.data-testid]="'cell-length-' + row.id">{{ row.length }}</span>
-        <span [attr.data-testid]="'cell-width-' + row.id">{{ row.width }}</span>
-        <span [attr.data-testid]="'cell-height-' + row.id">{{ row.height }}</span>
-        <span [attr.data-testid]="'cell-tare-' + row.id">{{ formatNumber(row.tareWeight) }}</span>
-        <span [attr.data-testid]="'cell-max-' + row.id">{{ formatNumber(row.maxWeight) }}</span>
-        <span [attr.data-testid]="'cell-cost-' + row.id">{{ formatCost(row.cost) }}</span>
+        <span class="data-grid__cell" [attr.data-testid]="'cell-name-' + row.id">{{ row.name }}</span>
+        <span class="data-grid__cell" [attr.data-testid]="'cell-type-' + row.id">{{ row.type }}</span>
+        <span class="data-grid__cell" [attr.data-testid]="'cell-length-' + row.id">{{ row.length }}</span>
+        <span class="data-grid__cell" [attr.data-testid]="'cell-width-' + row.id">{{ row.width }}</span>
+        <span class="data-grid__cell" [attr.data-testid]="'cell-height-' + row.id">{{ row.height }}</span>
+        <span class="data-grid__cell" [attr.data-testid]="'cell-tare-' + row.id">{{ formatNumber(row.tareWeight) }}</span>
+        <span class="data-grid__cell" [attr.data-testid]="'cell-max-' + row.id">{{ formatNumber(row.maxWeight) }}</span>
+        <span class="data-grid__cell" [attr.data-testid]="'cell-cost-' + row.id">{{ formatCost(row.cost) }}</span>
 
-        <!-- Toggle (brand teal) -->
-        <button type="button"
-          role="switch"
-          [attr.aria-checked]="row.enabled"
-          [attr.aria-label]="row.enabled ? 'Disable ' + row.name : 'Enable ' + row.name"
-          (click)="toggle(row.id)"
-          [attr.data-testid]="'toggle-packaging-' + row.id"
-          class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
-          [ngClass]="row.enabled ? 'bg-action-primary' : 'bg-neutral-400'">
-          <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-            [ngClass]="row.enabled ? 'translate-x-[18px]' : 'translate-x-0.5'"></span>
-        </button>
+        <span class="data-grid__cell">
+          <button type="button"
+            role="switch"
+            [attr.aria-checked]="row.enabled"
+            [attr.aria-label]="row.enabled ? 'Disable ' + row.name : 'Enable ' + row.name"
+            (click)="toggle(row.id)"
+            [attr.data-testid]="'toggle-packaging-' + row.id"
+            class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+            [ngClass]="row.enabled ? 'bg-action-primary' : 'bg-neutral-400'">
+            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+              [ngClass]="row.enabled ? 'translate-x-[18px]' : 'translate-x-0.5'"></span>
+          </button>
+        </span>
 
-        <!-- Row menu -->
-        <div class="relative flex justify-end">
+        <span class="data-grid__cell data-grid__cell--actions">
+          <div class="relative flex justify-end">
           <button type="button"
             (click)="toggleMenu(row.id, $event)"
             aria-label="Row actions"
@@ -134,8 +135,10 @@
             </ng-template>
           </div>
         </div>
+        </span>
       </li>
     </ul>
+    </div>
   </div>
 </div>
 

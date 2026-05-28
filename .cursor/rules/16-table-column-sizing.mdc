@@ -1,0 +1,64 @@
+---
+description: Table and data-grid column width rules — prevent cropped or wrapped cell text. Use with 15-data-grid.mdc.
+globs: angular-app/**/*.html, angular-app/src/styles.scss
+alwaysApply: false
+---
+
+# Table Column Sizing Rule
+
+Tables must show full cell content on **one line** unless a column is explicitly marked for multi-line content (e.g. automation rule chips).
+
+## Principles
+
+1. **Size columns to content** — use `minmax(max-content, …)` in CSS grids, or `table-layout: auto` for `<table>`.
+2. **No default truncation** — `.data-grid__cell` does not ellipsis. Use `.data-grid__cell--truncate` only when product explicitly accepts crop + `title` tooltip.
+3. **No accidental wrap** — avoid fixed pixel columns narrower than header labels or typical data. Do not use `.data-grid__cell--wrap` for single-value text columns.
+4. **Horizontal scroll over crop** — `.data-grid` scrolls horizontally (`overflow-x: auto`). Wide tables scroll inside the pane; do not clip with `overflow-hidden` on the grid wrapper.
+5. **Future zoom** — horizontal/vertical table zoom will adjust density; column mins should be content-based so zoom scales readable text instead of revealing hidden overflow.
+
+## CSS grid tables
+
+```html
+<div class="data-grid">
+  <div class="data-grid__header"
+    style="grid-template-columns: minmax(140px, 1fr) minmax(96px, max-content) 48px;">
+    <span class="data-grid__header-cell">Long Header Label</span>
+  </div>
+  <ul>
+    <li class="data-grid__row"
+      style="grid-template-columns: minmax(140px, 1fr) minmax(96px, max-content) 48px;">
+      <span class="data-grid__cell">Value</span>
+    </li>
+  </ul>
+</div>
+```
+
+- Match `grid-template-columns` on header and every row.
+- Prefer `minmax(Npx, max-content)` for label/numeric columns sized to header text.
+- Action/menu columns: fixed `40px`–`48px`.
+
+## HTML `<table>` tables
+
+```html
+<div class="data-grid">
+  <table class="data-grid-table">
+    <thead><tr><th>Transaction ID</th></tr></thead>
+    <tbody><tr><td>{{ id }}</td></tr></tbody>
+  </table>
+</div>
+```
+
+- Do **not** use `table-fixed` unless every column width is verified against content.
+- Remove `truncate` / `text-ellipsis` from `<td>` unless using opt-in `data-grid-table__cell--truncate`.
+- Sticky columns: use `min-w-[…]` instead of fixed `w-[…]` when content varies.
+
+## Explicit multi-line columns
+
+Use `.data-grid__cell--wrap` or `.data-grid-table--relaxed` only when the design requires chips, stacked lines, or composite cell content — not for long plain strings.
+
+## Checklist before merge
+
+- [ ] Header labels fully visible
+- [ ] Longest row value fully visible (or horizontal scroll present)
+- [ ] No unintended second-line wraps in standard data cells
+- [ ] Row action menus not clipped (`overflow-hidden` removed from grid when menus exist)

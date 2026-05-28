@@ -1,11 +1,11 @@
 <app-shell>
-  <div class="flex h-full min-h-full w-full flex-1 items-stretch gap-2">
+  <div class="flex h-full min-h-0 w-full flex-1 items-stretch gap-2 overflow-hidden">
 
     <!-- Main content -->
-    <section class="flex min-w-0 flex-1 flex-col items-stretch gap-2">
+    <section class="flex h-full min-h-0 min-w-0 flex-1 flex-col items-stretch gap-2 overflow-hidden">
 
       <!-- Pick Lists Table -->
-      <div class="flex h-auto w-full flex-col overflow-hidden rounded-lg border border-neutral-300 bg-white shadow-none">
+      <div class="flex max-h-[min(320px,40vh)] min-h-0 w-full shrink-0 flex-col overflow-hidden rounded-lg border border-neutral-300 bg-white shadow-none">
         <header class="flex w-full flex-col gap-3 border-b border-neutral-150 bg-white px-5 py-3 md:flex-row md:items-center md:justify-between">
           <div class="flex items-center gap-2">
             <img class="h-6 w-6 shrink-0" alt="" src="figmaAssets/package-plus-1.svg" />
@@ -45,28 +45,28 @@
           </div>
         </header>
 
-        <div class="w-full overflow-x-auto">
-          <table class="w-full min-w-[760px]">
+        <div class="data-grid data-grid--scroll min-h-0 flex-1 w-full">
+          <table class="data-grid-table min-w-[760px]">
             <thead>
-              <tr class="border-b border-neutral-300 bg-neutral-100">
-                <th class="h-8 w-9 px-2"></th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Pick List ID</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Created on</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Warehouse</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Total Orders</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Picker</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Status</th>
+              <tr>
+                <th class="w-9"></th>
+                <th>Pick List ID</th>
+                <th>Created on</th>
+                <th>Warehouse</th>
+                <th>Total Orders</th>
+                <th>Picker</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let row of svc.pickListRows()"
                 [attr.data-testid]="'row-picklist-' + row.pickListId"
                 (click)="svc.togglePickList(row.pickListId)"
-                class="h-8 border-b border-neutral-300 cursor-pointer transition-colors"
-                [ngClass]="svc.selectedPickListId() === row.pickListId ? 'bg-[hsl(179_100%_25%/0.1)]' : 'bg-white hover:bg-neutral-100'">
+                class="h-8 cursor-pointer transition-colors hover:bg-surface-light-primary"
+                [ngClass]="svc.selectedPickListId() === row.pickListId ? 'bg-[hsl(179_100%_25%/0.1)]' : ''">
 
                 <!-- Radio button -->
-                <td class="h-8 px-2 py-0">
+                <td class="h-8 py-0">
                   <button type="button" [attr.data-testid]="'radio-picklist-' + row.pickListId"
                     class="flex h-8 w-8 items-center justify-center"
                     [attr.aria-label]="'Select pick list ' + row.pickListId"
@@ -78,16 +78,16 @@
                     </span>
                   </button>
                 </td>
-                <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900"
+                <td class="h-8 py-0"
                   [ngClass]="svc.selectedPickListId() === row.pickListId ? 'text-brand-secondary font-semibold' : ''"
                   [attr.data-testid]="'text-picklist-id-' + row.pickListId">
                   {{ row.pickListId }}
                 </td>
-                <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900">{{ row.createdOn }}</td>
-                <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900">{{ row.warehouse }}</td>
-                <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900">{{ row.totalOrders }}</td>
-                <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900">{{ row.picker }}</td>
-                <td class="h-8 px-2 py-0">
+                <td class="h-8 py-0">{{ row.createdOn }}</td>
+                <td class="h-8 py-0">{{ row.warehouse }}</td>
+                <td class="h-8 py-0">{{ row.totalOrders }}</td>
+                <td class="h-8 py-0">{{ row.picker }}</td>
+                <td class="h-8 py-0">
                   <span [attr.data-testid]="'pill-status-' + row.pickListId"
                     class="inline-flex h-6 items-center rounded-full px-3 font-body text-sm font-medium text-neutral-900"
                     [ngClass]="row.status === 'Complete' ? 'bg-success-soft' : 'bg-status-picking'">
@@ -128,11 +128,11 @@
           </div>
         </header>
 
-        <div class="w-full min-h-0 flex-1 overflow-auto">
-          <table class="w-full min-w-[900px]">
+        <div class="data-grid data-grid--scroll w-full min-h-0 flex-1">
+          <table class="data-grid-table min-w-[900px]">
             <thead>
-              <tr class="border-b border-neutral-300 bg-neutral-100">
-                <th class="h-8 w-[44px] px-2">
+              <tr>
+                <th class="w-[44px]">
                   <div class="flex h-8 items-center justify-center">
                     <input type="checkbox" class="h-4 w-4 rounded accent-[#008572]"
                       data-testid="checkbox-select-all-shipments"
@@ -142,28 +142,28 @@
                       aria-label="Select all shipments" />
                   </div>
                 </th>
-                <th class="h-8 w-9 px-2"></th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Shipment ID</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Pick List ID</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Store</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Total Value</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Weight (lb)</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Customer</th>
-                <th class="h-8 px-2 text-left font-body text-sm font-medium text-neutral-900">Carrier</th>
+                <th class="w-9"></th>
+                <th>Shipment ID</th>
+                <th>Pick List ID</th>
+                <th>Store</th>
+                <th>Total Value</th>
+                <th>Weight (lb)</th>
+                <th>Customer</th>
+                <th>Carrier</th>
               </tr>
             </thead>
             <tbody>
               <ng-container *ngFor="let row of svc.displayShipments()">
                 <tr [attr.data-testid]="'row-shipment-' + row.shipmentId"
                   (click)="!svc.existingPickListShipmentIds().has(row.id) && svc.toggleShipment(row.id, !svc.selectedShipmentIds().has(row.id))"
-                  class="h-8 border-b border-neutral-300 transition-colors"
+                  class="h-8 transition-colors"
                   [ngClass]="[
                     svc.existingPickListShipmentIds().has(row.id) ? 'cursor-default' : 'cursor-pointer',
                     svc.existingPickListShipmentIds().has(row.id)
                       ? 'bg-neutral-100 text-neutral-500'
                       : svc.selectedShipmentIds().has(row.id)
                         ? 'bg-[hsl(179_100%_25%/0.1)]'
-                        : 'bg-white hover:bg-neutral-100'
+                        : 'hover:bg-surface-light-primary'
                   ]">
 
                   <!-- Checkbox -->
@@ -180,7 +180,7 @@
                   </td>
 
                   <!-- Expand button -->
-                  <td class="h-8 px-2 py-0">
+                  <td class="h-8 py-0">
                     <button type="button"
                       [attr.data-testid]="'button-expand-shipment-' + row.shipmentId"
                       [attr.aria-label]="svc.expandedShipmentIds().has(row.id) ? 'Collapse products' : 'Expand products'"
@@ -195,21 +195,21 @@
                     </button>
                   </td>
 
-                  <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900" [attr.data-testid]="'text-shipment-id-' + row.shipmentId">{{ row.shipmentId }}</td>
-                  <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900">{{ row.pickListId }}</td>
+                  <td class="h-8 py-0" [attr.data-testid]="'text-shipment-id-' + row.shipmentId">{{ row.shipmentId }}</td>
+                  <td class="h-8 py-0">{{ row.pickListId }}</td>
 
-                  <td class="h-8 px-2 py-0">
+                  <td class="h-8 py-0">
                     <div class="flex items-center gap-2.5">
                       <span class="h-4 w-4 rounded-full bg-cover bg-center" [style.background-image]="'url(' + row.storeIcon + ')'"></span>
                       <span class="font-body text-sm text-neutral-700">{{ row.store }}</span>
                     </div>
                   </td>
 
-                  <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900">{{ row.totalValue }}</td>
-                  <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900">{{ row.weight }}</td>
-                  <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900">{{ row.customer }}</td>
+                  <td class="h-8 py-0">{{ row.totalValue }}</td>
+                  <td class="h-8 py-0">{{ row.weight }}</td>
+                  <td class="h-8 py-0">{{ row.customer }}</td>
 
-                  <td class="h-8 px-2 py-0">
+                  <td class="h-8 py-0">
                     <div class="flex items-center gap-2.5">
                       <img class="h-4 w-4 shrink-0" alt="" [src]="row.carrierIcon" />
                       <span class="font-body text-sm text-neutral-700">{{ row.carrier }}</span>
@@ -222,22 +222,22 @@
                   [attr.data-testid]="'row-shipment-expanded-' + row.shipmentId"
                   class="border-b border-neutral-300 bg-neutral-100">
                   <td colspan="9" class="p-0">
-                    <div class="px-12 py-3">
-                      <table class="w-full bg-white">
+                    <div class="data-grid data-grid--scroll max-h-[160px]">
+                      <table class="data-grid-table w-full">
                         <thead>
-                          <tr class="border-b border-neutral-300">
-                            <th class="h-8 w-[120px] px-3 text-left font-body text-xs font-medium text-neutral-900">Ext. ID</th>
-                            <th class="h-8 px-3 text-left font-body text-xs font-medium text-neutral-900">Name</th>
-                            <th class="h-8 w-[80px] px-3 text-right font-body text-xs font-medium text-neutral-900">Qty</th>
+                          <tr>
+                            <th class="min-w-[120px]">Ext. ID</th>
+                            <th>Name</th>
+                            <th class="min-w-[80px] text-right">Qty</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let p of row.products" class="border-b border-neutral-150 hover:bg-neutral-50">
-                            <td class="h-8 px-3 py-1 font-body text-sm text-neutral-900">{{ p.extId }}</td>
-                            <td class="h-8 px-3 py-1">
-                              <a href="#" (click)="$event.preventDefault()" class="font-body text-sm font-medium text-[#2B64CB] underline underline-offset-2">{{ p.name }}</a>
+                          <tr *ngFor="let p of row.products" class="h-8 hover:bg-surface-light-primary">
+                            <td>{{ p.extId }}</td>
+                            <td>
+                              <a href="#" (click)="$event.preventDefault()" class="font-medium text-fg-link underline underline-offset-2">{{ p.name }}</a>
                             </td>
-                            <td class="h-8 px-3 py-1 text-right font-body text-sm text-neutral-900">
+                            <td class="text-right">
                               <span class="inline-flex items-center justify-end gap-1">
                                 {{ p.qty }}
                                 <svg *ngIf="p.lowInventory" class="h-3.5 w-3.5 text-warning-strong" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -383,19 +383,20 @@
             <!-- Products table -->
             <div class="px-4 py-3">
               <p class="mb-2 font-body text-xs font-medium uppercase text-neutral-700">Products</p>
-              <table class="w-full">
+            <div class="data-grid data-grid--scroll max-h-[200px]">
+              <table class="data-grid-table w-full">
                 <thead>
-                  <tr class="border-b border-neutral-200">
-                    <th class="pb-1 text-left font-body text-xs text-neutral-500">Ext.ID</th>
-                    <th class="pb-1 text-left font-body text-xs text-neutral-500">Name</th>
-                    <th class="pb-1 text-right font-body text-xs text-neutral-500">Qty</th>
+                  <tr>
+                    <th>Ext.ID</th>
+                    <th>Name</th>
+                    <th class="text-right">Qty</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let p of svc.relatedItems()" class="border-b border-neutral-100">
-                    <td class="py-1 font-body text-xs text-neutral-900">{{ p.extId }}</td>
-                    <td class="py-1 font-body text-xs text-neutral-900">{{ p.name }}</td>
-                    <td class="py-1 text-right font-body text-xs text-neutral-900">
+                  <tr *ngFor="let p of svc.relatedItems()" class="h-8">
+                    <td>{{ p.extId }}</td>
+                    <td>{{ p.name }}</td>
+                    <td class="text-right">
                       <span class="inline-flex items-center justify-end gap-1">
                         {{ p.qty }}
                         <svg *ngIf="p.lowInventory" class="h-3.5 w-3.5 text-warning-strong" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -406,6 +407,7 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
             </div>
           </ng-container>
 

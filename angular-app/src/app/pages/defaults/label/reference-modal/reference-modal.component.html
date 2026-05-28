@@ -1,0 +1,68 @@
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-8"
+  (click)="onCancel()"
+  data-testid="modal-reference-backdrop">
+  <div class="my-auto flex w-[531px] max-w-[95vw] flex-col overflow-hidden rounded-lg bg-surface shadow-[0_1px_16px_rgba(0,0,0,0.25)]"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reference-modal-title"
+    data-testid="modal-reference">
+
+    <header class="flex shrink-0 items-center justify-between border-b border-[#b8c6cc] px-6 py-4">
+      <h2 id="reference-modal-title"
+        class="flex-1 font-body text-[18px] font-semibold leading-[1.43] text-fg-primary"
+        data-testid="text-reference-modal-title">
+        {{ isEdit() ? 'Edit Reference' : 'Add Reference' }}
+      </h2>
+      <button type="button"
+        (click)="onCancel()"
+        aria-label="Close"
+        data-testid="button-close-reference-modal"
+        class="flex h-8 w-8 items-center justify-center rounded-2xl text-fg-secondary hover:bg-surface-light-primary">
+        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="px-6 py-5">
+      <div class="flex flex-col gap-5">
+        <label class="flex flex-col gap-1">
+          <span class="text-[12px] leading-[1.43] text-fg-primary">Reference Name</span>
+          <input type="text"
+            placeholder="Enter reference name"
+            [value]="name()"
+            (input)="name.set($any($event.target).value)"
+            data-testid="input-reference-name"
+            class="h-10 w-full rounded border border-divider bg-surface px-3 text-[14px] text-fg-primary outline-none placeholder:text-[#7f9199] focus:border-action-primary"/>
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span class="text-[12px] leading-[1.43] text-fg-primary">Description</span>
+          <textarea rows="3"
+            placeholder="Describe what this reference prints on the label"
+            [value]="description()"
+            (input)="description.set($any($event.target).value)"
+            data-testid="input-reference-description"
+            class="w-full resize-none rounded border border-divider bg-surface px-3 py-2 text-[14px] leading-[1.43] text-fg-primary outline-none placeholder:text-[#7f9199] focus:border-action-primary"></textarea>
+        </label>
+      </div>
+    </div>
+
+    <footer class="flex shrink-0 items-center justify-end gap-4 border-t border-[#b8c6cc] px-6 py-4">
+      <button type="button"
+        (click)="onCancel()"
+        data-testid="button-cancel-reference"
+        class="rounded-md px-3 py-2 text-[14px] font-bold leading-5 text-fg-primary hover:bg-surface-light-primary">
+        Cancel
+      </button>
+      <button type="button"
+        (click)="onSave()"
+        [disabled]="!canSave()"
+        data-testid="button-save-reference"
+        class="rounded-md bg-action-primary px-3 py-2 text-[14px] font-bold leading-5 text-fg-on-action transition-colors hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50">
+        {{ isEdit() ? 'Save' : 'Add Reference' }}
+      </button>
+    </footer>
+  </div>
+</div>

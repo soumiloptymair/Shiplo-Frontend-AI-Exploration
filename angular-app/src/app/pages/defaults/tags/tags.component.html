@@ -1,165 +1,166 @@
-<!-- Header bar -->
-<header class="flex h-[68px] shrink-0 items-center gap-3 border-b border-divider px-6"
+<!-- Title bar — Figma `27686:184893` -->
+<header class="flex h-[68px] shrink-0 items-center justify-between border-b border-divider px-5 py-4"
   data-testid="tags-header">
-  <svg class="h-5 w-5 text-action-primary" xmlns="http://www.w3.org/2000/svg"
-    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-    <path stroke-linecap="round" stroke-linejoin="round"
-      d="M7 7h.01M7 3h5a2 2 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
-  </svg>
-  <h2 class="font-heading text-[20px] font-semibold leading-[1.4] tracking-[0.15px] text-fg-primary">
-    Tags
-  </h2>
-
-  <div class="relative ml-auto">
-    <svg class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-tertiary"
-      xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"/>
+  <div class="flex items-center gap-2">
+    <svg class="h-7 w-7 shrink-0 text-action-primary" xmlns="http://www.w3.org/2000/svg"
+      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
+      aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M7 7h.01M7 3h5a2 2 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
     </svg>
+    <h2 class="font-heading text-[24px] font-medium leading-[1.4] tracking-[0.15px] text-fg-primary">
+      Tags
+    </h2>
+  </div>
+
+  <div class="flex items-center gap-2">
     <input type="text"
       placeholder="Search..."
       [value]="svc.query()"
       (input)="onSearch($any($event.target).value)"
       data-testid="input-tag-search"
-      class="h-9 w-[220px] rounded-token border border-divider bg-surface pl-8 pr-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"/>
+      class="h-9 w-[195px] rounded-md border border-[#ccd8dd] bg-surface px-3 text-[14px] text-fg-primary outline-none placeholder:text-fg-primary focus:border-action-primary"/>
+    <button type="button"
+      (click)="openCreate()"
+      data-testid="button-tag-add"
+      class="inline-flex h-9 items-center gap-1 rounded-md bg-action-primary px-3 text-[14px] font-bold text-fg-on-action transition-colors hover:bg-action-primary-hover">
+      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      Add
+    </button>
   </div>
-
-  <button type="button"
-    (click)="openCreate()"
-    data-testid="button-tag-add"
-    class="inline-flex h-9 items-center gap-1.5 rounded-token bg-action-primary px-3 text-[13px] font-medium text-fg-on-action transition-colors hover:bg-action-primary-hover">
-    <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-    </svg>
-    Add
-  </button>
 </header>
 
-<!-- Body -->
-<div class="min-h-0 flex-1 overflow-auto px-6 py-5">
+<!-- Body — Figma `27686:184933` -->
+<div class="flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-8 pt-4">
+  <div class="flex shrink-0 flex-col gap-1">
+    <h3 class="font-body text-[14px] font-medium uppercase leading-[1.43] text-fg-primary"
+      data-testid="section-tag-configuration">
+      Tag Configuration
+    </h3>
+    <p class="font-body text-[12px] leading-[1.43] text-[#72777e]">
+      Set up tags to label and track items across your workflow.
+    </p>
+  </div>
 
-  <!-- Section title + subtitle -->
-  <h3 class="font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-fg-primary"
-    data-testid="section-tag-configuration">
-    TAG CONFIGURATION
-  </h3>
-  <p class="mt-1 font-body text-[12px] leading-[1.4] text-fg-secondary">
-    Set up tags to label and track items across your workflow.
-  </p>
-
-  <!-- Table -->
-  <div class="mt-4 overflow-visible rounded-token" data-testid="table-tags">
-
-    <!-- Header row -->
-    <div class="grid items-center border-b border-divider px-3 py-2 text-[12px] font-semibold text-fg-primary"
-      style="grid-template-columns: minmax(160px,1.4fr) minmax(140px,1fr) minmax(160px,1fr) minmax(160px,1fr) 28px;">
-      <span data-testid="header-tag-name">Name</span>
-      <span data-testid="header-tag-category">Category</span>
-      <span data-testid="header-tag-color">Color</span>
-      <span data-testid="header-tag-preview">Preview</span>
-      <span></span>
+  <div class="data-grid data-grid--scroll mt-4 min-h-0 flex-1" data-testid="table-tags">
+    <div class="data-grid__header"
+      style="grid-template-columns: minmax(200px, 1fr) minmax(112px, max-content) minmax(160px, max-content) minmax(80px, max-content) minmax(134px, max-content) 40px;">
+      <span class="data-grid__header-cell" data-testid="header-tag-name">Name</span>
+      <span class="data-grid__header-cell" data-testid="header-tag-category">Category</span>
+      <span class="data-grid__header-cell" data-testid="header-tag-color">Color</span>
+      <span class="data-grid__header-cell" aria-hidden="true"></span>
+      <span class="data-grid__header-cell" data-testid="header-tag-preview">Preview</span>
+      <span class="data-grid__header-cell" aria-hidden="true"></span>
     </div>
 
-    <!-- Empty state -->
+    <div class="data-grid__body">
     <div *ngIf="svc.filtered().length === 0"
-      class="flex h-32 items-center justify-center text-[13px] text-fg-secondary"
+      class="data-grid__empty"
       data-testid="empty-tags">
       {{ svc.query() ? 'No tags match your search.' : 'No tags yet.' }}
     </div>
 
-    <!-- Rows -->
     <ul>
       <li *ngFor="let row of svc.filtered(); trackBy: trackById"
-        class="grid items-center border-b border-divider px-3 py-3 text-[13px] text-fg-primary hover:bg-surface-light-primary"
+        class="data-grid__row"
         [attr.data-testid]="'row-tag-' + row.id"
-        style="grid-template-columns: minmax(160px,1.4fr) minmax(140px,1fr) minmax(160px,1fr) minmax(160px,1fr) 28px;">
-
-        <span [attr.data-testid]="'cell-tag-name-' + row.id">{{ row.name }}</span>
-        <span [attr.data-testid]="'cell-tag-category-' + row.id">{{ row.category }}</span>
-
-        <span class="flex items-center gap-2" [attr.data-testid]="'cell-tag-color-' + row.id">
-          <span class="inline-block h-4 w-4 rounded-sm border border-divider"
+        style="grid-template-columns: minmax(200px, 1fr) minmax(112px, max-content) minmax(160px, max-content) minmax(80px, max-content) minmax(134px, max-content) 40px;">
+        <span class="data-grid__cell"
+          [attr.data-testid]="'cell-tag-name-' + row.id">{{ row.name }}</span>
+        <span class="data-grid__cell"
+          [attr.data-testid]="'cell-tag-category-' + row.id">{{ row.category }}</span>
+        <span class="data-grid__cell gap-2.5"
+          [attr.data-testid]="'cell-tag-color-' + row.id">
+          <span class="inline-block h-4 w-4 shrink-0"
             [style.background-color]="colorSpec(row.color).bg"></span>
-          <span>{{ row.color }}</span>
+          {{ row.color }}
         </span>
-
-        <span [attr.data-testid]="'cell-tag-preview-' + row.id">
-          <span class="inline-flex items-center gap-1.5 rounded-token px-2 py-1 text-[12px] font-medium"
-            [style.background-color]="colorSpec(row.color).bg"
-            [style.color]="colorSpec(row.color).fg">
+        <span class="data-grid__cell" aria-hidden="true"></span>
+        <span class="data-grid__cell"
+          [attr.data-testid]="'cell-tag-preview-' + row.id">
+          <span class="inline-flex h-6 items-center rounded px-2 py-1 text-[14px] leading-[1.43] text-fg-primary"
+            [style.background-color]="colorSpec(row.color).bg">
             {{ row.name }}
-            <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
           </span>
         </span>
 
-        <!-- Row menu -->
-        <div class="relative flex justify-end">
+        <div class="data-grid__cell data-grid__cell--actions relative">
           <button type="button"
             (click)="toggleMenu(row.id, $event)"
             aria-label="Row actions"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="openMenuId() === row.id"
             [attr.data-testid]="'menu-tag-' + row.id"
-            class="flex h-7 w-7 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
-            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+            class="flex h-7 w-7 items-center justify-center rounded-full text-fg-secondary hover:bg-surface-light-primary">
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="5" r="1.5"/>
               <circle cx="12" cy="12" r="1.5"/>
               <circle cx="12" cy="19" r="1.5"/>
             </svg>
           </button>
-          <div *ngIf="openMenuId() === row.id"
-            (click)="$event.stopPropagation()"
-            class="absolute right-0 top-8 z-30 w-48 rounded-token border border-divider bg-surface py-1 shadow-lg"
-            [attr.data-testid]="'menu-tag-popup-' + row.id">
-            <ng-container *ngIf="pendingDeleteId() !== row.id; else inlineConfirm">
-              <button type="button"
-                (click)="openEdit(row, $event)"
-                [attr.data-testid]="'menu-tag-edit-' + row.id"
-                class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
-                Edit
-              </button>
-              <button type="button"
-                (click)="startDelete(row.id, $event)"
-                [attr.data-testid]="'menu-tag-delete-' + row.id"
-                class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-negative hover:bg-surface-light-primary">
-                Delete
-              </button>
-            </ng-container>
-            <ng-template #inlineConfirm>
-              <div class="flex flex-col gap-2 px-3 py-2"
-                [attr.data-testid]="'inline-confirm-delete-tag-' + row.id">
-                <p class="text-[12px] leading-[1.4] text-fg-primary">
-                  Delete <span class="font-medium">{{ row.name }}</span>?
-                </p>
-                <div class="flex justify-end gap-2">
-                  <button type="button"
-                    (click)="cancelDelete(); $event.stopPropagation()"
-                    [attr.data-testid]="'button-cancel-delete-tag-' + row.id"
-                    class="h-7 rounded-token border border-divider bg-surface px-2 text-[12px] font-medium text-fg-primary hover:bg-surface-light-primary">
-                    Cancel
-                  </button>
-                  <button type="button"
-                    (click)="confirmDelete(); $event.stopPropagation()"
-                    [attr.data-testid]="'button-confirm-delete-tag-' + row.id"
-                    class="h-7 rounded-token bg-status-error px-2 text-[12px] font-medium text-fg-on-action hover:opacity-90">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </ng-template>
-          </div>
         </div>
       </li>
     </ul>
+    </div>
   </div>
 </div>
 
-<!-- Footer -->
-<footer class="flex h-[44px] shrink-0 items-center border-t border-divider px-6 text-[12px] text-fg-secondary"
+<!-- Footer — Figma `27686:185145` -->
+<footer class="flex h-8 shrink-0 items-center border-t border-divider bg-surface px-2 text-[14px] leading-[1.43] text-[#72777e]"
   data-testid="tags-footer">
-  <span data-testid="text-tags-total">Total Tags: {{ svc.filtered().length }}</span>
+  <span data-testid="text-tags-total">Total Tags: {{ svc.tags().length }}</span>
 </footer>
 
-<!-- Add / Edit modal -->
+<!-- Row actions menu — fixed so it is not clipped by the table scroll frame -->
+<div *ngIf="openMenuRow() as row"
+  (click)="$event.stopPropagation()"
+  class="fixed z-50 w-48 rounded-token border border-divider bg-surface py-1 shadow-lg"
+  role="menu"
+  [style.top.px]="menuPosition()?.top"
+  [style.left.px]="menuPosition()?.left"
+  [attr.data-testid]="'menu-tag-popup-' + row.id">
+  <ng-container *ngIf="pendingDeleteId() !== row.id; else inlineConfirm">
+    <button type="button"
+      role="menuitem"
+      (click)="openEdit(row, $event)"
+      [attr.data-testid]="'menu-tag-edit-' + row.id"
+      class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+      Edit
+    </button>
+    <button type="button"
+      role="menuitem"
+      (click)="startDelete(row.id, $event)"
+      [attr.data-testid]="'menu-tag-delete-' + row.id"
+      class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-negative hover:bg-surface-light-primary">
+      Delete
+    </button>
+  </ng-container>
+  <ng-template #inlineConfirm>
+    <div class="flex flex-col gap-2 px-3 py-2"
+      [attr.data-testid]="'inline-confirm-delete-tag-' + row.id">
+      <p class="text-[12px] leading-[1.4] text-fg-primary">
+        Delete <span class="font-medium">{{ row.name }}</span>?
+      </p>
+      <div class="flex justify-end gap-2">
+        <button type="button"
+          (click)="cancelDelete(); $event.stopPropagation()"
+          [attr.data-testid]="'button-cancel-delete-tag-' + row.id"
+          class="h-7 rounded-token border border-divider bg-surface px-2 text-[12px] font-medium text-fg-primary hover:bg-surface-light-primary">
+          Cancel
+        </button>
+        <button type="button"
+          (click)="confirmDelete(); $event.stopPropagation()"
+          [attr.data-testid]="'button-confirm-delete-tag-' + row.id"
+          class="h-7 rounded-token bg-status-error px-2 text-[12px] font-medium text-fg-on-action hover:opacity-90">
+          Delete
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</div>
+
 <app-tag-modal *ngIf="modalOpen()"
   [initialTag]="editing()"
   (save)="onSave($event)"

@@ -17,8 +17,7 @@ export interface ProductVariant {
   extId: string;
   sku: string;
   value: string;
-  tags: string[];
-  extraTagCount: number;
+  tagIds: string[];
   size: string;
   color: string;
   length: string;
@@ -47,6 +46,7 @@ export interface InventoryProduct {
   origin: string;
   variantCount: number;
   valueRange: string;
+  tagIds: string[];
   needsAttention?: boolean;
   variants: ProductVariant[];
   // Detail-panel fields
@@ -141,8 +141,7 @@ function buildVariants(productId: string, count: number): ProductVariant[] {
       extId: '12345A234',
       sku: `PBM${productId.replace('p-', '49514')}${String(i).padStart(3, '0')}`,
       value: VALUES[i % VALUES.length],
-      tags: ['Tag 1'],
-      extraTagCount: i === count ? 0 : 2,
+      tagIds: ['tag-seed-featured'],
       size: SIZES[i % SIZES.length],
       color: COLORS[Math.floor((i - 1) / 3) % COLORS.length],
       length: hasInventory ? '15' : '-',
@@ -185,6 +184,7 @@ export const SAMPLE_INVENTORY: InventoryProduct[] = PRODUCT_NAMES.map((name, idx
     origin: 'Canada',
     variantCount,
     valueRange: '16.50$ - 20.50$',
+    tagIds: [],
     needsAttention: idx !== 0,
     variants: buildVariants(id, variantCount),
     colors: ['black', 'grey', 'white'],

@@ -83,50 +83,42 @@
       </header>
 
       <!-- Body -->
-      <div class="min-h-0 flex-1 overflow-auto">
+      <div class="min-h-0 flex-1 overflow-hidden">
 
         @if (activeTab() === 'Connected') {
           <!-- CONNECTED: table -->
-          <table class="w-full table-fixed border-collapse font-['Roboto',sans-serif]" data-testid="table-marketplace">
-            <colgroup>
-              <col style="width:72px" />
-              <col style="width:180px" />
-              <col style="width:160px" />
-              <col style="width:96px" />
-              <col />
-              <col style="width:124px" />
-              <col style="width:40px" />
-            </colgroup>
+          <div class="data-grid data-grid--scroll min-h-0 h-full">
+          <table class="data-grid-table font-['Roboto',sans-serif]" data-testid="table-marketplace">
             <thead>
-              <tr class="h-8 border-b border-[#e4eaed] bg-[#f6f9fb]">
-                <th class="px-2"></th>
-                <th class="px-2 text-left text-[14px] font-medium leading-[1.43] text-[#0b1516]">
+              <tr>
+                <th></th>
+                <th>
                   <span class="inline-flex items-center gap-3">Account Name
                     <svg class="h-4 w-4 text-neutral-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg>
                   </span>
                 </th>
-                <th class="px-2 text-left text-[14px] font-medium leading-[1.43] text-[#0b1516]">
+                <th>
                   <span class="inline-flex items-center gap-3">Installed Date
                     <svg class="h-4 w-4 text-neutral-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg>
                   </span>
                 </th>
-                <th class="px-2 text-left text-[14px] font-medium leading-[1.43] text-[#0b1516]">Installed By</th>
-                <th class="px-2 text-left text-[14px] font-medium leading-[1.43] text-[#0b1516]">Description</th>
-                <th class="px-2 text-left text-[14px] font-medium leading-[1.43] text-[#0b1516]">
+                <th>Installed By</th>
+                <th>Description</th>
+                <th>
                   <span class="inline-flex items-center gap-3">Status
                     <svg class="h-4 w-4 text-neutral-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg>
                   </span>
                 </th>
-                <th class="px-2"></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               @for (r of filteredRows(); track r.id) {
-                <tr class="h-12 cursor-pointer border-b border-[#e4eaed] align-middle hover:bg-[#f6f9fb]"
-                    [class.bg-[#f6f9fb]]="selectedRowId() === r.id"
+                <tr class="h-8 cursor-pointer align-middle hover:bg-surface-light-primary"
+                    [class.bg-surface-light-primary]="selectedRowId() === r.id"
                     (click)="selectRow(r.id)"
                     [attr.data-testid]="'row-connector-' + r.id">
-                  <td class="px-2 align-middle">
+                  <td class="align-middle">
                     <div class="flex items-center justify-center">
                       <img [src]="r.logoUrl" [alt]="r.brand + ' logo'"
                            loading="lazy"
@@ -134,28 +126,28 @@
                            [attr.data-testid]="'logo-' + r.id" />
                     </div>
                   </td>
-                  <td class="px-2 align-middle">
+                  <td class="align-middle">
                     <button type="button"
                             (click)="selectRow(r.id); $event.stopPropagation()"
-                            class="block w-full truncate text-left text-[14px] leading-[1.43] text-[#008572] hover:underline focus:underline focus:outline-none"
+                            class="block w-full text-left text-action-primary hover:underline focus:underline focus:outline-none"
                             [title]="r.accountName"
                             [attr.data-testid]="'link-account-' + r.id">{{ r.accountName }}</button>
                   </td>
-                  <td class="truncate px-2 align-middle text-[14px] leading-[1.43] text-[#0b1516]"
+                  <td class="align-middle"
                       [attr.data-testid]="'text-installed-date-' + r.id">{{ r.installedDate }}</td>
-                  <td class="truncate px-2 align-middle text-[14px] leading-[1.43] text-[#0b1516]"
+                  <td class="align-middle"
                       [attr.data-testid]="'text-installed-by-' + r.id">{{ r.installedBy }}</td>
-                  <td class="truncate px-2 align-middle text-[14px] leading-[1.43] text-[#0b1516]"
+                  <td class="align-middle"
                       [title]="r.description"
                       [attr.data-testid]="'text-description-' + r.id">{{ r.description }}</td>
-                  <td class="px-2 align-middle">
-                    <span class="inline-flex items-center gap-2 text-[14px] leading-[1.43] text-[#0b1516]"
+                  <td class="align-middle">
+                    <span class="inline-flex items-center gap-2"
                           [attr.data-testid]="'status-' + r.id">
-                      <span class="h-2 w-2 rounded-full bg-[#008572]"></span>
+                      <span class="h-2 w-2 rounded-full bg-action-primary"></span>
                       Connected
                     </span>
                   </td>
-                  <td class="px-2 align-middle">
+                  <td class="align-middle">
                     <div class="relative inline-block">
                       <button type="button"
                               [attr.aria-label]="'Actions for ' + r.accountName"
@@ -186,12 +178,13 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="7" class="px-3 py-10 text-center text-[14px] text-neutral-700"
+                  <td colspan="7" class="data-grid__empty border-0 py-10"
                       data-testid="text-no-connectors">No connectors match your filters.</td>
                 </tr>
               }
             </tbody>
           </table>
+          </div>
         } @else {
           <!-- AVAILABLE: card grid with two sections -->
           <div class="flex flex-col gap-6 px-5 py-5 font-['Roboto',sans-serif]" data-testid="cards-marketplace">

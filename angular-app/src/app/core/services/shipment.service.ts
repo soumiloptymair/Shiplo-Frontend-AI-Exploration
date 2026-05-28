@@ -86,6 +86,12 @@ export class ShipmentService {
     this.panelShipmentId.set(null);
   }
 
+  setTagIds(shipmentId: string, tagIds: string[]) {
+    this.allShipments.update((rows) =>
+      rows.map((s) => (s.id === shipmentId ? { ...s, tagIds: [...tagIds] } : s)),
+    );
+  }
+
   /**
    * Replace the original shipment row with N new "Pending" rows (one per bucket).
    * - New ids: `${originalId}-${i+1}`; new shipmentId labels: `${original.shipmentId} - ${i+1}`.
@@ -118,7 +124,7 @@ export class ShipmentService {
         splitRecommendation: undefined,
         mergeRecommendation: undefined,
         needsAttention: false,
-        tags: [],
+        tagIds: [],
         isSplit: true,
         // Splitting a previously-merged row must clear merge state so the grid badges stay mutually exclusive.
         isMerged: false,
@@ -209,7 +215,7 @@ export class ShipmentService {
       splitRecommendation: undefined,
       mergeRecommendation: undefined,
       needsAttention: false,
-      tags: [],
+      tagIds: [],
       isSplit: false,
       isMerged: true,
       originalIds: sources.map((s) => s.id),

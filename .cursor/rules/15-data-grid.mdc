@@ -1,0 +1,123 @@
+---
+description: Standard data grid / table header and cell styling from the Figma component library (Tags frame 27686:184938). Use for all tabular UI in angular-app.
+globs: angular-app/**/*.html, angular-app/src/styles.scss
+alwaysApply: true
+---
+
+# Data Grid Rule
+
+All tabular data in the Angular app must use the **data grid tokens** defined in `angular-app/src/styles.scss` (Figma `27686:184938`).
+
+## Sticky header + body scroll (required — global)
+
+Whenever a table can overflow vertically, **only the body rows scroll**. The header must remain visible and must not scroll with the rows.
+
+This applies to every table in the app — page-level lists, defaults settings grids, modals, panels, and nested detail tables.
+
+**Do not** put `overflow-auto` or `overflow-y-auto` on a page body wrapper that contains a table; that scrolls the header away. Scroll happens inside the table frame instead.
+
+### CSS Grid tables (Defaults-style)
+
+Use `data-grid--scroll` and wrap rows / empty state in `data-grid__body`:
+
+```html
+<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+  <div class="shrink-0"><!-- section title, filters --></div>
+
+  <div class="data-grid data-grid--scroll min-h-0 flex-1" data-testid="table-example">
+    <div class="data-grid__header" style="grid-template-columns: ...">
+      <span class="data-grid__header-cell">Name</span>
+    </div>
+
+    <div class="data-grid__body">
+      <div class="data-grid__empty">No rows yet.</div>
+      <ul>
+        <li class="data-grid__row" style="grid-template-columns: ...">
+          <span class="data-grid__cell">Value</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+```
+
+Multi-row headers (Automations): wrap header rows in `data-grid__header-group` instead of ad hoc `sticky` wrappers.
+
+Embedded tables in scrollable forms may use `data-grid--scroll max-h-[…]` with `data-grid__body`.
+
+### Native `<table>` tables (Shipments, Inventory, Wallet, etc.)
+
+Use `data-grid--scroll` on the scroll container. Sticky `th` styling is global — do **not** add per-column `sticky top-0` classes.
+
+```html
+<div class="min-h-0 flex-1 overflow-hidden">
+  <div class="data-grid data-grid--scroll min-h-0 h-full">
+    <table class="data-grid-table">
+      <thead>
+        <tr>
+          <th class="w-[120px]">Column</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="h-8 hover:bg-surface-light-primary">
+          <td>Cell value</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+```
+
+### Page layout requirements
+
+- Parent of a scrollable table: `min-h-0 flex-1 overflow-hidden` (not `overflow-auto` on the whole page body).
+- Table scroll frame: `data-grid data-grid--scroll min-h-0 flex-1`.
+- Page chrome (title bar, footers, section intros): `shrink-0` outside the scroll frame.
+
+## CSS Grid tables (markup reference)
+
+```html
+<div class="data-grid" data-testid="table-example">
+  <div class="data-grid__header" style="grid-template-columns: ...">
+    <span class="data-grid__header-cell">Name</span>
+  </div>
+  <ul>
+    <li class="data-grid__row" style="grid-template-columns: ...">
+      <span class="data-grid__cell">Value</span>
+      <div class="data-grid__cell data-grid__cell--actions">...</div>
+    </li>
+  </ul>
+  <div class="data-grid__empty">No rows yet.</div>
+</div>
+```
+
+## Token reference
+
+| Element | Class | Spec |
+|---------|-------|------|
+| Wrapper | `.data-grid` | White surface, `#E4EAED` border |
+| Scroll frame | `.data-grid--scroll` | Fills remaining height; vertical scroll on body or table |
+| Scroll body | `.data-grid__body` | Scrollable rows for CSS-grid tables |
+| Multi-row header | `.data-grid__header-group` | Sticky group for complex headers |
+| Header row | `.data-grid__header` | `#F6F9FB` bg, `#EFF6F9` bottom border, 32px height, sticky |
+| Header cell | `.data-grid__header-cell` | 14px bold, `#0B1516`, px-2 |
+| Body row | `.data-grid__row` | 32px row, `#E4EAED` divider |
+| Body cell | `.data-grid__cell` | 14px regular, `#45565B`, nowrap, fits content |
+| Truncate cell | `.data-grid__cell--truncate` | Opt-in ellipsis when crop is acceptable |
+| Wrap cell | `.data-grid__cell--wrap` | Explicit multi-line / chip columns only |
+| Actions cell | `.data-grid__cell--actions` | Right-align menu/button |
+| Empty state | `.data-grid__empty` | Centered, 14px secondary text |
+| HTML table | `.data-grid-table` | Same header/cell typography on `th`/`td`; sticky `th` built in |
+| Multi-line rows | `.data-grid-table--relaxed` | Taller body rows (panel detail tables) |
+
+## Do not
+
+- Use ad hoc `bg-neutral-100`, `text-sm font-medium`, or `#f6f9fb` on new table headers.
+- Put `overflow-auto` on a page body wrapper when the table below should scroll independently.
+- Add manual `sticky top-0 z-10` on individual `th` elements (use global `.data-grid-table th`).
+- Use `overflow-hidden` on `.data-grid` when rows have action menus (clip risk) — use fixed-position menus.
+- Use default truncation or `table-fixed` without verifying column widths — see `16-table-column-sizing.mdc`.
+
+## Row menus
+
+Render dropdowns with **fixed positioning** (see Tags page) when inside scroll/overflow containers.

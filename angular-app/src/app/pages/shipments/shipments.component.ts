@@ -8,11 +8,12 @@ import { ShipmentService, ShipmentTab } from '../../core/services/shipment.servi
 import { ToastService } from '../../core/services/toast.service';
 import { SHIPMENT_STATUSES, ShipmentStatus, STATUS_PILL_CLASS } from '../../core/models/shipment.model';
 import { NewShipmentDraft } from '../../core/models/new-shipment.model';
+import { EntityTagsComponent } from '../../shared/components/entity-tags/entity-tags.component';
 
 @Component({
   selector: 'app-shipments',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppShellComponent, ShipmentDetailPanelComponent, NewShipmentModalComponent],
+  imports: [CommonModule, FormsModule, AppShellComponent, ShipmentDetailPanelComponent, NewShipmentModalComponent, EntityTagsComponent],
   templateUrl: './shipments.component.html',
 })
 export class ShipmentsComponent {

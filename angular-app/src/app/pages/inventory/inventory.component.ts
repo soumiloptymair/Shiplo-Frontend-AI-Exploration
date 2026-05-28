@@ -7,11 +7,12 @@ import { InventoryTab } from '../../core/models/inventory.model';
 import { SyncDialogComponent } from '../../shared/sync-dialog/sync-dialog.component';
 import { ProductDetailPanelComponent } from './product-detail-panel/product-detail-panel.component';
 import { VariantDetailPanelComponent } from './variant-detail-panel/variant-detail-panel.component';
+import { EntityTagsComponent } from '../../shared/components/entity-tags/entity-tags.component';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppShellComponent, SyncDialogComponent, ProductDetailPanelComponent, VariantDetailPanelComponent],
+  imports: [CommonModule, FormsModule, AppShellComponent, SyncDialogComponent, ProductDetailPanelComponent, VariantDetailPanelComponent, EntityTagsComponent],
   templateUrl: './inventory.component.html',
 })
 export class InventoryComponent {

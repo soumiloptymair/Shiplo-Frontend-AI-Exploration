@@ -140,4 +140,25 @@ export class InventoryService {
   dismissToast() {
     this.toastSvc.dismiss();
   }
+
+  setVariantTagIds(productId: string, variantId: string, tagIds: string[]) {
+    this.products.update((rows) =>
+      rows.map((p) =>
+        p.id !== productId
+          ? p
+          : {
+              ...p,
+              variants: p.variants.map((v) =>
+                v.id === variantId ? { ...v, tagIds: [...tagIds] } : v,
+              ),
+            },
+      ),
+    );
+  }
+
+  setProductTagIds(productId: string, tagIds: string[]) {
+    this.products.update((rows) =>
+      rows.map((p) => (p.id === productId ? { ...p, tagIds: [...tagIds] } : p)),
+    );
+  }
 }

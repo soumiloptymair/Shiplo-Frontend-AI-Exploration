@@ -50,6 +50,14 @@
       <p class="text-[12px] leading-[1.43] text-[#45565b]">
         Price: <span class="text-[#0b1516]" data-testid="text-product-price">{{ sel.product.valueRange }}</span>
       </p>
+      <div class="mt-2">
+        <app-entity-tags
+          [tagIds]="sel.product.tagIds"
+          category="Products"
+          variant="panel"
+          testIdPrefix="panel-product-tags"
+          (tagIdsChange)="onProductTagIdsChange($event)" />
+      </div>
     </div>
   </div>
 

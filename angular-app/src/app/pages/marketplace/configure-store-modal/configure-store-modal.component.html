@@ -274,22 +274,23 @@
             </label>
 
             <!-- Warehouses table -->
-            <table class="w-full table-fixed border-collapse" data-testid="table-warehouses">
+            <div class="data-grid data-grid--scroll max-h-[280px]">
+            <table class="data-grid-table" data-testid="table-warehouses">
               <colgroup><col><col style="width:120px"><col style="width:200px"><col style="width:32px"></colgroup>
               <thead>
-                <tr class="h-8 border-b border-divider text-left text-[12px] font-medium text-fg-primary">
-                  <th class="px-2">Warehouse Name</th>
-                  <th class="px-2">Warehouse Code</th>
-                  <th class="px-2">Carriers</th>
+                <tr>
+                  <th>Warehouse Name</th>
+                  <th>Warehouse Code</th>
+                  <th>Carriers</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 @for (w of warehouses(); track w.name) {
-                  <tr class="h-10 border-b border-divider text-[13px] text-fg-primary">
-                    <td class="px-2">{{ w.name }}</td>
-                    <td class="px-2">{{ w.code }}</td>
-                    <td class="px-2">
+                  <tr class="h-8">
+                    <td>{{ w.name }}</td>
+                    <td>{{ w.code }}</td>
+                    <td>
                       <div class="flex flex-wrap gap-1">
                         @for (c of w.carriers; track c) {
                           <span class="inline-flex h-5 items-center gap-1 rounded-full border border-divider bg-surface px-2 text-[11px] text-fg-primary">
@@ -299,7 +300,7 @@
                         }
                       </div>
                     </td>
-                    <td class="px-2 text-right">
+                    <td class="text-right">
                       <button type="button" aria-label="Row actions" class="inline-flex h-6 w-6 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
                       </button>
@@ -308,6 +309,7 @@
                 }
               </tbody>
             </table>
+            </div>
             <button type="button"
                     data-testid="button-add-warehouse"
                     class="inline-flex h-9 w-fit items-center gap-1 rounded-token border border-action-primary px-3 text-[13px] text-action-primary hover:bg-surface-light-primary">
@@ -318,25 +320,26 @@
             <!-- Warehouse Groups -->
             <div class="mt-2 border-t border-divider pt-3">
               <p class="mb-2 text-[13px] font-medium text-fg-primary">Warehouse Groups</p>
-              <table class="w-full table-fixed border-collapse" data-testid="table-warehouse-groups">
+              <div class="data-grid data-grid--scroll max-h-[280px]">
+              <table class="data-grid-table" data-testid="table-warehouse-groups">
                 <colgroup><col><col style="width:120px"><col style="width:140px"><col><col style="width:60px"></colgroup>
                 <thead>
-                  <tr class="h-8 border-b border-divider text-left text-[12px] font-medium text-fg-primary">
-                    <th class="px-2">Name</th>
-                    <th class="px-2">Destinations</th>
-                    <th class="px-2">Warehouses</th>
-                    <th class="px-2">Fallback Warehouse</th>
+                  <tr>
+                    <th>Name</th>
+                    <th>Destinations</th>
+                    <th>Warehouses</th>
+                    <th>Fallback Warehouse</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   @if (groupEditing()) {
-                    <tr class="h-10 border-b border-divider text-[13px] text-fg-primary" data-testid="row-edit-group">
-                      <td class="px-2"><input placeholder="Enter Name" class="h-7 w-full rounded-token border border-divider bg-surface px-2 text-[12px] focus:border-action-primary focus:outline-none" /></td>
-                      <td class="px-2"><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
-                      <td class="px-2"><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
-                      <td class="px-2"><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
-                      <td class="px-2">
+                    <tr class="h-8" data-testid="row-edit-group">
+                      <td><input placeholder="Enter Name" class="h-7 w-full rounded-token border border-divider bg-surface px-2 text-[12px] focus:border-action-primary focus:outline-none" /></td>
+                      <td><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
+                      <td><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
+                      <td><div class="flex h-7 items-center rounded-token border border-divider bg-surface px-2 text-[12px] text-fg-tertiary">Select <svg class="ml-auto h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg></div></td>
+                      <td>
                         <div class="flex items-center gap-1">
                           <button type="button" (click)="confirmAddGroup()" aria-label="Save group" data-testid="button-save-group" class="inline-flex h-6 w-6 items-center justify-center rounded text-action-primary hover:bg-surface-light-primary">
                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -349,20 +352,20 @@
                     </tr>
                   }
                   @for (g of warehouseGroups(); track g.name) {
-                    <tr class="h-10 border-b border-divider text-[13px] text-fg-primary">
-                      <td class="px-2">{{ g.name }}</td>
-                      <td class="px-2">
+                    <tr class="h-8">
+                      <td>{{ g.name }}</td>
+                      <td>
                         <span class="inline-flex items-center gap-1">{{ g.destinations }}
                           <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
                         </span>
                       </td>
-                      <td class="px-2">
+                      <td>
                         <span class="inline-flex items-center gap-1">{{ g.warehouses }}
                           <svg class="h-3 w-3 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
                         </span>
                       </td>
-                      <td class="px-2">{{ g.fallback }}</td>
-                      <td class="px-2 text-right">
+                      <td>{{ g.fallback }}</td>
+                      <td class="text-right">
                         <button type="button" aria-label="Group actions" class="inline-flex h-6 w-6 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary">
                           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
                         </button>
@@ -371,6 +374,7 @@
                   }
                 </tbody>
               </table>
+              </div>
               <button type="button"
                       (click)="startAddGroup()"
                       [disabled]="groupEditing()"
@@ -510,19 +514,21 @@
 
             <section>
               <p class="mb-2 text-[14px] font-medium text-fg-primary">Attachments</p>
-              <table class="w-full table-fixed border-collapse" data-testid="table-attachments">
+              <div class="data-grid data-grid--scroll max-h-[280px]">
+              <table class="data-grid-table" data-testid="table-attachments">
                 <colgroup><col><col style="width:200px"><col style="width:32px"></colgroup>
-                <thead><tr class="h-8 border-b border-divider text-left text-[12px] font-medium text-fg-primary"><th class="px-2">File Name</th><th class="px-2">Upload Date</th><th></th></tr></thead>
+                <thead><tr><th>File Name</th><th>Upload Date</th><th></th></tr></thead>
                 <tbody>
                   @for (a of attachments(); track a.name) {
-                    <tr class="h-9 border-b border-divider text-[13px] text-fg-primary">
-                      <td class="px-2"><a class="text-action-primary hover:underline" href="javascript:void(0)">{{ a.name }}</a></td>
-                      <td class="px-2 text-fg-secondary">{{ a.uploaded }}</td>
-                      <td class="px-2 text-right"><button type="button" aria-label="File actions" class="inline-flex h-6 w-6 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary"><svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></td>
+                    <tr class="h-8">
+                      <td><a class="text-action-primary hover:underline" href="javascript:void(0)">{{ a.name }}</a></td>
+                      <td>{{ a.uploaded }}</td>
+                      <td class="text-right"><button type="button" aria-label="File actions" class="inline-flex h-6 w-6 items-center justify-center rounded text-fg-secondary hover:bg-surface-light-primary"><svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></td>
                     </tr>
                   }
                 </tbody>
               </table>
+              </div>
               <button type="button"
                       data-testid="button-upload-attachment"
                       class="mt-3 inline-flex h-9 w-fit items-center gap-1 rounded-token border border-action-primary px-3 text-[13px] text-action-primary hover:bg-surface-light-primary">

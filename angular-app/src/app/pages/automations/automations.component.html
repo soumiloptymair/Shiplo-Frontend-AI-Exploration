@@ -50,45 +50,46 @@
       </header>
 
       <!-- ============ Table ============ -->
-      <div class="min-h-0 flex-1 overflow-auto" data-testid="automations-table">
+      <div class="data-grid data-grid--scroll min-h-0 flex-1" data-testid="automations-table">
 
         <!-- Two-row header -->
-        <div class="sticky top-0 z-10 bg-surface-light-primary">
+        <div class="data-grid__header-group">
           <!-- Row 1: outer column titles -->
-          <div class="grid items-center border-b border-divider px-5 py-2 text-[12px] font-medium text-fg-secondary"
+          <div class="data-grid__header px-5"
             style="grid-template-columns: 24px 1fr 160px 130px 32px;">
-            <span></span>
-            <span data-testid="header-rule">Rule</span>
-            <span data-testid="header-created-by">Created by</span>
-            <span data-testid="header-created-on">Created on</span>
-            <span></span>
+            <span class="data-grid__header-cell"></span>
+            <span class="data-grid__header-cell" data-testid="header-rule">Rule</span>
+            <span class="data-grid__header-cell" data-testid="header-created-by">Created by</span>
+            <span class="data-grid__header-cell" data-testid="header-created-on">Created on</span>
+            <span class="data-grid__header-cell"></span>
           </div>
           <!-- Row 2: IF / THEN split -->
-          <div class="grid items-center border-b border-divider px-5 py-2 text-[12px] text-fg-secondary"
+          <div class="data-grid__header px-5"
             style="grid-template-columns: 24px 1fr 1fr 160px 130px 32px;">
-            <span></span>
-            <span class="inline-flex items-center gap-1.5">
+            <span class="data-grid__header-cell"></span>
+            <span class="data-grid__header-cell inline-flex items-center gap-1.5 font-normal">
               <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                 <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4M12 16h.01"/>
               </svg>
               If this is true
             </span>
-            <span class="inline-flex items-center gap-1.5">
+            <span class="data-grid__header-cell inline-flex items-center gap-1.5 font-normal">
               <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h7v8l9-12h-7V2z"/>
               </svg>
               Then take these actions
             </span>
-            <span></span>
-            <span></span>
-            <span></span>
+            <span class="data-grid__header-cell"></span>
+            <span class="data-grid__header-cell"></span>
+            <span class="data-grid__header-cell"></span>
           </div>
         </div>
 
+        <div class="data-grid__body">
         <!-- Rule rows -->
         <ul *ngIf="filtered().length > 0; else emptyState">
           <li *ngFor="let rule of filtered(); trackBy: trackById"
-            class="group grid items-start border-b border-divider px-5 py-3 hover:bg-surface-light-primary"
+            class="data-grid__row data-grid__row--interactive px-5 py-3"
             [attr.data-testid]="'row-rule-' + rule.id"
             [class.opacity-60]="!rule.enabled"
             style="grid-template-columns: 24px 1fr 1fr 160px 130px 32px;">
@@ -106,7 +107,7 @@
             </button>
 
             <!-- IF column: Match All + condition chips -->
-            <div class="flex flex-col gap-1.5 pr-4" [attr.data-testid]="'cell-if-' + rule.id">
+            <div class="data-grid__cell data-grid__cell--wrap pr-4" [attr.data-testid]="'cell-if-' + rule.id">
               <div class="flex flex-wrap items-center gap-1.5">
               <span *ngIf="!rule.enabled"
                 class="inline-flex h-[18px] items-center rounded-token bg-chip-yellow px-1.5 text-[10px] font-medium uppercase tracking-wide text-fg-primary"
@@ -134,7 +135,7 @@
             </div>
 
             <!-- THEN column: action chips -->
-            <div class="flex flex-wrap items-center gap-1.5 pr-4" [attr.data-testid]="'cell-then-' + rule.id">
+            <div class="data-grid__cell data-grid__cell--wrap flex-wrap gap-1.5 pr-4" [attr.data-testid]="'cell-then-' + rule.id">
               <span *ngFor="let a of visibleChips(rule.actions)"
                 class="inline-flex h-[26px] items-stretch overflow-hidden rounded-token border border-divider bg-surface text-[12px]"
                 data-testid="chip-action">
@@ -154,7 +155,7 @@
             </div>
 
             <!-- Created by -->
-            <div class="flex items-center gap-2 text-[13px] text-fg-primary" [attr.data-testid]="'cell-created-by-' + rule.id">
+            <div class="data-grid__cell data-grid__cell--wrap gap-2" [attr.data-testid]="'cell-created-by-' + rule.id">
               <span class="flex h-6 w-6 items-center justify-center rounded-full bg-chip-blue text-[10px] font-medium text-fg-primary">
                 {{ initials(rule.createdBy) }}
               </span>
@@ -162,10 +163,10 @@
             </div>
 
             <!-- Created on -->
-            <div class="text-[13px] text-fg-primary" [attr.data-testid]="'cell-created-on-' + rule.id">{{ rule.createdOn }}</div>
+            <div class="data-grid__cell data-grid__cell--wrap" [attr.data-testid]="'cell-created-on-' + rule.id">{{ rule.createdOn }}</div>
 
             <!-- Row menu -->
-            <div class="relative flex justify-end">
+            <div class="data-grid__cell data-grid__cell--actions relative">
               <button type="button"
                 (click)="toggleMenu(rule.id, $event)"
                 aria-label="Row actions"
@@ -204,7 +205,7 @@
         </ul>
 
         <ng-template #emptyState>
-          <div class="flex h-48 flex-col items-center justify-center gap-2 text-fg-secondary"
+          <div class="data-grid__empty flex-col gap-2"
             data-testid="empty-state">
             <p class="text-[14px]">No automation rules yet.</p>
             <button type="button" (click)="openCreate()"
@@ -213,6 +214,7 @@
             </button>
           </div>
         </ng-template>
+        </div>
 
       </div>
     </div>

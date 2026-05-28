@@ -10,24 +10,20 @@ import {
   TagColorSpec,
   TagInsert,
 } from '../../../../core/models/tag.model';
-
+import { TagPillComponent } from '../../../../shared/components/tag-pill/tag-pill.component';
 /**
- * Add / Edit Tag modal.
- *
- * Pixel-faithful to Figma `7d1Ged8LHQYBV9abYhNhxG` node `27686-185147` /
- * `27686-185178` / `27686-185210` / `27686-185242`. Centered ~520px card on a
- * dark backdrop. Body: Name + Category (2-col, top row), Color + Preview
- * (2-col, second row). Footer: Cancel + Add/Save (disabled until Name,
- * Category and Color are all set).
+ * Add / Edit Tag modal — Figma `27686:185147`.
  */
 @Component({
   selector: 'app-tag-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TagPillComponent],
   templateUrl: './tag-modal.component.html',
 })
 export class TagModalComponent {
   @Input() initialTag: Tag | null = null;
+  /** Pre-select category when creating a tag from an entity context. */
+  @Input() presetCategory: TagCategory | null = null;
   @Output() save = new EventEmitter<TagInsert>();
   @Output() cancel = new EventEmitter<void>();
 
@@ -56,6 +52,8 @@ export class TagModalComponent {
       this.name.set(this.initialTag.name);
       this.category.set(this.initialTag.category);
       this.color.set(this.initialTag.color);
+    } else if (this.presetCategory) {
+      this.category.set(this.presetCategory);
     }
   }
 

@@ -18,6 +18,7 @@ import { PackagingModalComponent } from './packaging-modal/packaging-modal.compo
   standalone: true,
   imports: [CommonModule, PackagingModalComponent],
   templateUrl: './packaging.component.html',
+  host: { class: 'flex h-full min-h-0 flex-col overflow-hidden' },
 })
 export class PackagingDefaultsComponent {
   readonly svc = inject(PackagingService);

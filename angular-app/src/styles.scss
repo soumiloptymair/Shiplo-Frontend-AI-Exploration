@@ -152,6 +152,7 @@
   --surface-default:        0   0%   100%;  /* #FFFFFF */
   --surface-subtle:         200 22%  95%;   /* #F0F4F7  tinted panel (auto-topup body) */
   --surface-light-primary:  205 35%  97%;   /* #F6F9FB  table header / row inset */
+  --data-grid-header-divider: 205 35% 97%;   /* #EFF6F9  header row bottom border */
 
   /* Border / divider */
   --border-default: 200 16% 91%;            /* #E4EAED */
@@ -172,4 +173,203 @@
     0 3px 1px -2px rgba(0,0,0,0.20),
     0 2px 2px 0    rgba(0,0,0,0.14),
     0 1px 5px 0    rgba(0,0,0,0.12);
+}
+
+/* ============================================================
+ * Data grid — Figma component library (Tags frame 27686:184938)
+ * Use .data-grid + __header/__row for CSS grids; .data-grid-table for <table>.
+ * See .cursor/rules/15-data-grid.mdc
+ * ============================================================ */
+@layer components {
+  .data-grid {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid hsl(var(--border-default));
+    background-color: hsl(var(--surface-default));
+    overflow-x: auto;
+  }
+
+  /*
+   * Vertical scroll frame — header stays pinned; body rows scroll.
+   * CSS-grid tables: header sits outside .data-grid__body (flex sibling).
+   * Native <table>: sticky th inside the scrolling frame.
+   * See .cursor/rules/15-data-grid.mdc
+   */
+  .data-grid--scroll {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+  }
+
+  .data-grid--scroll:has(.data-grid__body) {
+    overflow: hidden;
+  }
+
+  .data-grid__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .data-grid__header-group {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-shrink: 0;
+    background-color: hsl(var(--surface-default));
+  }
+
+  .data-grid__header {
+    display: grid;
+    align-items: stretch;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-shrink: 0;
+    border-bottom: 1px solid hsl(var(--data-grid-header-divider));
+    background-color: hsl(var(--surface-light-primary));
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .data-grid__header-cell {
+    display: flex;
+    height: 2rem;
+    align-items: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: normal;
+    color: hsl(var(--fg-primary));
+    white-space: nowrap;
+  }
+
+  .data-grid__row {
+    display: grid;
+    align-items: stretch;
+    border-bottom: 1px solid hsl(var(--border-default));
+    background-color: hsl(var(--surface-default));
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .data-grid__row:last-child {
+    border-bottom-width: 0;
+  }
+
+  .data-grid__row--interactive:hover {
+    background-color: hsl(var(--surface-light-primary));
+  }
+
+  .data-grid__cell {
+    display: flex;
+    height: 2rem;
+    align-items: center;
+    min-width: max-content;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 14px;
+    line-height: 1.43;
+    color: hsl(var(--fg-secondary));
+    white-space: nowrap;
+  }
+
+  .data-grid__cell--truncate {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .data-grid__cell--wrap {
+    height: auto;
+    min-height: 2rem;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .data-grid__cell--actions {
+    justify-content: flex-end;
+  }
+
+  .data-grid__empty {
+    display: flex;
+    height: 8rem;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid hsl(var(--border-default));
+    font-size: 14px;
+    line-height: 1.43;
+    color: hsl(var(--fg-secondary));
+  }
+
+  .data-grid-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+  }
+
+  .data-grid-table thead tr {
+    height: 2rem;
+    border-bottom: 1px solid hsl(var(--data-grid-header-divider));
+    background-color: hsl(var(--surface-light-primary));
+  }
+
+  .data-grid-table th {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: normal;
+    color: hsl(var(--fg-primary));
+    white-space: nowrap;
+    background-color: hsl(var(--surface-light-primary));
+  }
+
+  .data-grid--scroll > .data-grid-table th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .data-grid-table tbody tr {
+    border-bottom: 1px solid hsl(var(--border-default));
+    background-color: hsl(var(--surface-default));
+  }
+
+  .data-grid-table tbody tr:last-child {
+    border-bottom-width: 0;
+  }
+
+  .data-grid-table td {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 14px;
+    line-height: 1.43;
+    color: hsl(var(--fg-secondary));
+    white-space: nowrap;
+  }
+
+  .data-grid-table td.data-grid-table__cell--truncate,
+  .data-grid-table th.data-grid-table__cell--truncate {
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .data-grid-table--relaxed tbody tr {
+    height: auto;
+  }
+
+  .data-grid-table--relaxed td {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    vertical-align: top;
+    white-space: normal;
+  }
 }

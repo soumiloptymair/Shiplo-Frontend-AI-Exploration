@@ -120,6 +120,14 @@
       <p class="font-body text-xs text-[#45565b]">Order Number: <span class="text-[#0b1516]">234779001</span></p>
       <p class="font-body text-xs text-[#45565b]">Created on: <span class="text-[#0b1516]">January 8, 2023, 2:32pm EST</span></p>
     </div>
+    <div class="mt-3">
+      <app-entity-tags
+        [tagIds]="shipment.tagIds"
+        category="Shipment"
+        variant="panel"
+        testIdPrefix="panel-shipment-tags"
+        (tagIdsChange)="onTagIdsChange($event)" />
+    </div>
   </div>
 
   <!-- Tabs -->
@@ -146,6 +154,7 @@
             <span class="font-body text-base font-medium text-[#0b1516]">Shipping Label</span>
             <div class="flex items-center gap-2">
               <button type="button" aria-label="Print label" data-testid="button-print-label"
+                (click)="printLabel()"
                 class="flex h-6 w-6 items-center justify-center rounded text-neutral-600 hover:bg-neutral-200">
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
@@ -411,34 +420,33 @@
             </div>
           </ng-container>
           <ng-template #docsTable>
-            <div class="overflow-hidden rounded-lg border border-[#e4eaed]">
-              <table class="w-full text-left" data-testid="table-documents">
+            <div class="data-grid data-grid--scroll max-h-[240px] rounded-lg border border-[#e4eaed]">
+              <table class="data-grid-table text-left" data-testid="table-documents">
                 <thead>
-                  <tr class="border-b border-[#e4eaed] bg-[#f6f9fb]">
-                    <th class="px-3 py-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Name</th>
-                    <th class="px-3 py-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Type</th>
-                    <th class="px-3 py-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Date</th>
-                    <th class="px-3 py-2 font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Size</th>
-                    <th class="w-[52px] px-3 py-2"></th>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Size</th>
+                    <th class="w-[52px]"></th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let doc of docs(); let i = index"
                     [attr.data-testid]="'row-doc-' + doc.id"
-                    class="border-b border-[#e4eaed] last:border-0"
-                    [ngClass]="i % 2 === 1 ? 'bg-[#f6f9fb]' : 'bg-white'">
-                    <td class="max-w-[110px] px-3 py-2">
-                      <span class="flex items-center gap-1.5 overflow-hidden">
+                    class="h-8">
+                    <td>
+                      <span class="flex items-center gap-1.5">
                         <svg class="h-3.5 w-3.5 shrink-0 text-[#2B64CB]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        <span class="overflow-hidden text-ellipsis whitespace-nowrap font-body text-xs font-medium text-[#2da1cb]" [title]="doc.name">{{ doc.name }}</span>
+                        <span class="font-body text-xs font-medium text-[#2da1cb]">{{ doc.name }}</span>
                       </span>
                     </td>
-                    <td class="px-3 py-2 font-body text-xs text-[#45565b]">{{ doc.type }}</td>
-                    <td class="px-3 py-2 font-body text-xs text-[#45565b] whitespace-nowrap">{{ doc.date }}</td>
-                    <td class="px-3 py-2 font-body text-xs text-[#45565b]">{{ doc.size }}</td>
-                    <td class="px-3 py-2">
+                    <td>{{ doc.type }}</td>
+                    <td class="whitespace-nowrap">{{ doc.date }}</td>
+                    <td>{{ doc.size }}</td>
+                    <td>
                       <div class="flex items-center gap-1">
                         <button type="button" [attr.aria-label]="'Download ' + doc.name" [attr.data-testid]="'button-download-doc-' + doc.id"
                           class="flex h-5 w-5 items-center justify-center rounded text-[#45565b] hover:bg-neutral-100">
@@ -530,20 +538,21 @@
       <div class="flex flex-col gap-5 p-5" data-testid="tab-content-products">
         <ng-container *ngIf="(shipment.products?.length ?? 0) > 0; else productsEmpty">
           <!-- Products table -->
-          <table class="w-full">
+          <div class="data-grid data-grid--scroll max-h-[320px]">
+          <table class="data-grid-table data-grid-table--relaxed w-full">
             <thead>
-              <tr class="border-b border-[#e4eaed]">
-                <th class="pb-2 text-left font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Item</th>
-                <th class="pb-2 pr-2 text-right font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Qty</th>
-                <th class="pb-2 pr-2 text-right font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Value</th>
-                <th class="pb-2 text-right font-body text-xs font-medium uppercase tracking-wide text-[#45565b]">Total</th>
+              <tr>
+                <th>Item</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Value</th>
+                <th class="text-right">Total</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let p of shipment.products; let i = index"
                 [attr.data-testid]="'row-product-' + i"
-                class="border-b border-[#e4eaed] last:border-0 align-top">
-                <td class="py-2 pr-2">
+                class="align-top">
+                <td>
                   <div class="flex flex-col gap-0.5">
                     <div class="flex items-center gap-1.5">
                       <svg class="h-3.5 w-3.5 shrink-0 text-[#45565b]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -557,23 +566,24 @@
                         <span class="h-1.5 w-1.5 rounded-full bg-[#D32F2F]"></span>
                       </span>
                     </div>
-                    <p class="font-body text-xs text-[#45565b] truncate">{{ p.name }}</p>
+                    <p class="font-body text-xs text-[#45565b]">{{ p.name }}</p>
                   </div>
                 </td>
-                <td class="py-2 pr-2 text-right font-body text-sm text-[#0b1516]">{{ p.qty }}</td>
-                <td class="py-2 pr-2 text-right font-body text-sm text-[#0b1516]">${{ p.unitValue.toFixed(2) }}</td>
-                <td class="py-2 text-right font-body text-sm text-[#0b1516]">${{ (p.qty * p.unitValue).toFixed(2) }}</td>
+                <td class="text-right">{{ p.qty }}</td>
+                <td class="text-right">${{ p.unitValue.toFixed(2) }}</td>
+                <td class="text-right">${{ (p.qty * p.unitValue).toFixed(2) }}</td>
               </tr>
             </tbody>
             <tfoot>
-              <tr class="bg-[#f6f9fb]">
-                <td colspan="3" class="px-2 py-2 font-body text-sm font-medium text-[#0b1516]">Total Value</td>
-                <td class="px-0 py-2 text-right font-body text-sm font-medium text-[#0b1516]" data-testid="text-products-total">
+              <tr class="bg-surface-light-primary">
+                <td colspan="3" class="font-medium text-fg-primary">Total Value</td>
+                <td class="text-right font-medium text-fg-primary" data-testid="text-products-total">
                   ${{ productsTotal().toFixed(2) }}
                 </td>
               </tr>
             </tfoot>
           </table>
+          </div>
 
           <!-- Materials -->
           <div *ngIf="shipment.materials as mats" class="flex flex-col gap-3" data-testid="section-materials">

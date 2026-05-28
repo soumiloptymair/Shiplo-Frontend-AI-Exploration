@@ -953,7 +953,7 @@ export class NewShipmentModalComponent implements AfterViewInit, OnDestroy, OnIn
       shipping: rate ? `${rate.carrier} ${rate.service}` : 'To be assigned',
       method: d.label.schedulePickup ? 'Pickup' : 'Standard',
       customer: 'New Customer',
-      tags: [],
+      tagIds: [],
       products,
       materials: { ...d.details.materials },
     };

@@ -1,16 +1,14 @@
 <div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-8"
   (click)="onCancel()"
   data-testid="modal-tag-backdrop">
-  <div
-    class="my-auto w-[520px] max-w-[95vw] overflow-hidden rounded-lg bg-surface shadow-[0_1px_16px_rgba(0,0,0,0.25)]"
+  <div class="my-auto flex min-h-[476px] w-[531px] max-w-[95vw] flex-col overflow-hidden rounded-lg bg-surface shadow-[0_1px_16px_rgba(0,0,0,0.25)]"
     (click)="$event.stopPropagation(); closePickers()"
     role="dialog"
     aria-modal="true"
     data-testid="modal-tag">
 
-    <!-- Header -->
-    <header class="flex items-center justify-between border-b border-divider px-5 py-4">
-      <h2 class="font-body text-[18px] font-semibold leading-[1.43] text-fg-primary"
+    <header class="flex shrink-0 items-center justify-between border-b border-[#b8c6cc] px-6 py-4">
+      <h2 class="flex-1 font-body text-[18px] font-semibold leading-[1.43] text-fg-primary"
         data-testid="text-tag-modal-title">
         {{ isEdit() ? 'Edit Tag' : 'Add Tag' }}
       </h2>
@@ -18,127 +16,126 @@
         (click)="onCancel()"
         aria-label="Close"
         data-testid="button-close-tag-modal"
-        class="flex h-8 w-8 items-center justify-center rounded-full text-fg-secondary hover:bg-surface-light-primary">
+        class="flex h-8 w-8 items-center justify-center rounded-2xl text-fg-secondary hover:bg-surface-light-primary">
         <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </header>
 
-    <!-- Body -->
-    <div class="flex min-h-[260px] flex-col gap-4 px-5 py-5">
+    <div class="flex-1 px-6 py-5">
+      <div class="flex flex-col gap-5">
+        <div class="grid grid-cols-2 gap-5">
+          <label class="flex flex-col gap-1">
+            <span class="text-[12px] leading-[1.43] text-fg-primary">Name</span>
+            <input type="text"
+              placeholder="Enter Name"
+              [value]="name()"
+              (input)="name.set($any($event.target).value)"
+              data-testid="input-tag-name"
+              class="h-10 w-full rounded border border-divider bg-surface px-3 text-[14px] text-fg-primary outline-none placeholder:text-[#7f9199] focus:border-action-primary"/>
+          </label>
 
-      <!-- Row 1: Name + Category -->
-      <div class="grid grid-cols-2 gap-4">
-        <label class="flex flex-col gap-1">
-          <span class="font-body text-[12px] font-medium text-fg-primary">Name</span>
-          <input type="text"
-            placeholder="Enter Name"
-            [value]="name()"
-            (input)="name.set($any($event.target).value)"
-            data-testid="input-tag-name"
-            class="h-10 rounded-token border border-divider bg-surface px-3 text-[13px] text-fg-primary outline-none placeholder:text-fg-tertiary focus:border-action-primary"/>
-        </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-[12px] leading-[1.43] text-fg-primary">Category</span>
+            <div class="relative">
+              <button type="button"
+                (click)="toggleCategory($event)"
+                data-testid="select-tag-category"
+                class="flex h-10 w-full items-center justify-between rounded border border-divider bg-surface py-2 pl-3 pr-2 text-left text-[14px] outline-none focus:border-action-primary">
+                <span class="truncate"
+                  [class.text-[#7f9199]]="!category()"
+                  [class.text-fg-primary]="!!category()">
+                  {{ category() || 'Select' }}
+                </span>
+                <svg class="h-6 w-6 shrink-0 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 10l5 5 5-5H7z"/>
+                </svg>
+              </button>
+              <ul *ngIf="categoryOpen()"
+                (click)="$event.stopPropagation()"
+                data-testid="menu-tag-categories"
+                class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-auto rounded bg-surface py-1 shadow-[0_1px_5px_rgba(0,0,0,0.12),0_2px_2px_rgba(0,0,0,0.14),0_3px_1px_-2px_rgba(0,0,0,0.2)]">
+                <li *ngFor="let c of CATEGORIES">
+                  <button type="button"
+                    (click)="pickCategory(c, $event)"
+                    [attr.data-testid]="'option-category-' + c.toLowerCase()"
+                    class="flex w-full px-2 py-2 text-left text-[14px] leading-[1.43] text-[#333538] hover:bg-surface-light-primary"
+                    [class.bg-surface-light-primary]="category() === c">
+                    {{ c }}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </label>
+        </div>
 
-        <label class="flex flex-col gap-1">
-          <span class="font-body text-[12px] font-medium text-fg-primary">Category</span>
-          <div class="relative">
-            <button type="button"
-              (click)="toggleCategory($event)"
-              data-testid="select-tag-category"
-              class="flex h-10 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] outline-none focus:border-action-primary"
-              [ngClass]="category() ? 'text-fg-primary' : 'text-fg-tertiary'">
-              <span>{{ category() || 'Select' }}</span>
-              <svg class="h-3.5 w-3.5 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
-              </svg>
-            </button>
-            <ul *ngIf="categoryOpen()"
-              (click)="$event.stopPropagation()"
-              data-testid="menu-tag-categories"
-              class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-auto rounded-token border border-divider bg-surface py-1 shadow-lg">
-              <li *ngFor="let c of CATEGORIES">
-                <button type="button"
-                  (click)="pickCategory(c, $event)"
-                  [attr.data-testid]="'option-category-' + c.toLowerCase()"
-                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary"
-                  [class.bg-surface-light-primary]="category() === c">
-                  {{ c }}
-                </button>
-              </li>
-            </ul>
-          </div>
-        </label>
-      </div>
+        <div class="grid grid-cols-2 gap-5">
+          <label class="flex flex-col gap-1">
+            <span class="text-[12px] leading-[1.43] text-fg-primary">Color</span>
+            <div class="relative">
+              <button type="button"
+                (click)="toggleColor($event)"
+                data-testid="select-tag-color"
+                class="flex h-10 w-full items-center justify-between rounded border border-divider bg-surface py-2 pl-3 pr-2 text-left text-[14px] outline-none focus:border-action-primary">
+                <span class="flex min-w-0 items-center gap-2 truncate">
+                  <span class="inline-block h-5 w-5 shrink-0 border border-divider"
+                    [style.background-color]="selectedColorSpec()?.bg || '#E3E9EC'"></span>
+                  <span [class.text-[#7f9199]]="!color()"
+                    [class.text-fg-primary]="!!color()">
+                    {{ color() || 'Select' }}
+                  </span>
+                </span>
+                <svg class="h-6 w-6 shrink-0 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7 10l5 5 5-5H7z"/>
+                </svg>
+              </button>
+              <ul *ngIf="colorOpen()"
+                (click)="$event.stopPropagation()"
+                data-testid="menu-tag-colors"
+                class="absolute left-0 right-0 top-full z-20 mt-1 max-h-72 overflow-auto rounded bg-surface py-1 shadow-[0_1px_5px_rgba(0,0,0,0.12),0_2px_2px_rgba(0,0,0,0.14),0_3px_1px_-2px_rgba(0,0,0,0.2)]">
+                <li *ngFor="let c of COLORS">
+                  <button type="button"
+                    (click)="pickColor(c.name, $event)"
+                    [attr.data-testid]="'option-color-' + c.name.toLowerCase()"
+                    class="flex w-full items-center gap-2 px-2 py-2 text-left text-[14px] leading-[1.43] text-[#333538] hover:bg-surface-light-primary"
+                    [class.bg-surface-light-primary]="color() === c.name">
+                    <span class="inline-block h-5 w-5 shrink-0 border border-divider"
+                      [style.background-color]="c.bg"></span>
+                    {{ c.name }}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </label>
 
-      <!-- Row 2: Color + Preview -->
-      <div class="grid grid-cols-2 gap-4">
-        <label class="flex flex-col gap-1">
-          <span class="font-body text-[12px] font-medium text-fg-primary">Color</span>
-          <div class="relative">
-            <button type="button"
-              (click)="toggleColor($event)"
-              data-testid="select-tag-color"
-              class="flex h-10 w-full items-center justify-between rounded-token border border-divider bg-surface px-3 text-left text-[13px] outline-none focus:border-action-primary"
-              [ngClass]="color() ? 'text-fg-primary' : 'text-fg-tertiary'">
-              <span class="flex items-center gap-2">
-                <span class="inline-block h-4 w-4 rounded-sm border border-divider"
-                  [style.background-color]="selectedColorSpec()?.bg || '#E4EAED'"></span>
-                <span>{{ color() || 'Select' }}</span>
-              </span>
-              <svg class="h-3.5 w-3.5 text-fg-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/>
-              </svg>
-            </button>
-            <ul *ngIf="colorOpen()"
-              (click)="$event.stopPropagation()"
-              data-testid="menu-tag-colors"
-              class="absolute left-0 right-0 top-full z-20 mt-1 max-h-72 overflow-auto rounded-token border border-divider bg-surface py-1 shadow-lg">
-              <li *ngFor="let c of COLORS">
-                <button type="button"
-                  (click)="pickColor(c.name, $event)"
-                  [attr.data-testid]="'option-color-' + c.name.toLowerCase()"
-                  class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary"
-                  [class.bg-surface-light-primary]="color() === c.name">
-                  <span class="inline-block h-4 w-4 rounded-sm border border-divider"
-                    [style.background-color]="c.bg"></span>
-                  <span>{{ c.name }}</span>
-                </button>
-              </li>
-            </ul>
-          </div>
-        </label>
-
-        <div class="flex flex-col gap-1">
-          <span class="font-body text-[12px] font-medium text-fg-primary">Preview</span>
-          <div class="flex h-10 items-center">
-            <span class="inline-flex items-center gap-1.5 rounded-token px-2 py-1 text-[12px] font-medium"
-              data-testid="preview-tag"
-              [style.background-color]="selectedColorSpec()?.bg || '#C4EEE6'"
-              [style.color]="selectedColorSpec()?.fg || '#0E4A41'">
-              {{ previewLabel() }}
-              <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </span>
+          <div class="flex flex-col gap-1">
+            <span class="text-[12px] leading-[1.43] text-fg-primary">Preview</span>
+            <div class="flex h-10 items-center">
+              <app-tag-pill
+                [label]="previewLabel()"
+                [backgroundColor]="selectedColorSpec()?.bg || '#B8C6CC'"
+                [textColor]="selectedColorSpec()?.fg || '#0B1516'"
+                [showDismissIcon]="true"
+                testId="preview-tag" />
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="flex items-center justify-end gap-3 border-t border-divider px-5 py-4">
+    <footer class="flex shrink-0 items-center justify-end gap-4 border-t border-[#b8c6cc] px-6 py-4">
       <button type="button"
         (click)="onCancel()"
         data-testid="button-cancel-tag"
-        class="h-9 rounded-token bg-transparent px-3 text-[13px] font-medium text-fg-primary hover:underline">
+        class="rounded-md px-3 py-2 text-[14px] font-bold leading-5 text-fg-primary hover:bg-surface-light-primary">
         Cancel
       </button>
       <button type="button"
         (click)="onSave()"
         [disabled]="!canSave()"
         data-testid="button-save-tag"
-        class="h-9 rounded-token bg-action-primary px-5 text-[13px] font-medium text-fg-on-action transition-colors hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50">
+        class="rounded-md bg-action-primary px-3 py-2 text-[14px] font-bold leading-5 text-fg-on-action transition-colors hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50">
         {{ isEdit() ? 'Save' : 'Add' }}
       </button>
     </footer>

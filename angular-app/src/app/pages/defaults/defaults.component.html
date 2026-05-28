@@ -1,45 +1,59 @@
 <app-shell>
-  <section class="relative flex h-full min-w-0 gap-4 font-body" data-testid="page-defaults">
+  <section class="relative flex h-full min-w-0 gap-2 font-body" data-testid="page-defaults">
 
-    <!-- ============ Left rail ============ -->
-    <aside class="flex w-[300px] shrink-0 flex-col overflow-hidden rounded-lg bg-surface"
+    <!-- Left rail — Figma `25739:522` (400px) -->
+    <aside class="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-lg bg-surface"
       data-testid="defaults-rail">
-      <header class="flex h-[68px] shrink-0 items-center gap-2 border-b border-divider px-5">
-        <svg class="h-6 w-6 text-action-primary" xmlns="http://www.w3.org/2000/svg"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+      <header class="flex h-[68px] shrink-0 items-center gap-2 border-b border-divider px-5 py-4">
+        <svg class="h-7 w-7 shrink-0 text-action-primary" xmlns="http://www.w3.org/2000/svg"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"
+          aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M12 3l3 3-3 3-3-3 3-3zM4 12l3 3-3 3-3-3 3-3zM20 12l3 3-3 3-3-3 3-3zM12 17l3 3-3 3-3-3 3-3z"
             transform="translate(-1.5 -2)"/>
         </svg>
-        <h1 class="font-heading text-[20px] font-semibold leading-[1.4] tracking-[0.15px] text-fg-primary">
+        <h1 class="font-heading text-[24px] font-medium leading-[1.4] tracking-[0.15px] text-fg-primary">
           Defaults
         </h1>
       </header>
 
-      <nav class="flex flex-1 flex-col gap-1 p-3" aria-label="Defaults sections">
+      <nav class="flex flex-1 flex-col overflow-y-auto" aria-label="Defaults sections">
         <ng-container *ngFor="let item of railItems">
-          <a *ngIf="item.route; else placeholder"
+          <a *ngIf="item.route; else disabledItem"
             [routerLink]="item.route"
-            routerLinkActive="bg-surface-light-primary"
+            routerLinkActive="defaults-rail-link-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
             [attr.data-testid]="testId(item.label)"
-            class="flex flex-col gap-0.5 rounded-token px-3 py-3 no-underline transition-colors hover:bg-surface-light-primary">
-            <span class="font-body text-[14px] font-semibold leading-[1.4] text-fg-primary">{{ item.label }}</span>
-            <span class="font-body text-[12px] leading-[1.4] text-fg-secondary">{{ item.description }}</span>
+            class="defaults-rail-link flex border-b border-divider px-5 py-0.5 no-underline outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-primary">
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5 py-2">
+              <span class="font-body text-[18px] font-medium leading-[1.43] text-fg-primary">
+                {{ item.label }}
+              </span>
+              <span class="font-body text-[12px] leading-[1.43] text-fg-secondary">
+                {{ item.description }}
+              </span>
+            </div>
           </a>
-          <ng-template #placeholder>
-            <button type="button"
-              disabled
+          <ng-template #disabledItem>
+            <div class="defaults-rail-item flex border-b border-divider px-5 py-0.5"
               [attr.data-testid]="testId(item.label)"
-              class="flex cursor-not-allowed flex-col gap-0.5 rounded-token border-0 bg-transparent px-3 py-3 text-left">
-              <span class="font-body text-[14px] font-semibold leading-[1.4] text-fg-primary">{{ item.label }}</span>
-              <span class="font-body text-[12px] leading-[1.4] text-fg-secondary">{{ item.description }}</span>
-            </button>
+              aria-disabled="true">
+              <div class="flex min-w-0 flex-1 flex-col gap-0.5 py-2">
+                <span class="font-body text-[18px] font-medium leading-[1.43] text-fg-primary">
+                  {{ item.label }}
+                </span>
+                <span class="font-body text-[12px] leading-[1.43] text-fg-secondary">
+                  {{ item.description }}
+                </span>
+              </div>
+            </div>
           </ng-template>
         </ng-container>
       </nav>
     </aside>
 
-    <!-- ============ Right pane (routed sub-section) ============ -->
+    <!-- Right pane (routed sub-section) -->
     <div class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg bg-surface"
       data-testid="defaults-content">
       <router-outlet />

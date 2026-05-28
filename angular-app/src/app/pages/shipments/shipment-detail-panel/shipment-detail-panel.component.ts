@@ -8,8 +8,10 @@ import { MergeRecommendationBannerComponent } from '../merge-recommendation-bann
 import { MergeShipmentModalComponent, MergeConfirmPayload } from '../merge-shipment-modal/merge-shipment-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
 import { ShipmentService } from '../../../core/services/shipment.service';
+import { PrinterService } from '../../../core/services/printer.service';
 import { TrackingDocument } from '../../../core/models/branded-tracking.model';
 import { TrackingDocumentPreviewComponent } from '../../branded-tracking/tracking-document-preview/tracking-document-preview.component';
+import { EntityTagsComponent } from '../../../shared/components/entity-tags/entity-tags.component';
 
 export type PanelTab = 'Label' | 'Details' | 'Products' | 'Notes' | 'Shipment Log';
 export type PanelMenuAction =
@@ -35,6 +37,7 @@ interface MaterialRow { key: keyof MaterialFlags; present: string; absent: strin
     MergeRecommendationBannerComponent,
     MergeShipmentModalComponent,
     TrackingDocumentPreviewComponent,
+    EntityTagsComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
 })
@@ -44,6 +47,7 @@ export class ShipmentDetailPanelComponent implements OnChanges {
 
   private toast = inject(ToastService);
   private shipmentSvc = inject(ShipmentService);
+  private printerSvc = inject(PrinterService);
 
   readonly CARRIER_ICON = 'figmaAssets/pngegg--2--1-1.png';
   readonly SOURCE_ICON  = 'figmaAssets/integrations-1.png';
@@ -189,6 +193,10 @@ export class ShipmentDetailPanelComponent implements OnChanges {
     event.stopPropagation();
     this.selectedStatus.set(status);
     this.statusDropdownOpen.set(false);
+  }
+
+  onTagIdsChange(tagIds: string[]) {
+    this.shipmentSvc.setTagIds(this.shipment.id, tagIds);
   }
 
   @HostListener('document:click')
@@ -345,4 +353,16 @@ export class ShipmentDetailPanelComponent implements OnChanges {
   }
 
   removePod(id: number) { this.podImages.update((p) => p.filter((x) => x.id !== id)); }
+
+  printLabel() {
+    const result = this.printerSvc.silentPrint({
+      documentType: 'Labels',
+      shipmentRef: this.shipment.id,
+    });
+    if (result.ok) {
+      this.toast.show(`Label sent to ${result.printerName}`);
+      return;
+    }
+    this.toast.show(result.error ?? 'Unable to print label');
+  }
 }

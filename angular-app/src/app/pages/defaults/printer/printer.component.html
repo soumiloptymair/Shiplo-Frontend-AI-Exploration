@@ -1,0 +1,160 @@
+<!-- Title bar — Figma node `27494:520277` -->
+<header class="flex h-[68px] shrink-0 items-center justify-between border-b border-divider px-5 py-4"
+  data-testid="printer-header">
+  <div class="flex items-center gap-2">
+    <svg class="h-7 w-7 shrink-0 text-action-primary" xmlns="http://www.w3.org/2000/svg"
+      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M6 9V4.5A1.5 1.5 0 017.5 3h9A1.5 1.5 0 0118 4.5V9M6 18h12v3H6v-3zM6 14.25h12a2.25 2.25 0 002.25-2.25V11.25A2.25 2.25 0 0018 9H6a2.25 2.25 0 00-2.25 2.25v.75A2.25 2.25 0 006 14.25z"/>
+    </svg>
+    <h2 class="font-heading text-[24px] font-medium leading-[1.4] tracking-[0.15px] text-fg-primary">
+      Printer
+    </h2>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button type="button"
+      (click)="downloadShiploSync()"
+      data-testid="button-download-shiplosync"
+      class="inline-flex h-9 items-center gap-1 rounded border border-divider bg-surface px-3 text-[14px] font-medium text-fg-primary transition-colors hover:bg-surface-light-primary">
+      <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
+      </svg>
+      Download ShiploSync
+    </button>
+    <button type="button"
+      (click)="openConnect()"
+      data-testid="button-connect-printer"
+      class="inline-flex h-9 items-center gap-1 rounded-md bg-action-primary px-3 text-[14px] font-bold text-fg-on-action transition-colors hover:bg-action-primary-hover">
+      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      Connect Printer
+    </button>
+  </div>
+</header>
+
+<!-- Bridge banner (functional; not in Figma frame) -->
+<div *ngIf="svc.bridgeStatus() === 'inactive'"
+  class="shrink-0 border-b border-status-warning/30 bg-status-warning/10 px-5 py-3"
+  data-testid="banner-bridge-inactive">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <p class="text-[13px] leading-[1.4] text-fg-primary">
+      ShiploSync is not connected. Printer discovery, test prints, and silent shipping prints are unavailable.
+    </p>
+    <button type="button"
+      (click)="downloadShiploSync()"
+      data-testid="button-activate-bridge"
+      class="inline-flex h-8 items-center rounded-token bg-action-primary px-3 text-[12px] font-medium text-fg-on-action hover:bg-action-primary-hover">
+      Connect ShiploSync
+    </button>
+  </div>
+</div>
+
+<!-- Body — Figma node `27494:520298` -->
+<div class="flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-8 pt-4">
+  <div class="flex min-h-0 flex-1 flex-col gap-2">
+    <h3 class="shrink-0 font-body text-[14px] font-medium uppercase leading-[1.43] text-fg-primary"
+      data-testid="section-connected-printers">
+      Connected Printers
+    </h3>
+
+    <div class="data-grid data-grid--scroll min-h-0 flex-1" data-testid="table-printers">
+        <div class="data-grid__header"
+          style="grid-template-columns: minmax(160px, max-content) minmax(106px, max-content) minmax(115px, max-content) minmax(118px, max-content) minmax(280px, 1fr) 48px;">
+          <span class="data-grid__header-cell" data-testid="header-printer-name">Name</span>
+          <span class="data-grid__header-cell" data-testid="header-printer-connection">Connection</span>
+          <span class="data-grid__header-cell" data-testid="header-printer-resolution">Resolution</span>
+          <span class="data-grid__header-cell" data-testid="header-printer-paper-sizes">Paper Sizes</span>
+          <span class="data-grid__header-cell" data-testid="header-printer-purpose">Assigned Purpose</span>
+          <span class="data-grid__header-cell" aria-hidden="true"></span>
+        </div>
+
+        <div class="data-grid__body">
+        <div *ngIf="svc.connectedPrinters().length === 0"
+          class="data-grid__empty"
+          data-testid="empty-printers">
+          No printers connected yet.
+        </div>
+
+        <ul>
+          <li *ngFor="let row of svc.connectedPrinters(); trackBy: trackById"
+            class="data-grid__row"
+            [attr.data-testid]="'row-printer-' + row.id"
+            style="grid-template-columns: minmax(160px, max-content) minmax(106px, max-content) minmax(115px, max-content) minmax(118px, max-content) minmax(280px, 1fr) 48px;">
+            <span class="data-grid__cell"
+              [attr.data-testid]="'cell-name-' + row.id">{{ row.name }}</span>
+            <span class="data-grid__cell"
+              [attr.data-testid]="'cell-connection-' + row.id">{{ row.connection }}</span>
+            <span class="data-grid__cell"
+              [attr.data-testid]="'cell-resolution-' + row.id">{{ row.resolution }}</span>
+            <span class="data-grid__cell"
+              [attr.data-testid]="'cell-paper-' + row.id">{{ row.paperSizes }}</span>
+            <span class="data-grid__cell"
+              [attr.data-testid]="'cell-purpose-' + row.id">{{ svc.purposeLabel(row) }}</span>
+
+            <div class="data-grid__cell data-grid__cell--actions relative">
+              <button type="button"
+                (click)="toggleMenu(row.id, $event)"
+                aria-label="Row actions"
+                [attr.data-testid]="'menu-printer-' + row.id"
+                class="flex h-7 w-7 items-center justify-center rounded-full text-fg-secondary hover:bg-surface-light-primary">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="5" r="1.5"/>
+                  <circle cx="12" cy="12" r="1.5"/>
+                  <circle cx="12" cy="19" r="1.5"/>
+                </svg>
+              </button>
+              <div *ngIf="openMenuId() === row.id"
+                (click)="$event.stopPropagation()"
+                class="absolute right-2 top-8 z-30 w-48 rounded-token border border-divider bg-surface py-1 shadow-lg"
+                [attr.data-testid]="'menu-printer-popup-' + row.id">
+                <button type="button"
+                  (click)="openConfigure(row, $event)"
+                  [attr.data-testid]="'menu-configure-' + row.id"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                  Configure
+                </button>
+                <button type="button"
+                  (click)="testPrint(row, $event)"
+                  [attr.data-testid]="'menu-test-print-' + row.id"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-primary hover:bg-surface-light-primary">
+                  Test Print
+                </button>
+                <button type="button"
+                  (click)="openDisconnect(row, $event)"
+                  [attr.data-testid]="'menu-disconnect-' + row.id"
+                  class="flex w-full items-center px-3 py-1.5 text-left text-[13px] text-fg-negative hover:bg-surface-light-primary">
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </li>
+        </ul>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Page footer — Figma node `27494:520366`, pinned to bottom of panel -->
+<footer class="flex h-8 shrink-0 items-center border-t border-divider bg-surface px-2 text-[14px] leading-[1.43] text-[#72777e]"
+  data-testid="printer-footer">
+  Displaying: {{ svc.connectedPrinters().length }}/{{ svc.connectedPrinters().length }} Printers
+</footer>
+
+<!-- Modals -->
+<app-connect-printer-modal *ngIf="connectOpen()"
+  (connected)="onConnected($event)"
+  (cancel)="closeConnect()" />
+
+<app-configure-printer-modal *ngIf="configureTarget() as printer"
+  [printer]="printer"
+  (save)="onSaveConfigure($event)"
+  (testPrint)="onTestPrintFromConfigure()"
+  (cancel)="closeConfigure()" />
+
+<app-disconnect-printer-dialog *ngIf="disconnectTarget() as printer"
+  [printerName]="printer.name"
+  (confirm)="confirmDisconnect()"
+  (cancel)="closeDisconnect()" />
+

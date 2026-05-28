@@ -153,39 +153,40 @@
       </header>
 
       <!-- Data grid -->
-      <div class="flex-1 overflow-auto">
-        <table class="w-full min-w-[1684px] border-collapse">
+      <div class="min-h-0 flex-1 overflow-hidden">
+        <div class="data-grid data-grid--scroll min-h-0 h-full">
+        <table class="data-grid-table min-w-full">
           <thead>
-            <tr class="border-b border-[#e4eaed] bg-neutral-100">
-              <th class="sticky top-0 z-10 h-8 w-[60px] bg-neutral-100 px-2 pl-5 pr-3 font-body text-sm font-medium text-neutral-900">
+            <tr>
+              <th class="h-8 min-w-[60px] px-2 pl-5 pr-3">
                 <input type="checkbox" class="h-4 w-4 rounded accent-[#008572]"
                   data-testid="checkbox-select-all"
                   [checked]="allSelected()"
                   (change)="svc.toggleAll()"
                   [attr.aria-label]="'Select all shipments'" />
               </th>
-              <th class="sticky top-0 z-10 h-8 w-[24px] bg-neutral-100 p-0"></th>
-              <th class="sticky top-0 z-10 h-8 w-[164px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Shipment ID</th>
-              <th class="sticky top-0 z-10 h-8 w-[136px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Freight Type</th>
-              <th class="sticky top-0 z-10 h-8 w-[24px] bg-neutral-100 p-0"></th>
-              <th class="sticky top-0 z-10 h-8 w-[164px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Order/Return ID</th>
-              <th class="sticky top-0 z-10 h-8 w-[136px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Status</th>
-              <th class="sticky top-0 z-10 h-8 w-[120px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Created on</th>
-              <th class="sticky top-0 z-10 h-8 w-[88px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Value</th>
-              <th class="sticky top-0 z-10 h-8 w-[228px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Source</th>
-              <th class="sticky top-0 z-10 h-8 w-[220px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Warehouse</th>
-              <th class="sticky top-0 z-10 h-8 w-[124px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Shipping</th>
-              <th class="sticky top-0 z-10 h-8 w-[124px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Method</th>
-              <th class="sticky top-0 z-10 h-8 w-[140px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Customer</th>
-              <th class="sticky top-0 z-10 h-8 w-[168px] bg-neutral-100 px-2 text-left font-body text-sm font-medium text-neutral-900 whitespace-nowrap">Tags</th>
-              <th class="sticky top-0 z-10 h-8 w-[44px] bg-neutral-100 p-0" aria-label="Row actions"></th>
+              <th class="h-8 w-[24px] p-0"></th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Shipment ID</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Freight Type</th>
+              <th class="h-8 w-[24px] p-0"></th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Order/Return ID</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Status</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Created on</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Value</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Source</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Warehouse</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Shipping</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Method</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Customer</th>
+              <th class="h-8 px-2 text-left whitespace-nowrap">Tags</th>
+              <th class="h-8 w-[44px] p-0" aria-label="Row actions"></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let s of svc.filtered()"
               [attr.data-testid]="'row-shipment-' + s.id"
-              class="h-8 cursor-pointer border-b border-[#e4eaed] transition-colors"
-              [ngClass]="svc.selectedIds().has(s.id) ? 'bg-[hsl(179_100%_25%/0.1)]' : 'bg-white hover:bg-neutral-100'"
+              class="h-8 cursor-pointer transition-colors"
+              [ngClass]="svc.selectedIds().has(s.id) ? 'bg-[hsl(179_100%_25%/0.1)]' : 'hover:bg-surface-light-primary'"
               (click)="svc.openPanel(s.id)">
 
               <!-- Checkbox -->
@@ -237,14 +238,14 @@
               </td>
 
               <!-- Shipment ID -->
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">
+              <td class="h-8 py-0 align-middle">
                 <a href="#" [attr.data-testid]="'link-shipment-' + s.id" class="font-medium text-[#328ac9] hover:underline" (click)="$event.preventDefault()">
                   {{ s.shipmentId }}
                 </a>
               </td>
 
               <!-- Freight Type -->
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">{{ s.freightType }}</td>
+              <td class="h-8 py-0 align-middle">{{ s.freightType }}</td>
 
               <!-- Kind icon -->
               <td class="h-8 w-[24px] p-0 text-center align-middle">
@@ -257,7 +258,7 @@
               </td>
 
               <!-- Order/Return ID -->
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">
+              <td class="h-8 py-0 align-middle">
                 <a href="#" [attr.data-testid]="'link-orderref-' + s.id" class="font-medium text-[#328ac9] hover:underline" (click)="$event.preventDefault()">
                   {{ s.orderRefId }}
                 </a>
@@ -273,53 +274,38 @@
                 </span>
               </td>
 
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">{{ s.createdOn }}</td>
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">{{ s.value }}</td>
+              <td class="h-8 py-0 align-middle">{{ s.createdOn }}</td>
+              <td class="h-8 py-0 align-middle">{{ s.value }}</td>
 
               <!-- Source -->
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">
+              <td class="h-8 py-0 align-middle">
                 <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
                   <img src="figmaAssets/integrations-1.png" alt="" class="h-4 w-4 shrink-0" />
                   {{ s.source }}
                 </span>
               </td>
 
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle whitespace-nowrap">{{ s.warehouse }}</td>
+              <td class="h-8 py-0 align-middle whitespace-nowrap">{{ s.warehouse }}</td>
 
               <!-- Shipping -->
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">
+              <td class="h-8 py-0 align-middle">
                 <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
                   <img *ngIf="s.shipping !== 'To be assigned'" src="figmaAssets/pngegg--2--1-1.png" alt="" class="h-4 w-4 shrink-0 rounded-sm" />
                   <span [ngClass]="s.shipping === 'To be assigned' ? 'italic text-neutral-500' : ''">{{ s.shipping }}</span>
                 </span>
               </td>
 
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">{{ s.method }}</td>
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">{{ s.customer }}</td>
+              <td class="h-8 py-0 align-middle">{{ s.method }}</td>
+              <td class="h-8 py-0 align-middle">{{ s.customer }}</td>
 
               <!-- Tags -->
-              <td class="h-8 px-2 py-0 font-body text-sm text-neutral-900 align-middle">
-                <span class="inline-flex items-center gap-1">
-                  <ng-container *ngFor="let tag of s.tags">
-                    <span *ngIf="!tag.startsWith('+')"
-                      class="inline-flex h-6 items-center gap-1 rounded-full border border-neutral-300 bg-neutral-100 px-2 font-body text-xs text-neutral-700">
-                      {{ tag }}
-                      <svg class="h-3 w-3 text-neutral-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                      </svg>
-                    </span>
-                    <span *ngIf="tag.startsWith('+')"
-                      class="inline-flex h-6 items-center rounded-full border border-neutral-300 bg-neutral-100 px-2 font-body text-xs text-neutral-700">
-                      {{ tag }}
-                    </span>
-                  </ng-container>
-                  <button type="button" aria-label="Add tag"
-                    class="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-500 hover:bg-neutral-100">
-                    <svg class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                  </button>
-                </span>
+              <td class="h-8 py-0 align-middle" (click)="$event.stopPropagation()">
+                <app-entity-tags
+                  [tagIds]="s.tagIds"
+                  category="Shipment"
+                  variant="compact"
+                  [testIdPrefix]="'tags-shipment-' + s.id"
+                  (tagIdsChange)="svc.setTagIds(s.id, $event)" />
               </td>
 
               <!-- Row actions (3-dot menu). Only rendered for merged or split rows for now. -->
@@ -358,6 +344,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </section>
 
